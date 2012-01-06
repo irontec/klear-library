@@ -19,7 +19,7 @@ class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
      * @param bool $isHTML
      * @return string
      */
-    public function truncate(string $texto, int $max_length, string $extra = '...', bool $isHTML = true){
+    public function truncate($texto, $max_length, $extra = '...', $isHTML = true){
         $i = 0;
         $tags = array();
         if($isHTML){
