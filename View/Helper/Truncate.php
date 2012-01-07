@@ -1,18 +1,18 @@
 <?php
-
+include_once('Zend/View/Helper/Abstract.php');
 
 class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
 {
 
-    
+
     /**
      * Recibe $texto y devuelve $texto truncado a $max_length caracteres.
      * Si es html ($isHTML), se encargará de cerrar todos los tags abiertos (y no contarlos para max_length)
      * Siempre que se trunque el texto, se añadirá $extra al final del string devuelto
-     * 
+     *
      * Uso (Desde la vista)
-     * $this->truncate($registro,20,'<a href="#more">[más]</a>',true); 
-     * 
+     * $this->truncate($registro,20,'<a href="#more">[más]</a>',true);
+     *
      * @param string $texto
      * @param int $max_length
      * @param string $extra
