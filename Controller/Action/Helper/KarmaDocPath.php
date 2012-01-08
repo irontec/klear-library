@@ -1,4 +1,6 @@
 <?php
+require_once('Zend/Controller/Action/Helper/Abstract.php');
+
 /**
  * Action Helper para obtener las rutas absolutas de los archivos subidos por Karma
  * @author alayn

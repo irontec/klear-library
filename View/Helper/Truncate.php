@@ -1,5 +1,5 @@
 <?php
-include_once('Zend/View/Helper/Abstract.php');
+require_once('Zend/View/Helper/Abstract.php');
 
 class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
 {

@@ -5,6 +5,9 @@ require_once 'Zend/Locale.php';
 /** Zend_Translate_Adapter */
 require_once 'Zend/Translate/Adapter.php';
 
+/** Zend_Translate_Adapter */
+require_once 'Zend/Db/Table.php';
+
 /**
  * Adaptador para el sistema de literales de Karma.
  * Guarda los datos no existentes en la tabla literales, para poder traducir desde la BBDD.

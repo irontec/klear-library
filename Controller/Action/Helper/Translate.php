@@ -1,4 +1,5 @@
 <?php
+require_once('Zend/Controller/Action/Helper/Abstract.php');
 
 /**
  * Action Helper para lanzar el translate en el controlador

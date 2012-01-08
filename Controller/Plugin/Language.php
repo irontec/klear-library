@@ -1,4 +1,6 @@
 <?php
+require_once('Zend/Controller/Plugin/Abstract.php');
+
 /**
  * Plugin para gestionar el idioma en la web.
  * Cualquier parámetro con nombre "lang" hace que el idioma cambie al seleccionado,

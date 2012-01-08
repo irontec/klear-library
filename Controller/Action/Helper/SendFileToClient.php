@@ -1,4 +1,6 @@
 <?php
+require_once('Zend/Controller/Action/Helper/Abstract.php');
+
 /**
  *
  * Action Helper para enviar ficheros al cliente (downloads)
