@@ -22,7 +22,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
      */
     public function sendFile($file, $options = array(), $isRaw = false)
     {
-        if (!isRaw && !file_exists($file)) {
+        if (!$isRaw && !file_exists($file)) {
             throw new Zend_Controller_Action_Exception('File not found', 404);
         }
 
@@ -63,7 +63,6 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         } else {
             readfile($file);
         }
-        exit();
     }
 
     /**
