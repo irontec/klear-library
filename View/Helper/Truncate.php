@@ -25,10 +25,10 @@ class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
         $tags = array();
         if ($isHtml) {
             preg_match_all(
-                    '/<[^>]+>([^<]*)/',
-                    $text,
-                    $result,
-                    PREG_OFFSET_CAPTURE | PREG_SET_ORDER
+                '/<[^>]+>([^<]*)/',
+                $text,
+                $result,
+                PREG_OFFSET_CAPTURE | PREG_SET_ORDER
             );
 
             foreach ($result as $object) {
@@ -36,15 +36,15 @@ class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
                     break;
                 }
                 $tag = substr(strtok($object[0][0], " \t\n\r\0\x0B>"), 1);
-                if($tag[0] != '/') {
+                if ($tag[0] != '/') {
                     $tags[] = $tag;
-                } elseif(end($tags) == substr($tag, 1)) {
+                } else if (end($tags) == substr($tag, 1)) {
                     array_pop($tags);
                 }
                 $i += $object[1][1] - $object[0][1];
             }
         }
-        return substr($text, 0, $maxLength = min(strlen($text),  $maxLength + $i))
+        return substr($text, 0, $maxLength = min(strlen($text), $maxLength + $i))
                 . (count($tags = array_reverse($tags)) ? '</' . implode('></', $tags) . '>' : '')
                 . (strlen($text) > $maxLength ? $extra : '');
     }
