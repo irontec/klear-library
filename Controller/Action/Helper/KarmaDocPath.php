@@ -25,7 +25,7 @@ class Iron_Controller_Action_Helper_KarmaDocPath extends Zend_Controller_Action_
         }
         $aId[] = $id;
         $filePath = $docsRoot . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $aId);
-
+var_dump($filePath);
         if (is_file($filePath)) {
             return realpath($filePath);
         }
