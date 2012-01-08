@@ -37,10 +37,13 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
 
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         $select = $dbAdapter->select();
-        $select->from($data, array(
-            'identificativo',
-            'literal' => 'literal_' . $locale
-        ));
+        $select->from(
+            $data,
+            array(
+                'identificativo',
+                'literal' => 'literal_' . $locale
+            )
+        );
 
         $dbStmt = $dbAdapter->query($select);
         $resultSet = $dbStmt->fetchAll();
@@ -126,7 +129,9 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         }
 
         $locale = (string) $locale;
-        if ((is_string($messageId) || is_int($messageId)) && isset($this->_translate[$locale][$messageId]) && ($this->_translate[$locale][$messageId])) {
+        if ((is_string($messageId) || is_int($messageId))
+                && isset($this->_translate[$locale][$messageId])
+                && ($this->_translate[$locale][$messageId])) {
             // return original translation
             if ($plural === null) {
                 $this->_routed = array();
@@ -184,7 +189,8 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         return $plural[$rule];
     }
 
-    protected function _createKey($messageId, $locale) {
+    protected function _createKey($messageId, $locale)
+    {
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         if ($dbAdapter->insert('literales', array('identificativo' => $messageId))) {
             $languages = array_keys($this->_translate);
@@ -197,7 +203,8 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
     /**
      * TODO: Revisar esto que está demasiado simple para nada bueno...
      */
-    public function addTranslation($options = array()) {
+    public function addTranslation($options = array())
+    {
         foreach ($options['availableLanguage'] as $language) {
             $this->_translate += $this->_loadTranslationData($options['content'], $language, $options);
         }

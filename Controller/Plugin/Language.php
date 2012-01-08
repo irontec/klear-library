@@ -18,7 +18,7 @@ class Iron_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
         $currLocale = $translate->getLocale();
         $session = new Zend_Session_Namespace('session');
 
-        $lang = $request->getParam('lang','');
+        $lang = $request->getParam('lang', '');
 
         $availableLanguages = $translate->getOptions('availableLanguage');
         if (sizeof($availableLanguages)) {

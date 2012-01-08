@@ -2,7 +2,8 @@
 require_once('Zend/Controller/Action/Helper/Abstract.php');
 
 /**
- * Action Helper para obtener las rutas absolutas de los archivos subidos por Karma
+ * Action Helper para obtener las rutas absolutas de los archivos
+ * subidos por Karma
  * @author alayn
  *
  */
@@ -10,7 +11,8 @@ class Iron_Controller_Action_Helper_KarmaDocPath extends Zend_Controller_Action_
 {
     /**
      *
-     * @param  string $docsRoot Directorio donde se encuentras los documentos (p.e. APPLICATION_PATH . '/data/documentos.plt/'
+     * @param  string $docsRoot Directorio donde se encuentras los documentos
+     *          (p.e. APPLICATION_PATH . '/data/documentos.plt/'
      * @param  $id Id del documento que se desea obtener
      * @return string|null Ruta real en la que se encuentra el fichero en el disco. Si no existe devuelve null
      */
@@ -24,8 +26,7 @@ class Iron_Controller_Action_Helper_KarmaDocPath extends Zend_Controller_Action_
         $aId[] = $id;
         $filePath = $docsRoot . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $aId);
 
-        if(is_file($filePath))
-        {
+        if (is_file($filePath)) {
             return realpath($filePath);
         }
         return null;
@@ -34,7 +35,8 @@ class Iron_Controller_Action_Helper_KarmaDocPath extends Zend_Controller_Action_
     /**
      * Llamar directamente a la función de getDocument()
      *
-     * @param  string $docsRoot Directorio donde se encuentras los documentos (p.e. APPLICATION_PATH . '/data/documentos.plt/'
+     * @param  string $docsRoot Directorio donde se encuentras los documentos
+     *          (p.e. APPLICATION_PATH . '/data/documentos.plt/'
      * @param  $id Id del documento que se desea obtener
      * @return string|null Ruta real en la que se encuentra el fichero en el disco. Si no existe devuelve null
      */

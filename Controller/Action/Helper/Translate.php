@@ -84,8 +84,9 @@ class Iron_Controller_Action_Helper_Translate extends Zend_Controller_Action_Hel
         } else if ($translate instanceof Zend_Translate) {
             $this->_translator = $translate->getAdapter();
         } else {
-            $e = new Zend_Controller_Action_Exception('You must set an instance of Zend_Translate or Zend_Translate_Adapter');
-            throw $e;
+            throw new Zend_Controller_Action_Exception(
+                'You must set an instance of Zend_Translate or Zend_Translate_Adapter'
+            );
         }
 
         return $this;
@@ -118,8 +119,9 @@ class Iron_Controller_Action_Helper_Translate extends Zend_Controller_Action_Hel
     {
         $translate = $this->getTranslator();
         if ($translate === null) {
-            $e = new Zend_Controller_Action_Exception('You must set an instance of Zend_Translate or Zend_Translate_Adapter');
-            throw $e;
+            throw new Zend_Controller_Action_Exception(
+                'You must set an instance of Zend_Translate or Zend_Translate_Adapter'
+            );
         }
 
         $translate->setLocale($locale);
@@ -136,8 +138,9 @@ class Iron_Controller_Action_Helper_Translate extends Zend_Controller_Action_Hel
     {
         $translate = $this->getTranslator();
         if ($translate === null) {
-            $e = new Zend_Controller_Action_Exception('You must set an instance of Zend_Translate or Zend_Translate_Adapter');
-            throw $e;
+            throw new Zend_Controller_Action_Exception(
+                'You must set an instance of Zend_Translate or Zend_Translate_Adapter'
+            );
         }
 
         return $translate->getLocale();

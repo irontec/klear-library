@@ -13,9 +13,11 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     /**
      * Envia el fichero al cliente
      *
-     * @param  string|binary $file Ruta al archivo que se quiere descargar ó contenido del fichero (depende del parámetro $isRaw)
+     * @param  string|binary $file Ruta al archivo que se quiere descargar ó
+     *          contenido del fichero (depende del parámetro $isRaw)
      * @param  array $options array con opciones para el fichero (name, filetype, etc...)
-     * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario (true) o si se trata del path al fichero (false). False por defecto
+     * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario
+     *          (true) o si se trata del path al fichero (false). False por defecto
      * @return string true si todo va bien, false en caso contrario
      */
     public function sendFile($file, $options = array(), $isRaw = false)
@@ -48,8 +50,10 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         }
 
         header('Content-type: ' . $options['type']);
-        header('Content-Disposition: ' . $options['disposition']
-        		. ';filename="' . str_replace('"','',$options['filename']) . '"');
+        header(
+            'Content-Disposition: ' . $options['disposition']
+    		. ';filename="' . str_replace('"', '', $options['filename']) . '"'
+        );
         header('Content-Transfer-Encoding: binary');
         header('Pragma: no-cache');
         header('Expires: 0');
@@ -65,9 +69,11 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     /**
      * Envia el fichero al cliente
      *
-     * @param  string|binary $file Ruta al archivo que se quiere descargar ó contenido del fichero (depende del parámetro $isRaw)
+     * @param  string|binary $file Ruta al archivo que se quiere descargar ó
+     *          contenido del fichero (depende del parámetro $isRaw)
      * @param  array $options array con opciones para el fichero (name, filetype, etc...)
-     * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario (true) o si se trata del path al fichero (false). False por defecto
+     * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario
+     *          (true) o si se trata del path al fichero (false). False por defecto
      * @return string true si todo va bien, false en caso contrario
      */
     public function direct($file, $options = array(), $isRaw = false)
