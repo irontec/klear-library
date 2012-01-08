@@ -19,6 +19,7 @@ require_once 'Zend/Db/Table.php';
 class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
 {
     private $_data = array();
+    private $_dbAdapter = null;
 
     /**
      * Load translation data
@@ -35,7 +36,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         $this->_data = array();
         $dbData = array();
 
-        $dbAdapter = Zend_Db_Table::getDefaultAdapter();
+        $dbAdapter = $this->getDbAdapter();
         $select = $dbAdapter->select();
         $select->from(
             $data,
@@ -191,7 +192,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
 
     protected function _createKey($messageId, $locale)
     {
-        $dbAdapter = Zend_Db_Table::getDefaultAdapter();
+        $dbAdapter = $this->getDbAdapter();
         if ($dbAdapter->insert('literales', array('identificativo' => $messageId))) {
             $languages = array_keys($this->_translate);
             foreach ($languages as $language) {
@@ -218,5 +219,18 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
     public function toString()
     {
         return "Iron_Translate_Adapter_Literals";
+    }
+
+    public function getDbAdapter()
+    {
+        if (is_null($this->_dbAdapter)) {
+            $this->_dbAdapter = Zend_Db_Table::getDefaultAdapter();
+        }
+        return $this->_dbAdapter;
+    }
+
+    public function setDbAdapter(Zend_Db_Adapter_Abstract $dbAdapter)
+    {
+        $this->_dbAdapter = $dbAdapter;
     }
 }
