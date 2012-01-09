@@ -11,6 +11,12 @@ require_once('Zend/Controller/Action/Exception.php');
  */
 class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Action_Helper_Abstract
 {
+    protected $_sendHeaders = true;
+
+    public function supressHeaders() {
+        $this->sendHeaders = false;
+    }
+
     /**
      * Envia el fichero al cliente
      *
@@ -61,7 +67,9 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $response->setHeader('Pragma', 'no-cache', true);
         $response->setHeader('Expires', '0', true);
 
-        $response->sendHeaders();
+        if ($this->sendHeaders) {
+            $response->sendHeaders();
+        }
 
         if ($isRaw) {
             echo $file;
