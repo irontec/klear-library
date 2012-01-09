@@ -1,5 +1,6 @@
 <?php
 require_once('Zend/Controller/Action/Helper/Abstract.php');
+require_once('Zend/Controller/Action/Exception.php');
 
 /**
  *
@@ -25,6 +26,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if (!$isRaw && !file_exists($file)) {
             throw new Zend_Controller_Action_Exception('File not found', 404);
         }
+        $response = $this->getResponse();
 
         set_time_limit(0);
         $defaultOptions = array(
@@ -41,22 +43,25 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         // Si no nos pasan el mimetype, intentamos obtenerlo nosotros
         if (!isset($options['type'])) {
-            $finfo = new finfo(FILEINFO_MIME_TYPE, __DIR__ . 'magic.mgc');
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
             if ($isRaw) {
-                header('Content-type: ' . $finfo->buffer($file));
+                $options['type'] = $finfo->buffer($file);
             } else {
-                header('Content-type: ' . $finfo->file($file));
+                $options['type'] = $finfo->file($file);
             }
         }
 
-        header('Content-type: ' . $options['type']);
-        header(
-            'Content-Disposition: ' . $options['disposition']
-            . ';filename="' . str_replace('"', '', $options['filename']) . '"'
+        $response->setHeader('Content-type', $options['type'], true);
+        $response->setHeader(
+            'Content-Disposition',
+            $options['disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
+            true
         );
-        header('Content-Transfer-Encoding: binary');
-        header('Pragma: no-cache');
-        header('Expires: 0');
+        $response->setHeader('Content-Transfer-Encoding', 'binary', true);
+        $response->setHeader('Pragma', 'no-cache', true);
+        $response->setHeader('Expires', '0', true);
+
+        $response->sendHeaders();
 
         if ($isRaw) {
             echo $file;
