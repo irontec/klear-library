@@ -21,6 +21,14 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
     private $_data = array();
     private $_dbAdapter = null;
 
+    public function __construct($options = array())
+    {
+        if (isset($options['dbAdapter']) && $options['dbAdapter'] instanceof Zend_Db_Adapter_Abstract) {
+            $this->setDbAdapter($options['dbAdapter']);
+        }
+        parent::__construct($options);
+    }
+
     /**
      * Load translation data
      *
