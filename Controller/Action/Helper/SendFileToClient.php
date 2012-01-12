@@ -12,9 +12,49 @@ require_once('Zend/Controller/Action/Exception.php');
 class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Action_Helper_Abstract
 {
     protected $_sendHeaders = true;
+    protected $_options = array();
+    protected $_isRaw;
+    protected $_file;
 
-    public function supressHeaders() {
+    public function supressHeaders()
+    {
         $this->sendHeaders = false;
+    }
+
+    public function setOptions($options)
+    {
+        $this->_options = $options;
+
+        $defaultOptions = array(
+            'filename' => $this->_isRaw? 'file' : basename($this->_file),
+            'disposition' => 'attachment'
+        );
+
+        // Metemos los valores por defecto en el array de options
+        foreach ($defaultOptions as $key => $value) {
+            if (!isset($this->_options[$key])) {
+                $this->_options[$key] = $value;
+            }
+        }
+
+        $this->_setMimetype();
+        return $this;
+    }
+
+    /**
+     * Setea el mimetype en caso de no estar entre las options
+     */
+    protected function _setMimetype()
+    {
+        if (!isset($this->_options['type'])) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            if ($this->_isRaw) {
+                $this->_options['type'] = $finfo->buffer($this->_file);
+            } else {
+                $this->_options['type'] = $finfo->file($this->_file);
+            }
+        }
+        return $this;
     }
 
     /**
@@ -32,35 +72,17 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if (!$isRaw && !file_exists($file)) {
             throw new Zend_Controller_Action_Exception('File not found', 404);
         }
-        $response = $this->getResponse();
-
         set_time_limit(0);
-        $defaultOptions = array(
-            'filename' => $isRaw? 'file' : basename($file),
-            'disposition' => 'attachment'
-        );
+        $response = $this->getResponse();
+        $this->_isRaw = $isRaw;
+        $this->_file = $file;
 
-        // Metemos los valores por defecto en el array de options
-        foreach ($defaultOptions as $key => $value) {
-            if (!isset($options[$key])) {
-                $options[$key] = $value;
-            }
-        }
+        $this->setOptions($options);
 
-        // Si no nos pasan el mimetype, intentamos obtenerlo nosotros
-        if (!isset($options['type'])) {
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            if ($isRaw) {
-                $options['type'] = $finfo->buffer($file);
-            } else {
-                $options['type'] = $finfo->file($file);
-            }
-        }
-
-        $response->setHeader('Content-type', $options['type'], true);
+        $response->setHeader('Content-type', $this->_options['type'], true);
         $response->setHeader(
             'Content-Disposition',
-            $options['disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
+            $this->_options['disposition'] . ';filename="' . str_replace('"', '', $this->_options['filename']) . '"',
             true
         );
         $response->setHeader('Content-Transfer-Encoding', 'binary', true);
@@ -71,10 +93,10 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
             $response->sendHeaders();
         }
 
-        if ($isRaw) {
-            echo $file;
+        if ($this->_isRaw) {
+            echo $this->_file;
         } else {
-            readfile($file);
+            readfile($this->_file);
         }
     }
 
