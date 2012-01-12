@@ -80,9 +80,9 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     public function translate($messageId, $locale = null)
     {
-    	/**
-    	 * BUGFIX: No metemos en la BBDD nada que no tenga letras.
-    	 */
+        /**
+         * BUGFIX: No metemos en la BBDD nada que no tenga letras.
+         */
         if (preg_match('/[a-zA-Z]/', $messageId) === 0) {
             return $messageId;
         }
