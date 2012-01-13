@@ -1,5 +1,6 @@
 <?php
 require_once('Zend/Controller/Plugin/Abstract.php');
+require_once('Zend/Session/Namespace.php');
 
 /**
  * Plugin para gestionar el idioma en la web.
