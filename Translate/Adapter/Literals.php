@@ -181,8 +181,10 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             }
         }
 
-        if (!array_key_exists($messageId, $this->_translate[$locale])) {
-            $this->_createKey($messageId, $locale);
+        if (isset($this->_translate[$locale])) {
+            if (!array_key_exists($messageId, $this->_translate[$locale])) {
+                $this->_createKey($messageId, $locale);
+            }
         }
 
         $this->_routed = array();
