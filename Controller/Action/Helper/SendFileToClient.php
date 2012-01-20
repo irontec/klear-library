@@ -18,7 +18,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
     public function supressHeaders()
     {
-        $this->sendHeaders = false;
+        $this->_sendHeaders = false;
     }
 
     public function setOptions($options)
@@ -79,19 +79,19 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->setOptions($options);
 
-        $response->setHeader('Content-type', filetype($file), true);
+        $response->setHeader('Content-type', $this->_options['type'], true);
         $response->setHeader(
             'Content-Disposition',
-            $this->_options['disposition'] . ";filename=\"" .str_replace("\"","",$options['filename'])."\"",
+            $this->_options['disposition'] . ';filename="' . str_replace('"', '', $this->_options['filename']) . '"',
             true
         );
         $response->setHeader('Content-Transfer-Encoding', 'binary', true);
         $response->setHeader('Pragma', 'no-cache', true);
         $response->setHeader('Expires', '0', true);
 
-        //if ($this->sendHeaders) {
+        if ($this->_sendHeaders) {
             $response->sendHeaders();
-        //}
+        }
 
         if ($this->_isRaw) {
             echo $this->_file;
