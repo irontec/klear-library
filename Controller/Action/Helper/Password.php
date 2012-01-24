@@ -59,7 +59,13 @@ class Iron_Controller_Action_Helper_Password extends Zend_Controller_Action_Help
     }
 
     /**
-     * Comprueba la robustez de un password. No terminado.
+     * Basado en http://www.passwordmeter.com/ menos las Sequential y los Requirements
+     * Comprueba la robustez de un password. Devuelve un integer de 0 a 100, que indica el % de robustez.
+     * De 0 a 20: muy débil
+     * De 20 a 40: débil
+     * De 40 a 60: buena
+     * De 60 a 80: fuerte
+     * De 80 a 100: muy fuerte
      * @param $password Password a comprobar
      * @return integer
      */
@@ -67,48 +73,94 @@ class Iron_Controller_Action_Helper_Password extends Zend_Controller_Action_Help
     {
         $length = strlen($password);
 
-        if ($length == 0 ) {
-            return 0;
-        } elseif ($length <= 4) {
-            return 10;
-        }
-        $numbers = false;
-        $letters = false;
-        $symbols = false;
+        $numbers = $upper = $lower = $symbols = 0; /* total de cada tipo */
+        $cNumber = $cUpper =$cLower = 0; /* consecutivos de cada tipo */
+        $nRepInc = $nRepChar = 0;
+        $last = false; /* para saber que tipo es el caracter anterior */
 
         $chars = array();
-        $total = $length * 4;
+        $total = $length * 4; /* Número de caracteres por 4 */
+
         for ($i = 0; $i < $length; $i++) {
             $char = $password{$i};
-            /* Comprobamos si el caracter ya estaba */
-            if (isset($chars[$char])) {
-                $chars[$char]['count']++;
-                continue;
-            }
+
             if ($char >= '0' && $char <= '9') {
-                if ($i > 0 && $i < ($length - 1)) {
+                /* Si no está en los extremos, sumamos 2 */
+                if ($i > 0 && $i < ($length -1)) {
                     $total += 2;
                 }
-                $numbers = true;
-                $point = 4;
-            } elseif (($char >= 'A' && $char <= 'Z') || ($char >= 'a' && $char <= 'z')) {
-                $letters = true;
-                $point = 2;
+                /* Si el anterior era number, restamos 2 por consecutivo */
+                if ($last == 'number') {
+                    $total -= 2;
+                }
+                $numbers++;
+                $last = 'number';
+            } elseif ($char >= 'A' && $char <= 'Z') {
+                /* Si el anterior era upper, restamos 2 por consecutivo */
+                if ($last == 'upper') {
+                    $total -= 2;
+                }
+                $upper++;
+                $last = 'upper';
+            } elseif ($char >= 'a' && $char <= 'z') {
+                /* Si el anterior era lower, restamos 2 por consecutivo */
+                if ($last == 'lower') {
+                    $total -= 2;
+                }
+                $lower++;
+                $last = 'lower';
             } else {
-                $symbols = true;
-                $point = 6;
+                /* Si no está en los extremos, sumamos 2 */
+                if ($i > 0 && $i < ($length -1)) {
+                    $total += 2;
+                }
+                $symbols++;
+                $total += 6;
+                $last = 'symbol';
             }
-            $chars[$char] = array('count' => 1, 'point' => $point);
-        }
-        foreach ($chars as $char) {
-            $total += $char['point'];
-            if ($char['count'] > 1) {
-                $total -= $char['count'];
+
+            /* comprobamos caracteres repetidos */
+            $bCharExists = false;
+            for ($k = 0; $k < $length; $k++) {
+                if ($char == $password{$k} && $i != $k) {
+                    $bCharExists = true;
+                    /*
+                    Calculate icrement deduction based on proximity to identical characters
+                    Deduction is incremented each time a new match is discovered
+                    Deduction amount is based on total password length divided by the
+                    difference of distance between currently selected match
+                    */
+                    $nRepInc += abs($length / ($k - $i));
+                }
+            }
+            if ($bCharExists) {
+                $nRepChar++;
+                $nUnqChar = $length - $nRepChar;
+                $nRepInc = ($nUnqChar) ? ceil($nRepInc / $nUnqChar) : ceil($nRepInc);
             }
         }
+        $total -= $nRepInc;
+        /* Solo sumamos los numeros si no hay solo numeros */
+        if ($numbers && ($upper || $lower || $symbols)) {
+            $total += ($numbers * 4);
+        }
+        /* Para mayusculas y minusculas (si hay), se suma al total la diferencia del total de caracteres
+        menos mayusculas/minusculas multiplicado por 2 */
+        if ($upper > 0) {
+            $total += (($length - $upper) * 2);
+        }
+        if ($lower > 0) {
+            $total += (($length - $lower) * 2);
+        }
+
         /* Si solo es números o solo letras, restamos la longitud */
-        if (($numbers && !$letters && !$symbols) || ($letters && !$numbers && !$symbols)) {
-            $total -= $length * 2;
+        if (($numbers && !$upper && !$lower && !$symbols) || (($lower || $upper) && !$numbers && !$symbols)) {
+            $total -= $length;
+        }
+        if ($total < 0) {
+            $total = 0;
+        } elseif ($total > 100) {
+            $total = 100;
         }
         return $total;
     }
