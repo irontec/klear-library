@@ -1,6 +1,6 @@
 <?php
 
-class Iron_Translate_Adapter_Translator extends Zend_Translate_Adapter_Array
+class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 {
     protected $_translationFile;
     protected $_directory;
