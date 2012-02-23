@@ -32,8 +32,12 @@ class Iron_Controller_Action_Helper_IronContextSwitch extends Zend_Controller_Ac
 
                 $viewVars = $view->getVars();
                 foreach ($viewVars as $name => $param) {
-                    if (is_object($param) && method_exists($param, 'toArray')) {
-                        $viewVars[$name] = $param->toArray();
+                    if (is_array($param)) {
+                        foreach ($param as $arName => $arValue) {
+                            $viewVars[$name][$arName] = $this->_normalizeParam($arValue);                           
+                        }
+                    } else {
+                        $viewVars[$name] = $this->_normalizeParam($param);
                     }
                 }
 
@@ -45,5 +49,13 @@ class Iron_Controller_Action_Helper_IronContextSwitch extends Zend_Controller_Ac
                 throw new Zend_Controller_Action_Exception('View does not implement the getVars() method needed to encode the view into JSON');
             }
         }
+    }
+    
+    protected function _normalizeParam($param)
+    {
+        if (is_object($param) && method_exists($param, 'serializeData')) {
+            return $param->serializeData();
+       }
+       return $param;
     }
 }
