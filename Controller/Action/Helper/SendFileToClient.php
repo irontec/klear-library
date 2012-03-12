@@ -69,9 +69,12 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
      */
     public function sendFile($file, $options = array(), $isRaw = false)
     {
+        $this->_disableOtherOutput();
+
         if (!$isRaw && !file_exists($file)) {
             throw new Zend_Controller_Action_Exception('File not found', 404);
         }
+
         set_time_limit(0);
         $response = $this->getResponse();
         $this->_isRaw = $isRaw;
@@ -92,13 +95,25 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if ($this->_sendHeaders) {
             $response->sendHeaders();
         }
-
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
             readfile($this->_file);
         }
     }
+
+    protected function _disableOtherOutput()
+    {
+        require_once 'Zend/Controller/Action/HelperBroker.php';
+        Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer')->setNoRender(true);
+
+        require_once 'Zend/Layout.php';
+        $layout = Zend_Layout::getMvcInstance();
+        if (null !== $layout) {
+            $layout->disableLayout();
+        }
+    }
+
 
     /**
      * Envia el fichero al cliente
