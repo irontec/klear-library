@@ -1,5 +1,5 @@
 <?php
-require_once('Zend/Controller/Action/Helper/Abstract.php');
+require_once('Zend/Controller/Action/Helper/ContextSwitch.php');
 
 /**
  * @author Alayn Gortazar <alayn+karma@irontec.com>
@@ -34,7 +34,7 @@ class Iron_Controller_Action_Helper_IronContextSwitch extends Zend_Controller_Ac
                 foreach ($viewVars as $name => $param) {
                     if (is_array($param)) {
                         foreach ($param as $arName => $arValue) {
-                            $viewVars[$name][$arName] = $this->_normalizeParam($arValue);                           
+                            $viewVars[$name][$arName] = $this->_normalizeParam($arValue);
                         }
                     } else {
                         $viewVars[$name] = $this->_normalizeParam($param);
@@ -50,7 +50,7 @@ class Iron_Controller_Action_Helper_IronContextSwitch extends Zend_Controller_Ac
             }
         }
     }
-    
+
     protected function _normalizeParam($param)
     {
         if (is_object($param) && method_exists($param, 'serializeData')) {
