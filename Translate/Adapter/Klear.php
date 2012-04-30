@@ -49,8 +49,16 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 	    . DIRECTORY_SEPARATOR
 	    . $this->_translationFileName;
 
+	    
+	    
 	    $this->_updateLocaleTranslation($this->_translationFile, $baseTranslationFile);
 
+	    
+	    if ($this->_front->getRequest()->getParam('translationnamespace') == true && !strpos($this->_translationFileName, 'javascript-' )<=0) {
+	        $this->_translationFileName = 'javascript-' . $this->_translationFileName;
+	    }
+	    
+	    
 	    foreach ($this->_locales as $sysLocale) {
 	        if ($this->_currentLocale == $sysLocale) continue;
 
@@ -121,6 +129,7 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 	 */
 	protected function _updateLocaleTranslation($translationFile, $baseTranslationFile)
 	{
+	
 	    $baseTranslations = $this->_getDataFromFile($baseTranslationFile);
 
 	    if (!isset($this->_baseTranslations[$baseTranslationFile])) {
