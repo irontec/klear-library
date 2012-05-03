@@ -48,6 +48,7 @@ class Iron_Controller_Action_Helper_SendHtml5Video extends Zend_Controller_Actio
      */
     public function sendFile($filePath, $headers = array())
     {
+        set_time_limit(0);
         $this->_disableOtherOutput();
 
         $this->_filePath = $filePath;
