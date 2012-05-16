@@ -1,5 +1,8 @@
 <?php
 
+include_once('Zend/Translate/Adapter/Array.php');
+include_once('Zend/Controller/Front.php');
+
 class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 {
     protected $_translationFile;
@@ -55,7 +58,7 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 
 
         if ($this->_front->getRequest()->getParam('translationnamespace') == true && !strpos($this->_translationFileName, 'javascript-' )<=0) {
-            $this->_translationFileName = 'javascript-' . $this->_translationFileName;
+            $this->setTranslationFileName('javascript-' . $this->_translationFileName);
         }
 
 
@@ -72,13 +75,7 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
                 . (string) $sysLocale
                 . DIRECTORY_SEPARATOR
                 . $this->_translationFileName,
-                dirname($this->_directory)
-                . DIRECTORY_SEPARATOR
-                . $this->_currentModuleName
-                . DIRECTORY_SEPARATOR
-                . $this->_translationLanguagePath
-                . DIRECTORY_SEPARATOR
-                . $this->_translationFileName
+                $baseTranslationFile
             );
         }
     }
