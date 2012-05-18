@@ -138,7 +138,6 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
             while (ob_get_level() > 1) {
                 ob_end_clean();
             }
-            flush();
         }
     }
 
