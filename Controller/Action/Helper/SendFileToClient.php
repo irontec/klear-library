@@ -1,6 +1,8 @@
 <?php
 require_once('Zend/Controller/Action/Helper/Abstract.php');
 require_once('Zend/Controller/Action/Exception.php');
+require_once 'Zend/Controller/Action/HelperBroker.php';
+require_once 'Zend/Layout.php';
 
 /**
  *
@@ -21,13 +23,50 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $this->_sendHeaders = false;
     }
 
+    /**
+     * Envia el fichero al cliente
+     *
+     * @param  string|binary $file Ruta al archivo que se quiere descargar ó
+     *          contenido del fichero (depende del parámetro $isRaw)
+     * @param  array $options array con opciones para el fichero (name, filetype, etc...)
+     * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario
+     *          (true) o si se trata del path al fichero (false). False por defecto
+     * @return string true si todo va bien, false en caso contrario
+     */
+    public function sendFile($file, $options = array(), $isRaw = false)
+    {
+        if ($this->_fileNotFound($file, $isRaw)) {
+            throw new Zend_Controller_Action_Exception('File not found', 404);
+        }
+
+        set_time_limit(0);
+        $this->_disableOtherOutput();
+
+        $this->_isRaw = $isRaw;
+        $this->_file = $file;
+
+        $this->setOptions($options);
+        $this->_sendHeaders($this->_options);
+
+        if ($this->_isRaw) {
+            echo $this->_file;
+        } else {
+            readfile($this->_file);
+        }
+    }
+
+    protected function _fileNotFound($file, $isRaw)
+    {
+        return !$isRaw && !file_exists($file);
+    }
+
     public function setOptions($options)
     {
         $this->_options = $options;
 
         $defaultOptions = array(
-            'filename' => $this->_isRaw? 'file' : basename($this->_file),
-            'disposition' => 'attachment'
+                'filename' => $this->_isRaw? 'file' : basename($this->_file),
+                'disposition' => 'attachment'
         );
 
         // Metemos los valores por defecto en el array de options
@@ -39,6 +78,30 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->_setMimetype();
         return $this;
+    }
+
+    protected function _sendHeaders($options)
+    {
+        if ($this->_sendHeaders) {
+            $response = $this->getResponse();
+            $this->_setHeaders($response, $options);
+            $response->sendHeaders();
+        }
+    }
+
+    protected function _setHeaders($response, $options)
+    {
+        $response = $this->getResponse();
+
+        $response->setHeader('Content-type', $options['type'], true);
+        $response->setHeader(
+                'Content-Disposition',
+                $options['disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
+                true
+        );
+        $response->setHeader('Content-Transfer-Encoding', 'binary', true);
+        $response->setHeader('Pragma', 'no-cache', true);
+        $response->setHeader('Expires', '0', true);
     }
 
     /**
@@ -57,64 +120,17 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         return $this;
     }
 
-    /**
-     * Envia el fichero al cliente
-     *
-     * @param  string|binary $file Ruta al archivo que se quiere descargar ó
-     *          contenido del fichero (depende del parámetro $isRaw)
-     * @param  array $options array con opciones para el fichero (name, filetype, etc...)
-     * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario
-     *          (true) o si se trata del path al fichero (false). False por defecto
-     * @return string true si todo va bien, false en caso contrario
-     */
-    public function sendFile($file, $options = array(), $isRaw = false)
-    {
-        $this->_disableOtherOutput();
-
-        if (!$isRaw && !file_exists($file)) {
-            throw new Zend_Controller_Action_Exception('File not found', 404);
-        }
-
-        set_time_limit(0);
-        $response = $this->getResponse();
-        $this->_isRaw = $isRaw;
-        $this->_file = $file;
-
-        $this->setOptions($options);
-
-        $response->setHeader('Content-type', $this->_options['type'], true);
-        $response->setHeader(
-            'Content-Disposition',
-            $this->_options['disposition'] . ';filename="' . str_replace('"', '', $this->_options['filename']) . '"',
-            true
-        );
-        $response->setHeader('Content-Transfer-Encoding', 'binary', true);
-        $response->setHeader('Pragma', 'no-cache', true);
-        $response->setHeader('Expires', '0', true);
-
-        if ($this->_sendHeaders) {
-            $response->sendHeaders();
-        }
-
-        $this->_cleanOutputBuffers();
-
-        if ($this->_isRaw) {
-            echo $this->_file;
-        } else {
-            readfile($this->_file);
-        }
-    }
 
     protected function _disableOtherOutput()
     {
-        require_once 'Zend/Controller/Action/HelperBroker.php';
         Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer')->setNoRender(true);
 
-        require_once 'Zend/Layout.php';
         $layout = Zend_Layout::getMvcInstance();
         if (null !== $layout) {
             $layout->disableLayout();
         }
+
+        $this->_cleanOutputBuffers();
     }
 
     protected function _cleanOutputBuffers()
