@@ -135,7 +135,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
     protected function _cleanOutputBuffers()
     {
-        while(ob_get_level() > 0) {
+        while(ob_get_level() > 1) {
             ob_end_clean();
         }
         flush();
