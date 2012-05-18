@@ -46,7 +46,6 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->setOptions($options);
         $this->_sendHeaders($this->_options);
-
         $this->_disableOtherOutput();
 
         if ($this->_isRaw) {
@@ -136,7 +135,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     protected function _cleanOutputBuffers()
     {
         if (!$this->_outputBufferingAllowed) {
-            while (ob_get_level() > 1) {
+            while (ob_get_level()) {
                 ob_end_clean();
             }
         }
