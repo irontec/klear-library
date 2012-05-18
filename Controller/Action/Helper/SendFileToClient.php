@@ -17,6 +17,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     protected $_options = array();
     protected $_isRaw;
     protected $_file;
+    protected $_outputBufferingAllowed = false;
 
     public function supressHeaders()
     {
@@ -40,11 +41,10 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         }
 
         set_time_limit(0);
-        $this->_disableOtherOutput();
-
         $this->_isRaw = $isRaw;
         $this->_file = $file;
 
+        $this->_disableOtherOutput();
         $this->setOptions($options);
         $this->_sendHeaders($this->_options);
 
@@ -124,7 +124,6 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     protected function _disableOtherOutput()
     {
         Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer')->setNoRender(true);
-
         $layout = Zend_Layout::getMvcInstance();
         if (null !== $layout) {
             $layout->disableLayout();
@@ -135,10 +134,17 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
     protected function _cleanOutputBuffers()
     {
-        while(ob_get_level() > 1) {
-            ob_end_clean();
+        if (!$this->_outputBufferingAllowed) {
+            while(ob_get_level() > 1) {
+                ob_end_clean();
+            }
+            flush();
         }
-        flush();
+    }
+
+    public function allowOutputBuffering($flag = true)
+    {
+        $this->_outputBufferingAllowed = (bool)$flag;
     }
 
 
