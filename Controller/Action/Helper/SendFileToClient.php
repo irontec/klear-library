@@ -95,6 +95,9 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if ($this->_sendHeaders) {
             $response->sendHeaders();
         }
+
+        $this->_cleanOutputBuffers();
+
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
@@ -112,6 +115,14 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if (null !== $layout) {
             $layout->disableLayout();
         }
+    }
+
+    protected function _cleanOutputBuffers()
+    {
+        while(ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        flush();
     }
 
 
