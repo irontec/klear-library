@@ -95,9 +95,9 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $response->setHeader('Content-type', $options['type'], true);
         $response->setHeader(
-                'Content-Disposition',
-                $options['disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
-                true
+            'Content-Disposition',
+            $options['disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
+            true
         );
         $response->setHeader('Content-Transfer-Encoding', 'binary', true);
         $response->setHeader('Pragma', 'no-cache', true);
@@ -135,7 +135,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     protected function _cleanOutputBuffers()
     {
         if (!$this->_outputBufferingAllowed) {
-            while(ob_get_level() > 1) {
+            while (ob_get_level() > 1) {
                 ob_end_clean();
             }
             flush();
