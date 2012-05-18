@@ -44,9 +44,10 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $this->_isRaw = $isRaw;
         $this->_file = $file;
 
-        $this->_disableOtherOutput();
         $this->setOptions($options);
         $this->_sendHeaders($this->_options);
+
+        $this->_disableOtherOutput();
 
         if ($this->_isRaw) {
             echo $this->_file;
