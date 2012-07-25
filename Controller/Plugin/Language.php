@@ -5,39 +5,53 @@ require_once('Zend/Session/Namespace.php');
 /**
  * Plugin para gestionar el idioma en la web.
  * Cualquier parámetro con nombre "lang" hace que el idioma cambie al seleccionado,
- * solo si existe entre los "availableLanguage".
+ * solo si existe entre los "availableLanguage" que debe estar definido como opción en Zend_Translate.
  * @author Alayn Gortazar <alayn+karma@irontec.com>
  *
  */
 class Iron_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
 {
-    public function preDispatch(Zend_Controller_Request_Abstract $request)
+    protected $_translate;
+    protected $_session;
+    protected $_request;
+    public function routeShutdown(Zend_Controller_Request_Abstract $request)
     {
-        $registry = Zend_Registry::getInstance();
-        $translate = $registry->get('Zend_Translate');
+        $this->_translate = Zend_Registry::get('Zend_Translate');
+        $this->_session = new Zend_Session_Namespace('session');
+        $this->_request = $request;
 
-        $currLocale = $translate->getLocale();
-        $session = new Zend_Session_Namespace('session');
+        $currentLanguage = $this->_getCurrentLanguage();
 
-        $lang = $request->getParam('lang', '');
+        $locale = new Zend_Locale($currentLanguage);
+        Zend_Registry::set('Zend_Locale', $locale);
 
-        $availableLanguages = $translate->getOptions('availableLanguage');
+        $this->_session->lang = $locale->toString();
+        $this->_translate->setLocale($locale);
+    }
+
+    /**
+     * Returns current languages based on system's parameters. Preference:
+     *     - lang param if present and compatible with availableLanguages
+     *     - current session's language if present
+     *     - Zend_Translate's default language
+     * @param Zend_Controller_Request_Abstract $this->_request
+     * @param Zend_Translate $this->_translate
+     * @return Ambigous <mixed, multitype:>
+     */
+    protected function _getCurrentLanguage()
+    {
+        $availableLanguages = $this->_translate->getOptions('availableLanguages');
         if (sizeof($availableLanguages)) {
-            if (in_array($lang, $availableLanguages)) {
-                $langLocale = $lang;
-            } else {
-                $langLocale = isset($session->lang) ? $session->lang : $currLocale;
+            $lang = $this->_request->getParam('lang');
+            if (!is_null($lang) && in_array($lang, $availableLanguages)) {
+                return $lang;
             }
         }
 
-        $newLocale = new Zend_Locale();
-        $newLocale->setLocale($langLocale);
-        $registry->set('Zend_Locale', $newLocale);
+        if (isset($this->_session->lang)) {
+            return $this->_session->lang;
+        }
 
-        $translate->setLocale($langLocale);
-        $session->lang = $langLocale;
-
-        // Save the modified translate back to registry
-        $registry->set('Zend_Translate', $translate);
+        return $this->_translate->getLocale();
     }
 }
