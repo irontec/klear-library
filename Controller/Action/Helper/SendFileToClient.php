@@ -62,16 +62,33 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
     public function setOptions($options)
     {
+        if (isset($options['disposition'])) {
+
+            $options['Content-Disposition'] = $options['disposition'];
+            unset($options['disposition']);
+        }
+
+        if (isset($options['type'])) {
+
+            $options['Content-type'] = $options['type'];
+            unset($options['type']);
+        }
+
         $this->_options = $options;
 
         $defaultOptions = array(
                 'filename' => $this->_isRaw? 'file' : basename($this->_file),
-                'disposition' => 'attachment'
+                'Content-Disposition' => 'attachment',
+                'Content-Transfer-Encoding' => 'binary',
+                'Pragma' =>'no-cache',
+                'Expires' => '0'
         );
 
         // Metemos los valores por defecto en el array de options
         foreach ($defaultOptions as $key => $value) {
+
             if (!isset($this->_options[$key])) {
+
                 $this->_options[$key] = $value;
             }
         }
@@ -82,26 +99,34 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
     protected function _sendHeaders($options)
     {
+        $response = $this->getResponse();
+
         if ($this->_sendHeaders) {
-            $response = $this->getResponse();
+
             $this->_setHeaders($response, $options);
             $response->sendHeaders();
         }
+
+        $response->clearHeaders();
     }
 
     protected function _setHeaders($response, $options)
     {
-        $response = $this->getResponse();
-
-        $response->setHeader('Content-type', $options['type'], true);
         $response->setHeader(
             'Content-Disposition',
-            $options['disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
+            $options['Content-Disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
             true
         );
-        $response->setHeader('Content-Transfer-Encoding', 'binary', true);
-        $response->setHeader('Pragma', 'no-cache', true);
-        $response->setHeader('Expires', '0', true);
+
+        foreach ($options as $key => $value) {
+
+            if (in_array($key, array('filename', 'Content-Disposition'))) {
+
+                continue;
+            }
+
+            $response->setHeader($key, $value, true);
+        }
     }
 
     /**
