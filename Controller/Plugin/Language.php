@@ -14,10 +14,10 @@ class Iron_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
     protected $_translate;
     protected $_session;
     protected $_request;
-    public function routeShutdown(Zend_Controller_Request_Abstract $request)
+    public function preDispatch(Zend_Controller_Request_Abstract $request)
     {
-        $this->_translate = Zend_Registry::get('Zend_Translate');
         $this->_session = new Zend_Session_Namespace('session');
+        $this->_translate = Zend_Registry::get('Zend_Translate');
         $this->_request = $request;
 
         $currentLanguage = $this->_getCurrentLanguage();
@@ -40,7 +40,7 @@ class Iron_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
      */
     protected function _getCurrentLanguage()
     {
-        $availableLanguages = $this->_translate->getOptions('availableLanguages');
+        $availableLanguages = $this->_translate->getOptions('availableLanguage');
         if (sizeof($availableLanguages)) {
             $lang = $this->_request->getParam('lang');
             if (!is_null($lang) && in_array($lang, $availableLanguages)) {
