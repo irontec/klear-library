@@ -41,21 +41,31 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     protected function _loadTranslationData($data, $locale, array $options = array())
     {
+        $hideSlash = @$options['hideSlashes']; 
         $this->_data = array();
         $dbData = array();
 
         $dbAdapter = $this->getDbAdapter();
         $select = $dbAdapter->select();
+        
+        if ($hideSlash == true) {
+            $cleanLocale = str_replace('_','', $locale);
+            $literal = 'literal' . $cleanLocale;
+        } else {
+            $literal = 'literal_' . $locale;
+        }
+        
         $select->from(
             $data,
             array(
                 'identificativo',
-                'literal' => 'literal_' . $locale
+                'literal' => $literal
             )
         );
 
         $dbStmt = $dbAdapter->query($select);
         $resultSet = $dbStmt->fetchAll();
+        
         foreach ($resultSet as $row) {
             $dbData[$row['identificativo']] = $row['literal'];
         }
