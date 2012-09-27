@@ -9,9 +9,10 @@ class Iron_View_Helper_QueryUrl extends Zend_View_Helper_Url
      * Returns current url with correct lang parameter for language links
      * @param array $values associative array with key => value pairs
      * @param bool $reset true if previously existing values must be deleted
+     * @param string $url url generated with $this->url()
      * @return string
      */
-    public function queryUrl(array $values, $reset = false)
+    public function queryUrl(array $values, $reset = false, $url = null)
     {
         $request = Zend_Controller_Front::getInstance()->getRequest();
 
@@ -25,7 +26,10 @@ class Iron_View_Helper_QueryUrl extends Zend_View_Helper_Url
         }
 
         $queryStrings = $this->_getQueryStrings($query);
-        return $this->url() . '?' . implode('&amp;', $queryStrings);
+        if (is_null($url)) {
+            $url = $this->url();
+        }
+        return $url . '?' . implode('&amp;', $queryStrings);
     }
 
 
