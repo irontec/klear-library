@@ -20,8 +20,10 @@ class Iron_View_Helper_QueryUrl extends Zend_View_Helper_Url
             $query = $values;
         } else {
             $query = $request->getQuery();
-            foreach ($values as $key => $value) {
-                $query[$key] = $value;
+            if (!empty($values)) {
+                foreach ($values as $key => $value) {
+                    $query[$key] = $value;
+                }
             }
         }
 
@@ -41,8 +43,10 @@ class Iron_View_Helper_QueryUrl extends Zend_View_Helper_Url
     protected function _getQueryStrings(array $query)
     {
         $queryStrings = array();
-        foreach ($query as $key => $value) {
-            $queryStrings[$key] = $key . '=' . $value;
+        if (!empty($query)) {
+            foreach ($query as $key => $value) {
+                $queryStrings[$key] = $key . '=' . $value;
+            }
         }
         return $queryStrings;
     }
