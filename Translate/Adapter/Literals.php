@@ -41,20 +41,20 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     protected function _loadTranslationData($data, $locale, array $options = array())
     {
-        $hideSlash = @$options['hideSlashes']; 
+        $hideSlash = @$options['hideSlashes'];
         $this->_data = array();
         $dbData = array();
 
         $dbAdapter = $this->getDbAdapter();
         $select = $dbAdapter->select();
-        
+
         if ($hideSlash == true) {
             $cleanLocale = str_replace('_','', $locale);
             $literal = 'literal' . $cleanLocale;
         } else {
             $literal = 'literal_' . $locale;
         }
-        
+
         $select->from(
             $data,
             array(
@@ -65,9 +65,11 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
 
         $dbStmt = $dbAdapter->query($select);
         $resultSet = $dbStmt->fetchAll();
-        
+
         foreach ($resultSet as $row) {
-            $dbData[$row['identificativo']] = $row['literal'];
+
+            $identificativo = trim(mb_strtolower($row['identificativo']));
+            $dbData[$identificativo] = $row['literal'];
         }
 
         if (!isset($this->_data[$locale])) {
@@ -90,6 +92,8 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     public function translate($messageId, $locale = null)
     {
+        $messageId =  trim(mb_strtolower($messageId));
+
         /**
          * BUGFIX: No metemos en la BBDD nada que no tenga letras.
          */
@@ -192,7 +196,8 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         }
 
         if (isset($this->_translate[$locale])) {
-            if (!array_key_exists($messageId, $this->_translate[$locale])) {
+            if (!array_key_exists(trim(mb_strtolower($messageId)), $this->_translate[$locale])) {
+
                 $this->_createKey($messageId, $locale);
             }
         }
