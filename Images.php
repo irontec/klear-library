@@ -48,41 +48,185 @@ class Iron_Images
     }
 
     /**
-     * @return void
+     * @return bool
      */
     public function resize($newWidth, $newHeight, $strategy = "auto") {
+
         $dimensions = $this->_getOptimalDimensions($newWidth, $newHeight, $strategy);
 
         $optimalWidth  = $dimensions->optimalWidth;
         $optimalHeight = $dimensions->optimalHeight;
 
-        $this->_image->resizeImage($optimalWidth,$optimalHeight, \Imagick::FILTER_LANCZOS, 0.9, false);
+        $resp = $this->_image->resizeImage($dimensions->optimalWidth, $dimensions->optimalHeight,
+                                           \Imagick::FILTER_LANCZOS, 0.9, false);
+
+        $this->_loadGeometry();
+        return $resp;
     }
 
     /**
-     * @return int número de bytes escritos o FALSE
+     * @return bool
+     * @Throws ImagickException
+     */
+    public function crop($newWidth, $newHeight, $x = 0, $y = 0, $strategy = "exact") {
+
+        $dimensions = $this->_getOptimalDimensions($newWidth, $newHeight, $strategy);
+        $optimalWidth  = $dimensions->optimalWidth;
+        $optimalHeight = $dimensions->optimalHeight;
+
+        $this->_image = $this->_image->coalesceImages();
+
+        $resp = true;
+        foreach($this->_image as $frame){
+
+            $resp = $frame->cropImage($optimalWidth, $optimalHeight, $x, $y);
+            $frame->setImagePage(0,0,0,0);
+        }
+
+        $this->_loadGeometry();
+        return $resp;
+    }
+
+    /**
+     * Ambas caras serán escaladas a una proporción menor hasta que la
+     * comparación sea menor que el parámetro dado para la cara.
+     *
+     * @param int $width
+     * @param int $height
+     * @return bool
+     */
+    public function thumbnailImage($maxWidth, $maxHeight)
+    {
+        $resp = $this->_image->thumbnailImage($maxWidth, $maxHeight, true);
+        $this->_loadGeometry();
+        return $resp;
+    }
+
+    /**
+     * Crea una miniatura de tamaño fijo ampliando o reduciendo de escala la imagen
+     * y recortando un área específica desde el centro.
+     *
+     * @param int $width
+     * @param int $height
+     * @return bool
+     */
+    public function cropThumbnailImage($width, $height)
+    {
+        $resp = $this->_image->cropThumbnailImage($width, $height);
+        $this->_loadGeometry();
+        return $resp;
+    }
+
+    /**
+     * Escala una imagen proporcionalmente.
+     * @return bool
+     */
+    public function scale($escala = 0.5)
+    {
+        $width = round($this->_width * $escala);
+        $height = round($this->_height * $escala);
+
+        $resp = $this->resize($width, $height);
+        $this->_loadGeometry();
+        return $resp;
+    }
+
+    /**
+     * Añade una marca de agua a la imagen.
+     * Si la marca de agua es mayor que la imagen se escala antes de ser insertada
+     *
+     * @param string ruta a la marca de agua
+     * @param string $position : center, topleft, topright, bottomleft o bottomright
+     * @return bool
+     */
+    public function addWatermark($waterMarkPath, $position = 'bottomright')
+    {
+        $watermark = new Imagick();
+        $watermark->readImage($waterMarkPath);
+
+        $width = $watermark->getImageWidth();
+        $height = $watermark->getImageHeight();
+
+        if ($this->_height < $height || $this->_width < $width) {
+
+            // resize the watermark
+            $watermark->scaleImage($this->_height, $this->_width, true);
+            $width = $watermark->getImageWidth();
+            $height = $watermark->getImageHeight();
+        }
+
+        list($x, $y) = $this->_calculateWatermarkPosition($width, $height, $position);
+
+        return $this->_image->compositeImage($watermark, Imagick::COMPOSITE_OVER, $x,$y);
+    }
+
+    /**
+     * @return array x,y
+     */
+    private function _calculateWatermarkPosition($width, $height, $position)
+    {
+        switch ($position) {
+
+            case 'topleft':
+                $x = 0;
+                $y = 0;
+                break;
+
+            case 'topright':
+                $x = $this->_width - $width;
+                $y = 0;
+                break;
+
+            case 'bottomleft':
+                $x = 0;
+                $y = $this->_height - $height;
+                break;
+
+            case 'bottomright':
+                $x = $this->_width - $width;
+                $y = $this->_height - $height;
+                break;
+
+            case 'center':
+            default :
+                $x = ($this->_width - $width) / 2;
+                $y = ($this->_height  - $height) / 2;
+        }
+
+        return array($x, $y);
+    }
+
+    /**
+     * @return bool
      */
     public function saveImage($savePath) {
-        file_put_contents($savePath, $this->_image->getimageblob());
+        return $this->_image->writeImages($savePath, true);
     }
 
     /**
      * @return string
      */
     public function getRaw() {
-        return $this->_image->getimageblob();
+
+        return $this->_image->getImageBlob();
     }
 
     /**
      * @return string
      */
     public function getFormat() {
-        return $this->_image->getFormat();
+
+        return $this->_image->getImageFormat();
     }
 
     private function _loadImageAndDimensions($file) {
 
         $this->_image = new \Imagick($file);
+        $this->_loadGeometry();
+    }
+
+    private function _loadGeometry()
+    {
         $geometry = $this->_image->getImageGeometry();
 
         $this->_width  = $geometry['width'];
