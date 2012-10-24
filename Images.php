@@ -11,8 +11,7 @@ class Iron_Images
      * @param string $filePath
      * @Throws Exception
      */
-    function __construct($filePath = null)
-    {
+    function __construct($filePath = null) {
         if (! is_null($filePath)) {
 
             $this->_imageSrc = $filePath;
@@ -24,7 +23,6 @@ class Iron_Images
      * @param string $filePath
      */
     public function setFilePath($filePath) {
-
         $this->_imageSrc = $filePath;
     }
 
@@ -32,31 +30,27 @@ class Iron_Images
      * @Throws Exception
      */
     public function load() {
-
         $this->image = $this->_loadImageAndDimensions($this->_imageSrc);
     }
 
     /**
      * @return int
      */
-    public function getWidth()
-    {
+    public function getWidth() {
         return $this->_width;
     }
 
     /**
      * @return int
      */
-    public function getHeight()
-    {
+    public function getHeight() {
         return $this->_height;
     }
 
     /**
      * @return void
      */
-    public function resize($newWidth, $newHeight, $strategy = "auto")
-    {
+    public function resize($newWidth, $newHeight, $strategy = "auto") {
         $dimensions = $this->_getOptimalDimensions($newWidth, $newHeight, $strategy);
 
         $optimalWidth  = $dimensions->optimalWidth;
@@ -68,40 +62,34 @@ class Iron_Images
     /**
      * @return int número de bytes escritos o FALSE
      */
-    public function saveImage($savePath)
-    {
+    public function saveImage($savePath) {
         file_put_contents($savePath, $this->_image->getimageblob());
     }
 
     /**
      * @return string
      */
-    public function getRaw()
-    {
+    public function getRaw() {
         return $this->_image->getimageblob();
     }
 
     /**
      * @return string
      */
-    public function getFormat()
-    {
+    public function getFormat() {
         return $this->_image->getFormat();
     }
 
+    private function _loadImageAndDimensions($file) {
 
-    private function _loadImageAndDimensions($file)
-    {
         $this->_image = new \Imagick($file);
-
         $geometry = $this->_image->getImageGeometry();
 
         $this->_width  = $geometry['width'];
         $this->_height = $geometry['height'];
     }
 
-    private function _getOptimalDimensions($newWidth, $newHeight, $option)
-    {
+    private function _getOptimalDimensions($newWidth, $newHeight, $option) {
         $results = new stdClass;
 
         switch ($option)
@@ -132,22 +120,19 @@ class Iron_Images
         return $results;
     }
 
-    private function _getSizeByFixedHeight($newHeight)
-    {
+    private function _getSizeByFixedHeight($newHeight) {
         $ratio = $this->_width / $this->_height;
         $newWidth = $newHeight * $ratio;
         return $newWidth;
     }
 
-    private function _getSizeByFixedWidth($newWidth)
-    {
+    private function _getSizeByFixedWidth($newWidth) {
         $ratio = $this->_height / $this->_width;
         $newHeight = $newWidth * $ratio;
         return $newHeight;
     }
 
-    private function _getSizeByAuto($newWidth, $newHeight)
-    {
+    private function _getSizeByAuto($newWidth, $newHeight) {
         $results = new stdClass;
 
         if ($this->_height < $this->_width) {
