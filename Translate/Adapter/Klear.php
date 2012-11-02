@@ -1,7 +1,7 @@
 <?php
 
-include_once('Zend/Translate/Adapter/Array.php');
-include_once('Zend/Controller/Front.php');
+//include_once('Zend/Translate/Adapter/Array.php');
+//include_once('Zend/Controller/Front.php');
 
 class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 {
