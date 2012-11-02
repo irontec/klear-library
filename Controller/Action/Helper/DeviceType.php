@@ -1,5 +1,5 @@
 <?php
-require_once('Zend/Controller/Action/Helper/Abstract.php');
+//require_once('Zend/Controller/Action/Helper/Abstract.php');
 class Iron_Controller_Action_Helper_DeviceType extends Zend_Controller_Action_Helper_Abstract
 {
     public function deviceType($userAgent)

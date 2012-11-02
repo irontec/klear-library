@@ -1,6 +1,6 @@
 <?php
-require_once('Zend/Controller/Action/Helper/Abstract.php');
-require_once('Zend/Controller/Action/Exception.php');
+//require_once('Zend/Controller/Action/Helper/Abstract.php');
+//require_once('Zend/Controller/Action/Exception.php');
 
 /**
  *
@@ -91,10 +91,10 @@ class Iron_Controller_Action_Helper_SendHtml5Video extends Zend_Controller_Actio
 
     protected function _disableOtherOutput()
     {
-        require_once 'Zend/Controller/Action/HelperBroker.php';
+        //require_once 'Zend/Controller/Action/HelperBroker.php';
         Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer')->setNoRender(true);
 
-        require_once 'Zend/Layout.php';
+        //require_once 'Zend/Layout.php';
         $layout = Zend_Layout::getMvcInstance();
         if (null !== $layout) {
             $layout->disableLayout();

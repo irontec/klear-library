@@ -1,5 +1,5 @@
 <?php
-require_once('Zend/Controller/Action/Helper/Abstract.php');
+//require_once('Zend/Controller/Action/Helper/Abstract.php');
 
 /**
  * Action Helper para tratar passwords

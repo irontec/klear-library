@@ -1,5 +1,5 @@
 <?php
-require_once('Zend/Controller/Action/Helper/ContextSwitch.php');
+//require_once('Zend/Controller/Action/Helper/ContextSwitch.php');
 
 /**
  * @author Alayn Gortazar <alayn+karma@irontec.com>
@@ -41,11 +41,11 @@ class Iron_Controller_Action_Helper_IronContextSwitch extends Zend_Controller_Ac
                     }
                 }
 
-                require_once 'Zend/Json.php';
+                //require_once 'Zend/Json.php';
                 $vars = Zend_Json::encode($viewVars);
                 $this->getResponse()->setBody($vars);
             } else {
-                require_once 'Zend/Controller/Action/Exception.php';
+                //require_once 'Zend/Controller/Action/Exception.php';
                 throw new Zend_Controller_Action_Exception('View does not implement the getVars() method needed to encode the view into JSON');
             }
         }

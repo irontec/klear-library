@@ -1,7 +1,7 @@
 <?php
 
-require_once('Zend/Controller/Router/Abstract.php');
-require_once('Zend/Controller/Router/Interface.php');
+//require_once('Zend/Controller/Router/Abstract.php');
+//require_once('Zend/Controller/Router/Interface.php');
 class Iron_Controller_Router_Cli extends Zend_Controller_Router_Abstract implements Zend_Controller_Router_Interface {
     public function route(Zend_Controller_Request_Abstract $dispatcher){}
     public function assemble($userParams, $name = null, $reset = false, $encode = true){}

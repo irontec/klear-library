@@ -1,5 +1,5 @@
 <?php
-require_once('Zend/Controller/Plugin/Abstract.php');
+//require_once('Zend/Controller/Plugin/Abstract.php');
 
 /**
  * Plugin megasimple que sirve para desactivar el Layout en las peticiones Ajax
