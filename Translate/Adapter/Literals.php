@@ -68,7 +68,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
 
         foreach ($resultSet as $row) {
 
-            $identificativo = trim(mb_strtolower($row['identificativo']));
+            $identificativo = trim(mb_strtolower($row['identificativo'], 'UTF-8'));
             $dbData[$identificativo] = $row['literal'];
         }
 
@@ -92,7 +92,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     public function translate($messageId, $locale = null)
     {
-        $messageId =  trim(mb_strtolower($messageId));
+        $messageId =  trim(mb_strtolower($messageId, 'UTF-8'));
 
         /**
          * BUGFIX: No metemos en la BBDD nada que no tenga letras.
@@ -196,7 +196,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         }
 
         if (isset($this->_translate[$locale])) {
-            if (!array_key_exists(trim(mb_strtolower($messageId)), $this->_translate[$locale])) {
+            if (!array_key_exists(trim(mb_strtolower($messageId, 'UTF-8')), $this->_translate[$locale])) {
 
                 $this->_createKey($messageId, $locale);
             }
