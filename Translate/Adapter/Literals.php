@@ -92,13 +92,14 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     public function translate($messageId, $locale = null)
     {
+        $originMessageId = trim($messageId);
         $messageId =  trim(mb_strtolower($messageId, 'UTF-8'));
 
         /**
          * BUGFIX: No metemos en la BBDD nada que no tenga letras.
          */
         if (preg_match('/[a-zA-Z]/', $messageId) === 0) {
-            return $messageId;
+            return $this->_literalReturn($messageId);
         }
 
         if ($locale === null) {
@@ -131,13 +132,13 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
                     if (array_key_exists($locale, $this->_options['route']) &&
                         !array_key_exists($locale, $this->_routed)) {
                         $this->_routed[$locale] = true;
-                        return $this->translate($messageId, $this->_options['route'][$locale]);
+                        return $this->_literalReturn($this->translate($messageId, $this->_options['route'][$locale]));
                     }
                 }
 
                 $this->_routed = array();
                 if ($plural === null) {
-                    return $messageId;
+                    return $this->_literalReturn($originMessageId);
                 }
 
                 $rule = Zend_Translate_Plural::getPlural($number, $plocale);
@@ -145,7 +146,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
                     $rule = 0;
                 }
 
-                return $plural[$rule];
+                return $this->_literalReturn($plural[$rule]);
             }
 
             $locale = new Zend_Locale($locale);
@@ -158,13 +159,13 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             // return original translation
             if ($plural === null) {
                 $this->_routed = array();
-                return $this->_translate[$locale][$messageId];
+                return $this->_literalReturn($this->_translate[$locale][$messageId]);
             }
 
             $rule = Zend_Translate_Plural::getPlural($number, $locale);
             if (isset($this->_translate[$locale][$plural[0]][$rule])) {
                 $this->_routed = array();
-                return $this->_translate[$locale][$plural[0]][$rule];
+                return $this->_literalReturn($this->_translate[$locale][$plural[0]][$rule]);
             }
         } else if (strlen($locale) != 2) {
             // faster than creating a new locale and separate the leading part
@@ -174,13 +175,13 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
                 // return regionless translation (en_US -> en)
                 if ($plural === null) {
                     $this->_routed = array();
-                    return $this->_translate[$locale][$messageId];
+                    return $this->_literalReturn($this->_translate[$locale][$messageId]);
                 }
 
                 $rule = Zend_Translate_Plural::getPlural($number, $locale);
                 if (isset($this->_translate[$locale][$plural[0]][$rule])) {
                     $this->_routed = array();
-                    return $this->_translate[$locale][$plural[0]][$rule];
+                    return $this->_literalReturn($this->_translate[$locale][$plural[0]][$rule]);
                 }
             }
         }
@@ -191,7 +192,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             if (array_key_exists($locale, $this->_options['route']) &&
                 !array_key_exists($locale, $this->_routed)) {
                 $this->_routed[$locale] = true;
-                return $this->translate($messageId, $this->_options['route'][$locale]);
+                return $this->_literalReturn($this->translate($messageId, $this->_options['route'][$locale]));
             }
         }
 
@@ -203,8 +204,9 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         }
 
         $this->_routed = array();
+        
         if ($plural === null) {
-            return $messageId;
+            return $this->_literalReturn($originMessageId);
         }
 
         $rule = Zend_Translate_Plural::getPlural($number, $plocale);
@@ -212,7 +214,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             $rule = 0;
         }
 
-        return $plural[$rule];
+        return $this->_literalReturn($plural[$rule]);
     }
 
     protected function _createKey($messageId, $locale)
@@ -257,5 +259,14 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
     public function setDbAdapter(Zend_Db_Adapter_Abstract $dbAdapter)
     {
         $this->_dbAdapter = $dbAdapter;
+    }
+    
+    
+    protected function _literalReturn($string)
+    {
+        
+        return $string;
+        //return '<div class="literalEditable">' . $string . '</div>';
+        
     }
 }
