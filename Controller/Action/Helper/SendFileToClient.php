@@ -134,12 +134,12 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
      */
     protected function _setMimetype()
     {
-        if (!isset($this->_options['type'])) {
+        if (!isset($this->_options['Content-type'])) {
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             if ($this->_isRaw) {
-                $this->_options['type'] = $finfo->buffer($this->_file);
+                $this->_options['Content-type'] = $finfo->buffer($this->_file);
             } else {
-                $this->_options['type'] = $finfo->file($this->_file);
+                $this->_options['Content-type'] = $finfo->file($this->_file);
             }
         }
         return $this;
