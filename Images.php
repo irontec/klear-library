@@ -7,51 +7,94 @@ class Iron_Images
     private $_width;
     private $_height;
 
+    private $_resolution;
     /**
      * @param string $filePath
      * @Throws Exception
      */
-    function __construct($filePath = null) {
+    function __construct($filePath = null)
+    {
         if (! is_null($filePath)) {
 
             $this->_imageSrc = $filePath;
-            $this->image = $this->_loadImageAndDimensions($this->_imageSrc);
+            $this->_loadImageAndDimensions($this->_imageSrc);
         }
     }
 
     /**
      * @param string $filePath
      */
-    public function setFilePath($filePath) {
+    public function setFilePath($filePath)
+    {
         $this->_imageSrc = $filePath;
     }
 
     /**
      * @Throws Exception
      */
-    public function load() {
-        $this->image = $this->_loadImageAndDimensions($this->_imageSrc);
+    public function load()
+    {
+        $this->_loadImageAndDimensions($this->_imageSrc);
     }
 
     /**
      * @return int
      */
-    public function getWidth() {
+    public function getWidth()
+    {
         return $this->_width;
     }
 
     /**
      * @return int
      */
-    public function getHeight() {
+    public function getHeight()
+    {
         return $this->_height;
+    }
+
+    /**
+     * @return array (x,y)
+     */
+    public function getResolution()
+    {
+        return $this->_resolution;
+    }
+
+    public function setResolution($x, $y)
+    {
+        $this->_resolution = array($x, $y);
+        //$this->_image->setResolution($x, $y);
+        $this->_image->resampleImage($x,$y,imagick::FILTER_UNDEFINED,1);
+
+        return $this;
+    }
+
+    public function setFormat($format, $quality = 100)
+    {
+        switch(strtolower($format)) {
+
+            case 'jpg':
+            case 'jpeg':
+
+                $this->_image->setCompression(Imagick::COMPRESSION_JPEG);
+                $this->_image->setCompressionQuality($quality);
+                $this->_image->setImageFormat( "jpg" );
+                break;
+
+            default:
+
+             Throw new Exception("Unknown format " . $format);
+        }
+
+        return $this;
     }
 
     /**
      * @return bool
      */
-    public function resize($newWidth, $newHeight, $strategy = "auto") {
-
+    public function resize($newWidth, $newHeight, $strategy = "auto")
+    {
         $dimensions = $this->_getOptimalDimensions($newWidth, $newHeight, $strategy);
 
         $optimalWidth  = $dimensions->optimalWidth;
@@ -68,8 +111,8 @@ class Iron_Images
      * @return bool
      * @Throws ImagickException
      */
-    public function crop($newWidth, $newHeight, $x = 0, $y = 0, $strategy = "exact") {
-
+    public function crop($newWidth, $newHeight, $x = 0, $y = 0, $strategy = "exact")
+    {
         $dimensions = $this->_getOptimalDimensions($newWidth, $newHeight, $strategy);
         $optimalWidth  = $dimensions->optimalWidth;
         $optimalHeight = $dimensions->optimalHeight;
@@ -125,6 +168,8 @@ class Iron_Images
     {
         $width = round($this->_width * $escala);
         $height = round($this->_height * $escala);
+
+
 
         $resp = $this->resize($width, $height);
         $this->_loadGeometry();
@@ -199,23 +244,24 @@ class Iron_Images
     /**
      * @return bool
      */
-    public function saveImage($savePath) {
+    public function saveImage($savePath)
+    {
         return $this->_image->writeImages($savePath, true);
     }
 
     /**
      * @return string
      */
-    public function getRaw() {
-
+    public function getRaw()
+    {
         return $this->_image->getImageBlob();
     }
 
     /**
      * @return string
      */
-    public function getFormat() {
-
+    public function getFormat()
+    {
         return $this->_image->getImageFormat();
     }
 
@@ -231,9 +277,12 @@ class Iron_Images
 
         $this->_width  = $geometry['width'];
         $this->_height = $geometry['height'];
+
+        $this->_resolution = $this->_image->getImageResolution();
     }
 
-    private function _getOptimalDimensions($newWidth, $newHeight, $option) {
+    private function _getOptimalDimensions($newWidth, $newHeight, $option)
+    {
         $results = new stdClass;
 
         switch ($option)
@@ -264,19 +313,22 @@ class Iron_Images
         return $results;
     }
 
-    private function _getSizeByFixedHeight($newHeight) {
+    private function _getSizeByFixedHeight($newHeight)
+    {
         $ratio = $this->_width / $this->_height;
         $newWidth = $newHeight * $ratio;
         return $newWidth;
     }
 
-    private function _getSizeByFixedWidth($newWidth) {
+    private function _getSizeByFixedWidth($newWidth)
+    {
         $ratio = $this->_height / $this->_width;
         $newHeight = $newWidth * $ratio;
         return $newHeight;
     }
 
-    private function _getSizeByAuto($newWidth, $newHeight) {
+    private function _getSizeByAuto($newWidth, $newHeight)
+    {
         $results = new stdClass;
 
         if ($this->_height < $this->_width) {
