@@ -34,22 +34,32 @@ class Iron_Time
         
         $time = preg_replace("/[^0-9:]+/", '', $time);
         
-        list($hora, $minuto, $segundo) = explode(":",$time);
+        
+        $segments = explode(":",$time);
+
+        $segmentsItems = array("hora","min","seg");
+        $items = array();
+        
+        foreach($segments as $idx => $segment) {
+            $items[$segmentsItems[$idx]] = $segment;    
+        }
+            
+        
 
         
-        if (is_null($minuto) && is_null($segundo)) {
+        if (!isset($items['min']) && !isset($items['seg'])) {
             
-            if (is_null($hora)) return 0;
+            if (!isset($items['hora'])) return 0;
             
-            return (int)$hora;
+            return (int)$items['hora'];
         }
         
-        if (is_null($segundo)) {
+        if ( !isset($items['seg'])) {
         
-            return ($hora*3600) + ($minuto*60);
+            return ( $items['hora']*3600) + ( $items['min']*60);
         }
         
-        return ($hora*3600) + ($minuto*60) + $segundo;
+        return ( $items['hora']*3600) + ( $items['min']*60) + $items['seg'];
             
     }
     
