@@ -100,8 +100,18 @@ class Iron_Images
         $optimalWidth  = $dimensions->optimalWidth;
         $optimalHeight = $dimensions->optimalHeight;
 
-        $resp = $this->_image->resizeImage($dimensions->optimalWidth, $dimensions->optimalHeight,
-                                           \Imagick::FILTER_LANCZOS, 0.9, false);
+        $resp = false;
+        while ($this->_image->previousImage()) {
+
+            $resp = $this->_image->resizeImage(
+                                     $dimensions->optimalWidth,
+                                     $dimensions->optimalHeight,
+                                     \Imagick::FILTER_LANCZOS,
+                                     0.9,
+                                     false
+                                   );
+
+        }
 
         $this->_loadGeometry();
         return $resp;
@@ -117,13 +127,16 @@ class Iron_Images
         $optimalWidth  = $dimensions->optimalWidth;
         $optimalHeight = $dimensions->optimalHeight;
 
-        $this->_image = $this->_image->coalesceImages();
+        if ($this->_image->getNumberImages() > 1) {
 
-        $resp = true;
-        foreach($this->_image as $frame){
+            $this->_image = $this->_image->coalesceImages();
+        }
 
-            $resp = $frame->cropImage($optimalWidth, $optimalHeight, $x, $y);
-            $frame->setImagePage(0,0,0,0);
+        $resp = false;
+        while ($this->_image->previousImage()) {
+
+            $resp = $this->_image->cropImage($optimalWidth, $optimalHeight, $x, $y);
+            $this->_image->setImagePage(0,0,0,0);
         }
 
         $this->_loadGeometry();
@@ -140,7 +153,11 @@ class Iron_Images
      */
     public function thumbnailImage($maxWidth, $maxHeight)
     {
-        $resp = $this->_image->thumbnailImage($maxWidth, $maxHeight, true);
+        while ($this->_image->previousImage()) {
+
+            $this->_image->thumbnailImage($maxWidth, $maxHeight, true);
+        }
+
         $this->_loadGeometry();
         return $resp;
     }
@@ -155,7 +172,11 @@ class Iron_Images
      */
     public function cropThumbnailImage($width, $height)
     {
-        $resp = $this->_image->cropThumbnailImage($width, $height);
+        while ($this->_image->previousImage()) {
+
+            $this->_image->cropThumbnailImage($width, $height);
+        }
+
         $this->_loadGeometry();
         return $resp;
     }
@@ -168,8 +189,6 @@ class Iron_Images
     {
         $width = round($this->_width * $escala);
         $height = round($this->_height * $escala);
-
-
 
         $resp = $this->resize($width, $height);
         $this->_loadGeometry();
@@ -254,7 +273,7 @@ class Iron_Images
      */
     public function getRaw()
     {
-        return $this->_image->getImageBlob();
+        return $this->_image->getImagesBlob();
     }
 
     /**
