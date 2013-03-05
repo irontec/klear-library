@@ -153,9 +153,12 @@ class Iron_Images
      */
     public function thumbnailImage($maxWidth, $maxHeight)
     {
+        $resp = false;
+
+        $resp = $this->_image->thumbnailImage($maxWidth, $maxHeight, true);
         while ($this->_image->previousImage()) {
 
-            $this->_image->thumbnailImage($maxWidth, $maxHeight, true);
+            $resp = $this->_image->thumbnailImage($maxWidth, $maxHeight, true);
         }
 
         $this->_loadGeometry();
@@ -172,9 +175,10 @@ class Iron_Images
      */
     public function cropThumbnailImage($width, $height)
     {
+        $resp = $this->_image->cropThumbnailImage($width, $height);
         while ($this->_image->previousImage()) {
 
-            $this->_image->cropThumbnailImage($width, $height);
+            $resp = $this->_image->cropThumbnailImage($width, $height);
         }
 
         $this->_loadGeometry();
