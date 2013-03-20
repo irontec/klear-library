@@ -22,7 +22,13 @@ class Iron_Plugin_Init extends Zend_Controller_Plugin_Abstract
             return;
         }
         
-        $defaultLang = 'es';
+        $defaultLang = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('defaultLanguage');
+        
+        if (!$defaultLang) {
+            $defaultLang = 'es';
+        }
+        
+        
         $configLangs = array(
                 'es' => array(
                         'title' => 'Español',
