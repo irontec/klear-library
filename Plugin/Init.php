@@ -89,6 +89,7 @@ class Iron_Plugin_Init extends Zend_Controller_Plugin_Abstract
         Zend_Registry::set('currentSystemLanguage', $this->_lang);
         Zend_Registry::set('SystemDefaultLanguage', $configLangs[$defaultLang]);
         Zend_Registry::set('SystemLanguages', $configLangs);
+        Zend_Registry::set('defaultLang', $this->_lang['language']);
 
 
 
