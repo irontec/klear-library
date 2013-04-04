@@ -51,7 +51,11 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
-            readfile($this->_file);
+            $f = fopen($this->_file, 'r');
+            while(!feof($f)){
+                print fgets($f, 1024);
+            }
+            fclose($f);
         }
     }
 
