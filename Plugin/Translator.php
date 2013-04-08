@@ -22,7 +22,6 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
 
     public function preDispatch(Zend_Controller_Request_Abstract $request)
     {
-        
         $this->_initTranslator();
     }
 
@@ -30,16 +29,14 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
     {
         $this->_frontController = Zend_Controller_Front::getInstance();
 
-        
         $sesion = Zend_Registry::get('currentSystemLanguage');
-        
-        
+
         $locale = new Zend_Locale($sesion['locale']);
-        
+
         $translationPath = $this->_getTranslationPath(APPLICATION_PATH, $locale);
-        
+
         if (!Zend_Registry::isRegistered(self::DEFAULT_REGISTRY_KEY)) {
-        
+
             $this->_translate = new Zend_Translate(
                     array(
                             'disableNotices' => true,
@@ -47,21 +44,21 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
                             'content' => $translationPath
                     )
             );
-        
+
             Zend_Registry::set(self::DEFAULT_REGISTRY_KEY, $this->_translate);
             $this->_setViewHelperTranslator();
             $this->_setActionHelperTranslator();
-        
+
         } else {
-        
+
             $this->_translate->getAdapter()->addTranslation($translationPath);
-        
+
         }
-        
-        
+
+
         Zend_Form::setDefaultTranslator($this->_translate);
         Zend_Validate_Abstract::setDefaultTranslator($this->_translate);
-        
+
     }
 
     /**
@@ -79,8 +76,7 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
                 $locale->toString(),
                 $locale->toString() . '.mo'
         );
-        
-        
+
         return implode(DIRECTORY_SEPARATOR, $translationPath);
     }
 

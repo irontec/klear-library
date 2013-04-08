@@ -8,6 +8,15 @@
 class Iron_Plugin_Init extends Zend_Controller_Plugin_Abstract
 {
 
+    const DEFAULT_USER_SESSION_NAMESPACE = 'PublicUserSettings';
+    const DEFAULT_REQUEST_LANGUAGE_PARAM = 'language';
+
+    protected $_bootstrap;
+    protected $_config;
+
+    protected $_defaultLang;
+    protected $_langsConfig;
+    protected $_session;
 
 
     /**
@@ -17,92 +26,104 @@ class Iron_Plugin_Init extends Zend_Controller_Plugin_Abstract
      */
     public function routeShutdown(Zend_Controller_Request_Abstract $request)
     {
-
         if (preg_match("/^klear/", $request->getModuleName())) {
             return;
         }
-        
-        $defaultLang = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('defaultLanguage');
-        
-        if (!$defaultLang) {
-            $defaultLang = 'es';
-        }
-        
-        
-        $configLangs = array(
-                'es' => array(
-                        'title' => 'Español',
-                        'language' => 'es',
-                        'locale' => 'es_ES'),
-                'en' => array(
-                        'title' => 'English',
-                        'language' => 'en',
-                        'locale' => 'en_US'),
-                'eu' => array(
-                        'title' => 'Euskera',
-                        'language' => 'eu',
-                        'locale' => 'eu_ES')
-        );
 
-        /*
-         * Loading System Languages
-        */
-        foreach ($configLangs as $_langIden => $lang) {
-            $language = new \Iron_Model_Language();
-            $language->setIden($_langIden);
-            $language->setConfig($lang);
-            $langs[$language->getIden()] = $language;
-        }
+        $this->_init();
 
-        /*
-         * Resquested Language // SESSION Language
-        */
-
-        $session = new Zend_Session_Namespace('PublicUserSettings');
-
-        $front = Zend_Controller_Front::getInstance();
-
-        $req = $front->getRequest();
-        
-        $requestedLanguage = false;
-        if ($req) {
-            $requestedLanguage = $front->getRequest()->getParam('language', false);
-        }
-
-
-        $lang = null;
-        
-        if ($requestedLanguage && (array_key_exists($requestedLanguage, $configLangs)) ) {
-            $lang = $requestedLanguage;
-        }
-        if ((!$lang)
-                && ($session->currentSystemLanguage!=null)
-                && (array_key_exists($session->currentSystemLanguage, $configLangs)) ) {
-            $lang = $session->currentSystemLanguage;
-        }
-
-        if (!$lang) {
-            $lang = $defaultLang;
-        }
-
-        $session->currentSystemLanguage = $lang;
-
-        /*
-         * Setting language Object
-        */
-        $this->_lang = $configLangs[$session->currentSystemLanguage];
-
-        Zend_Registry::set('currentSystemLanguage', $this->_lang);
-        Zend_Registry::set('SystemDefaultLanguage', $configLangs[$defaultLang]);
-        Zend_Registry::set('SystemLanguages', $configLangs);
-        Zend_Registry::set('defaultLang', $this->_lang['language']);
-
-
+        $currentLang = $this->_getCurrentLang();
+        $currentLangConfig = $this->_langsConfig[$currentLang];
+        $this->_session->currentSystemLanguage = $currentLang;
+        Zend_Registry::set('currentSystemLanguage', $currentLangConfig);
+        Zend_Registry::set('SystemDefaultLanguage', $this->_langsConfig[$this->_defaultLang]);
+        Zend_Registry::set('SystemLanguages', $this->_langsConfig);
+        Zend_Registry::set('defaultLang', $currentLangConfig['language']);
 
         $front = Zend_Controller_Front::getInstance();
         $front->registerPlugin(new Iron_Plugin_Translator());
-
-
     }
 
+    protected function _init()
+    {
+        $this->_bootstrap = Zend_Controller_Front::getInstance()->getParam('bootstrap');
+        $this->_config = $this->_bootstrap->getOption('translate');
+
+        $this->_langsConfig = $this->_getLangsConfig();
+        $this->_defaultLang = $this->_getDefaultLang($this->_langsConfig);
+        $this->_session = new Zend_Session_Namespace($this->_getPublicUserSessionNamespace());
+    }
+
+    protected function _getLangsConfig()
+    {
+        if (isset($this->_config['language'])) {
+            return $this->_config['language'];
+        }
+
+        return array(
+                'es' => array(
+                        'title' => 'Español',
+                        'language' => 'es',
+                        'locale' => 'es_ES'
+                ),
+                'en' => array(
+                        'title' => 'English',
+                        'language' => 'en',
+                        'locale' => 'en_US'
+                ),
+                'eu' => array(
+                        'title' => 'Euskera',
+                        'language' => 'eu',
+                        'locale' => 'eu_ES'
+                )
+        );
+    }
+
+    protected function _getDefaultLang(array $langsConfig)
+    {
+        $defaultLang = $this->_bootstrap->getOption('defaultLanguage'); //Deprecated
+        if ($defaultLang) {
+            return $defaultLang;
+        }
+
+        if (isset($this->_config['defaultLanguage'])) {
+            return $this->_config['defaultLanguage'];
+        }
+
+        return key($langsConfig);
+    }
+
+    protected function _getPublicUserSessionNamespace()
+    {
+        if (isset($this->_config['userNamespace'])) {
+            return $this->_config['userNamespace'];
+        }
+        return self::DEFAULT_USER_SESSION_NAMESPACE;
+    }
+
+    protected function _getCurrentLang()
+    {
+        //Take requested lang
+        $requestedLanguage = $this->getRequest()->getParam($this->_getLanguageParam());
+        if ($requestedLanguage && array_key_exists($requestedLanguage, $this->_langsConfig)) {
+            return $requestedLanguage;
+        }
+
+        //Take session lang
+        $currentSystemLanguage = $this->_session->currentSystemLanguage;
+        if (!is_null($currentSystemLanguage) && array_key_exists($currentSystemLanguage, $this->_langsConfig)) {
+            return $currentSystemLanguage;
+        }
+
+        //OK, take default lang
+        return $this->_defaultLang;
+    }
+
+    protected function _getLanguageParam()
+    {
+        if (isset($this->_config['requestParam'])) {
+            return $this->_config['requestParam'];
+        }
+        return self::DEFAULT_REQUEST_LANGUAGE_PARAM;
+    }
 }
