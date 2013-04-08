@@ -5,7 +5,7 @@
  * @author Lander Ontoria Gardeazabal <lander+dev@irontec.com>
  *
  */
-class Iron_Plugin_Init extends Zend_Controller_Plugin_Abstract
+class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abstract
 {
 
     const DEFAULT_USER_SESSION_NAMESPACE = 'PublicUserSettings';
