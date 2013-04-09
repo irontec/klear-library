@@ -7,12 +7,9 @@ require_once 'Zend/Form/Element/Xhtml.php';
  * Text form html5 element
  * Browser compatibility: http://www.w3schools.com/html/html5_form_input_types.asp
  *
- * @category   Zend
- * @package    Zend_Form
- * @subpackage Element
- * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Text.php 23775 2011-03-01 17:25:24Z ralph $
+ * @category   Iron
+ * @package    Iron_Form_Element
+ * @subpackage Html5
  */
 Abstract class Iron_Form_Element_Html5_Abstract extends Zend_Form_Element_Xhtml
 {
@@ -29,6 +26,7 @@ Abstract class Iron_Form_Element_Html5_Abstract extends Zend_Form_Element_Xhtml
      */
     public function init()
     {
-        $this->getView()->getPluginLoader('helper')->addPrefixPath("Iron_View_Helper_", "Iron/View/Helper/");
+        $this->getView()->getPluginLoader('helper')
+                        ->addPrefixPath("Iron_View_Helper_", "Iron/View/Helper/");
     }
 }
