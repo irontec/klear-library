@@ -24,11 +24,18 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
     }
 
     /**
-     * @return string
+     * @return string | boolean
      */
     public function getCacheFilePath($id)
     {
-        return $this->_file($id);
+        $filepath = $this->_file($id);
+
+        if (! file_exists($filepath)) {
+
+            return false;
+        }
+
+        return $filepath;
     }
 
     /**
