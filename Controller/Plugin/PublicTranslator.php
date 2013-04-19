@@ -103,6 +103,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
 
     protected function _getCurrentLang()
     {
+
         //Take requested lang
         $requestedLanguage = $this->getRequest()->getParam($this->_getLanguageParam());
         if ($requestedLanguage && array_key_exists($requestedLanguage, $this->_langsConfig)) {
@@ -115,6 +116,14 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
             return $currentSystemLanguage;
         }
 
+
+        $locale = new Zend_Locale();
+        $browserLanguage = $locale->getLanguage();
+        if (!is_null($browserLanguage) && array_key_exists($browserLanguage, $this->_langsConfig)) {
+            return $browserLanguage;
+        }
+        
+        
         //OK, take default lang
         return $this->_defaultLang;
     }
