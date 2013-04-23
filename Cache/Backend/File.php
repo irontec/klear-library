@@ -4,9 +4,25 @@
  * liviano de memoria. Permite jugar con rutas de ficheros para evitar
  * cargar continuamente el contenido en memoria
  *
- *
- * Requiere de settear 'write_control' a false en el frontend
+ * Requiere settear 'write_control' a false en el frontend
  * o bien hacer una implementación custom de Zend_Cache_Core
+ *
+ * Ejemplo de uso:
+ *
+ *    Zend_Cache::factory(
+ *       'Core',
+ *       new Iron_Cache_Backend_File(
+ *           array(
+ *               'cache_dir' => APPLICATION_PATH . '/envios',
+ *           )
+ *       ),
+ *       array(
+ *           'lifetime' => null,
+ *           'automatic_cleaning_factor' => 0,
+ *           'automatic_serialization' => false,
+ *           'write_control' => false
+ *       )
+ *    );
  */
 
 class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
@@ -36,7 +52,7 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
      */
     protected function _hash($data, $controlType)
     {
-        if (file_exists($data)) {
+        if ($this->_validPathSintax($data) && file_exists($data)) {
 
             return $this->_hashFileData($data, $controlType);
         }
@@ -48,7 +64,7 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
      * Make a control key with the string containing datas
      *
      * @param  string $data        Data
-     * @param  string $controlType Type of control 'md5', 'crc32' or 'strlen'
+     * @param  string $controlType Type of control 'md5', 'crc32', 'strlen' or 'adler32'
      * @throws Zend_Cache_Exception
      * @return string Control key
      */
@@ -56,7 +72,7 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
     {
         switch ($controlType) {
             case 'md5':
-                return file_exists($data) ? md5_file($data) : md5($data);
+                return md5($data);
             case 'crc32':
                 return crc32($data);
             case 'strlen':
@@ -69,10 +85,10 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
     }
 
     /**
-     * Make a control key with the string containing datas
+     * Make a control key with the string containing file path
      *
-     * @param  string $data        Data
-     * @param  string $controlType Type of control 'md5', 'crc32' or 'strlen'
+     * @param  string $filePath File complete path
+     * @param  string $controlType Type of control 'md5', 'crc32', 'strlen' or 'adler32'
      * @throws Zend_Cache_Exception
      * @return string Control key
      */
@@ -113,6 +129,9 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
         }
     }
 
+    /**
+     * @return boolean
+     */
     protected function _validPathSintax($path)
     {
         if (
@@ -128,6 +147,9 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
 
     }
 
+    /**
+     * @return boolean
+     */
     protected function _fileCopy($filePathDestino, $filePathOrigen)
     {
         return copy($filePathOrigen ,$filePathDestino);
