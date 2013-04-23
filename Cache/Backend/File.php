@@ -12,18 +12,6 @@
 class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
 {
     /**
-     * Constructor
-     *
-     * @param  array $options associative array of options
-     * @throws Zend_Cache_Exception
-     * @return void
-     */
-    public function __construct(array $options = array())
-    {
-        return parent::__construct($options);
-    }
-
-    /**
      * @return string | boolean
      */
     public function getCacheFilePath($id)
@@ -36,52 +24,6 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
         }
 
         return $filepath;
-    }
-
-    /**
-     * @param  string| $data            Datas to cache or filePath
-     * @param  string $id               Cache id
-     * @param  array  $tags             Array of strings, the cache record will be tagged by each string entry
-     * @param  int    $specificLifetime If != false, set a specific lifetime for this cache record (null => infinite lifetime)
-     * @return boolean true if no problem
-     */
-    public function save($data, $id, $tags = array(), $specificLifetime = false)
-    {
-        clearstatcache();
-        $file = $this->_file($id);
-        $path = $this->_path($id);
-        if ($this->_options['hashed_directory_level'] > 0) {
-            if (!is_writable($path)) {
-                // maybe, we just have to build the directory structure
-                $this->_recursiveMkdirAndChmod($id);
-            }
-            if (!is_writable($path)) {
-                return false;
-            }
-        }
-
-        if ($this->_options['read_control']) {
-            $hash = $this->_hash($data, $this->_options['read_control_type']);
-        } else {
-            $hash = '';
-        }
-
-        $metadatas = array(
-            'hash' => $hash,
-            'mtime' => time(),
-            'expire' => $this->_expireTime($this->getLifetime($specificLifetime)),
-            'tags' => $tags
-        );
-
-        $res = $this->_setMetadatas($id, $metadatas);
-
-        if (!$res) {
-            $this->_log('Zend_Cache_Backend_File::save() / error on saving metadata');
-            return false;
-        }
-        $res = $this->_filePutContents($file, $data);
-
-        return $res;
     }
 
     /**
