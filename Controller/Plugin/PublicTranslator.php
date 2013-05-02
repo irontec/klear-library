@@ -61,21 +61,21 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         }
 
         return array(
-                'es' => array(
-                        'title' => 'Español',
-                        'language' => 'es',
-                        'locale' => 'es_ES'
-                ),
-                'en' => array(
-                        'title' => 'English',
-                        'language' => 'en',
-                        'locale' => 'en_US'
-                ),
-                'eu' => array(
-                        'title' => 'Euskera',
-                        'language' => 'eu',
-                        'locale' => 'eu_ES'
-                )
+            'es' => array(
+                'title' => 'Español',
+                'language' => 'es',
+                'locale' => 'es_ES'
+            ),
+            'en' => array(
+                'title' => 'English',
+                'language' => 'en',
+                'locale' => 'en_US'
+            ),
+            'eu' => array(
+                'title' => 'Euskera',
+                'language' => 'eu',
+                'locale' => 'eu_ES'
+            )
         );
     }
 

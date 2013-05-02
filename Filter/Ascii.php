@@ -1,10 +1,50 @@
 <?php
 class Iron_Filter_Ascii implements Zend_Filter_Interface
 {
+    protected $_currentLocales;
+    protected $_locales = array(
+        'en_US.UTF8', 'en_GB.UTF8', 'es_ES.UTF8', 'eu_ES.UTF8', 'fr_FR.UTF8', 'UTF8'
+    );
+
     public function filter($value)
     {
-        // TODO: Asegurarnos de que esto no afecta a otros asuntos de klear...
-        setlocale(LC_ALL, 'en_US.UTF8');
-        return iconv('UTF-8', 'ASCII//TRANSLIT', $value);
+        $this->_saveCurrentLocales();
+
+        setlocale(LC_ALL, $this->_locales);
+        $asciiValue = iconv('UTF-8', 'ASCII//TRANSLIT', $value);
+
+        $this->_restoreCurrentLocales();
+        return $asciiValue;
+    }
+
+    protected function _saveCurrentLocales()
+    {
+        $localesString = setlocale(LC_ALL, 0);
+        if (false === strpos($localesString, ';')) {
+            $this->_currentLocales = $localesString;
+        } else {
+            $localesArray = explode(';', $localesString);
+            $this->_currentLocales = array_map(
+                function ($locale) {
+                    return explode('=', $locale);
+                },
+                $localesArray
+            );
+        }
+    }
+
+    protected function _restoreCurrentLocales()
+    {
+        if (!is_array($this->_currentLocales)) {
+            setlocale(LC_ALL, $this->_currentLocales);
+        } else {
+            array_walk(
+                $this->_currentLocales,
+                function ($locale) {
+                    setlocale($locale[0], $locale[1]);
+                }
+            );
+        }
+
     }
 }
