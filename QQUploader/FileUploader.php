@@ -114,12 +114,19 @@ class Iron_QQUploader_FileUploader {
         $path = explode(DIRECTORY_SEPARATOR, $uploadDirectory);
         $path[] = $filename . $ext;
 
-        if ($this->file->save(implode(DIRECTORY_SEPARATOR,$path))){
+        if ($this->file->save(implode(DIRECTORY_SEPARATOR,$path))) {
+
+            $baneName = $pathinfo['filename'];
+            if (isset($pathinfo['extension'])) {
+
+                $baneName .= '.' . $pathinfo['extension'];
+            }
+
             return array(
                         'success'=>true,
                         'path'=>implode(DIRECTORY_SEPARATOR,$path),
                         'filename' => $filename . $ext,
-                        'basename' => $pathinfo['filename'] . '.' . $pathinfo['extension']
+                        'basename' => $baneName
                    );
         } else {
 
