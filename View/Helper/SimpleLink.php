@@ -10,17 +10,22 @@ class Iron_View_Helper_SimpleLink extends Zend_View_Helper_Abstract
      */
     public function simpleLink($url, $text = null, $attribs = array())
     {
-        $url = trim($url);
-        $text = trim($text);
+        $finalUrl = trim($url);
+        $finalText = trim($text);
 
-        if (!$url) {
+        if (!$finalUrl) {
             return '';
         }
 
-        if (!$text) {
-            $showText = $url;
+        if (!$finalText) {
+            if (isset($attribs['domainOnly']) && $attribs['domainOnly']) {
+                $uri = Zend_Uri_Http::fromString($finalUrl);
+                $showText = $uri->getHost();
+            } else {
+                $showText = $finalUrl;
+            }
         } else{
-            $showText = $text;
+            $showText = $finalText;
         }
 
         $attrString = ' ';
@@ -28,7 +33,7 @@ class Iron_View_Helper_SimpleLink extends Zend_View_Helper_Abstract
             $attrString .= $key . '="' . $value . '"';
         }
 
-        return '<a href="' . $url .'" ' . $attrString . '>' . $showText . '</a>';
+        return '<a href="' . $finalUrl .'" ' . $attrString . '>' . $this->view->escape($showText) . '</a>';
 
     }
 }
