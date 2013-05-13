@@ -28,6 +28,11 @@ class Iron_View_Helper_SimpleLink extends Zend_View_Helper_Abstract
             $showText = $finalText;
         }
 
+        if (isset($attribs['hash'])) {
+            $finalUrl .= '#' . $attribs['hash'];
+            unset ($attribs['hash']);
+        }
+
         $attrString = ' ';
         foreach ($attribs as $key => $value) {
             $attrString .= $key . '="' . $value . '"';
