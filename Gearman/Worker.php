@@ -59,7 +59,7 @@ class Iron_Gearman_Worker
         }
 
         // Creates a new Gearman Worker and set its servers
-        $this->_worker = EKT_Gearman_Manager::getWorker();
+        $this->_worker = Iron_Gearman_Manager::getWorker();
 
         // Checks the registerFunction
         if (empty($this->_registerFunction)) {

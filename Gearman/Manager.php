@@ -38,6 +38,10 @@ class Iron_Gearman_Manager
         $gmclient= new \GearmanClient();
         $servers = self::getServers();
         $gmclient->addServers($servers);
+        if (isset(self::$_options['client']) && 
+            isset(self::$_options['client']['timeout'])) {
+            $gmclient->setTimeout(self::$_options['client']['timeout']);
+        }
 
         return $gmclient;
     }
