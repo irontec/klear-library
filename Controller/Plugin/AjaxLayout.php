@@ -10,6 +10,12 @@ class Iron_Controller_Plugin_AjaxLayout extends Zend_Controller_Plugin_Abstract
 {
     public function preDispatch(Zend_Controller_Request_Abstract $request)
     {
+
+	// truqito temporal
+	if (!method_exists($request, 'isXmlHttpRequest')) {
+		return;
+	}
+
         if (($request->isXmlHttpRequest()) &&
             ($layout = Zend_Layout::getMvcInstance()) ) {
 
