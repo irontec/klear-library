@@ -32,6 +32,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
      * @param  array $options array con opciones para el fichero (name, filetype, etc...)
      * @param  bool $isRaw indica si el primer parametro es de tipo Raw/Binario
      *          (true) o si se trata del path al fichero (false). False por defecto
+     * @param  bool $partialDownload indica si la descarga acepta HTTP_RANGE
      * @return string true si todo va bien, false en caso contrario
      */
     public function sendFile($file, $options = array(), $isRaw = false)
@@ -45,9 +46,10 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $this->_file = $file;
 
         $this->setOptions($options);
-        $this->_sendHeaders($this->_options);
         $this->_disableOtherOutput();
-
+        
+        $this->_sendHeaders($this->_options);
+        
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
@@ -58,12 +60,14 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
             fclose($f);
         }
     }
-
+    
     protected function _fileNotFound($file, $isRaw)
     {
         return !$isRaw && !file_exists($file);
     }
 
+
+    
     public function setOptions($options)
     {
         if (isset($options['disposition'])) {
@@ -80,10 +84,13 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->_options = $options;
 
+        $size = $this->_isRaw? strlen($this->_file) : filesize($this->_file);
+        
         $defaultOptions = array(
                 'filename' => $this->_isRaw? 'file' : basename($this->_file),
                 'Content-Disposition' => 'attachment',
                 'Content-Transfer-Encoding' => 'binary',
+                'Content-Length' => $size,
                 'Pragma' =>'no-cache',
                 'Expires' => '0'
         );
