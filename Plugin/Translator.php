@@ -10,15 +10,12 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
     const DEFAULT_REGISTRY_KEY = 'Application_Translate';
 
     /**
-     * @var Zend_Controller_Front
-     */
-    protected $_frontController;
-
-    /**
      *
      * @var Zend_Translate
      */
     protected $_translate;
+
+    protected $_languages = array();
 
     public function preDispatch(Zend_Controller_Request_Abstract $request)
     {
@@ -27,38 +24,46 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
 
     protected function _initTranslator()
     {
-        $this->_frontController = Zend_Controller_Front::getInstance();
-
-        $sesion = Zend_Registry::get('currentSystemLanguage');
-
-        $locale = new Zend_Locale($sesion['locale']);
-
-        $translationPath = $this->_getTranslationPath(APPLICATION_PATH, $locale);
-
-        if (!Zend_Registry::isRegistered(self::DEFAULT_REGISTRY_KEY)) {
-
-            $this->_translate = new Zend_Translate(
-                    array(
-                            'disableNotices' => true,
-                            'adapter' => 'Iron_Translate_Adapter_GettextKlear',
-                            'content' => $translationPath
-                    )
-            );
-
-            Zend_Registry::set(self::DEFAULT_REGISTRY_KEY, $this->_translate);
-            $this->_setViewHelperTranslator();
-            $this->_setActionHelperTranslator();
-
-        } else {
-
-            $this->_translate->getAdapter()->addTranslation($translationPath);
-
+        foreach ($this->_languages as $locale) {
+            $this->_addTranslation($locale);
         }
 
+        $this->_translate->getAdapter()->setLocale(Zend_Registry::get('defaultLang'));
+    }
 
+    protected function _addTranslation($locale)
+    {
+
+        if (!Zend_Registry::isRegistered(self::DEFAULT_REGISTRY_KEY)) {
+            $this->_registerTranslator($locale);
+        } else {
+            $translationPath = $this->_getTranslationPath(APPLICATION_PATH, $locale);
+            $this->_translate->getAdapter()->addTranslation(
+                array(
+                    'content' => $translationPath,
+                    'locale' => $locale->getLanguage()
+                )
+            );
+        }
+    }
+
+    protected function _registerTranslator($locale)
+    {
+        $translationPath = $this->_getTranslationPath(APPLICATION_PATH, $locale);
+        $this->_translate = new Zend_Translate(
+            array(
+                'disableNotices' => true,
+                'adapter' => 'Iron_Translate_Adapter_GettextKlear',
+                'content' => $translationPath,
+                'locale' => $locale->getLanguage()
+            )
+        );
+
+        Zend_Registry::set(self::DEFAULT_REGISTRY_KEY, $this->_translate);
         Zend_Form::setDefaultTranslator($this->_translate);
         Zend_Validate_Abstract::setDefaultTranslator($this->_translate);
-
+        $this->_setViewHelperTranslator();
+        $this->_setActionHelperTranslator();
     }
 
     /**
@@ -85,7 +90,8 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
      */
     protected function _setViewHelperTranslator()
     {
-        $view = $this->_frontController->getParam("bootstrap")->getResource('view');
+        $frontController = Zend_Controller_Front::getInstance();
+        $view = $frontController->getParam("bootstrap")->getResource('view');
 
         if ($view) {
             $this->_translateHelper = $view->getHelper('Translate');
@@ -104,5 +110,10 @@ class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
         Zend_Controller_Action_HelperBroker::addHelper(
             new Klear_Controller_Helper_Translate($this->_translate)
         );
+    }
+
+    public function addLanguage($language)
+    {
+        $this->_languages[] = new Zend_Locale($language);
     }
 }

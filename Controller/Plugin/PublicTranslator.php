@@ -40,8 +40,13 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         Zend_Registry::set('SystemLanguages', $this->_langsConfig);
         Zend_Registry::set('defaultLang', $currentLangConfig['language']);
 
+        $translatorPlugin = new Iron_Plugin_Translator();
+        foreach ($this->_langsConfig as $lang) {
+            $translatorPlugin->addLanguage($lang['locale']);
+        }
+
         $front = Zend_Controller_Front::getInstance();
-        $front->registerPlugin(new Iron_Plugin_Translator());
+        $front->registerPlugin($translatorPlugin);
     }
 
     protected function _init()
@@ -122,8 +127,8 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         if (!is_null($browserLanguage) && array_key_exists($browserLanguage, $this->_langsConfig)) {
             return $browserLanguage;
         }
-        
-        
+
+
         //OK, take default lang
         return $this->_defaultLang;
     }
