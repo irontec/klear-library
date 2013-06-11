@@ -79,7 +79,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
                 'locale' => 'en_US'
             ),
             'eu' => array(
-                'title' => 'Euskera',
+                'title' => 'Euskara',
                 'language' => 'eu',
                 'locale' => 'eu_ES'
             )
