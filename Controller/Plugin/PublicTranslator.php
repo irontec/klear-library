@@ -18,7 +18,6 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
     protected $_langsConfig;
     protected $_session;
 
-
     /**
      * Este método que se ejecuta una vez se ha matcheado la ruta adecuada
      * (non-PHPdoc)
@@ -29,7 +28,6 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         if (preg_match("/^klear/", $request->getModuleName())) {
             return;
         }
-
         $this->_init();
 
         $currentLang = $this->_getCurrentLang();
@@ -39,6 +37,10 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         Zend_Registry::set('SystemDefaultLanguage', $this->_langsConfig[$this->_defaultLang]);
         Zend_Registry::set('SystemLanguages', $this->_langsConfig);
         Zend_Registry::set('defaultLang', $currentLangConfig['language']);
+
+        if ($this->_cookiesEnabled()) {
+            $this->_createCookie($currentLang);
+        }
 
         $translatorPlugin = new Iron_Plugin_Translator();
         foreach ($this->_langsConfig as $lang) {
@@ -109,18 +111,23 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
     protected function _getCurrentLang()
     {
 
-        //Take requested lang
+        // Take requested lang
         $requestedLanguage = $this->getRequest()->getParam($this->_getLanguageParam());
         if ($requestedLanguage && array_key_exists($requestedLanguage, $this->_langsConfig)) {
             return $requestedLanguage;
         }
 
-        //Take session lang
+        // Take session lang
         $currentSystemLanguage = $this->_session->currentSystemLanguage;
         if (!is_null($currentSystemLanguage) && array_key_exists($currentSystemLanguage, $this->_langsConfig)) {
             return $currentSystemLanguage;
         }
 
+        if ($this->_cookiesEnabled()) {
+            if (isset($_COOKIE[$this->_getLanguageParam()])) {
+                return $_COOKIE[$this->_getLanguageParam()];
+            }
+        }
 
         $locale = new Zend_Locale();
         $browserLanguage = $locale->getLanguage();
@@ -132,6 +139,29 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         //OK, take default lang
         return $this->_defaultLang;
     }
+
+    protected function _cookiesEnabled()
+    {
+        return isset($this->_config['cookies']['enabled']) && (bool)$this->_config['cookies']['enabled'];
+    }
+
+    protected function _createCookie($currentLang)
+    {
+        $baseUrl = Zend_Controller_Front::getInstance()->getBaseUrl();
+        $domain = $_SERVER['HTTP_HOST'];
+        $expiration = $this->_getCookieExpirationTime();
+        setcookie($this->_getLanguageParam(), $currentLang, $expiration, $baseUrl, $domain);
+    }
+
+    protected function _getCookieExpirationTime()
+    {
+        $lifetime = 3600 * 24 * 7;
+        if (isset($this->_config['cookies']['lifetime'])) {
+            $lifetime = $this->_config['cookies']['lifetime'];
+        }
+        return time() + $lifetime;
+    }
+
 
     protected function _getLanguageParam()
     {
