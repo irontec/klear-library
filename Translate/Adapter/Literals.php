@@ -27,9 +27,6 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             $this->setDbAdapter($options['dbAdapter']);
         }
         parent::__construct($options);
-//         if ($options['locale'] == 'fr') {
-//         var_dump($this->_options['disableNotices']);exit();
-//         }
     }
 
     /**
