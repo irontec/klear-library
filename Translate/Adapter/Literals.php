@@ -27,6 +27,9 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             $this->setDbAdapter($options['dbAdapter']);
         }
         parent::__construct($options);
+//         if ($options['locale'] == 'fr') {
+//         var_dump($this->_options['disableNotices']);exit();
+//         }
     }
 
     /**
@@ -41,7 +44,11 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     protected function _loadTranslationData($data, $locale, array $options = array())
     {
-        $hideSlash = @$options['hideSlashes'];
+        $hideSlash = null;
+        if (isset($options['hideSlashes'])) {
+            $hideSlash = $options['hideSlashes'];
+        }
+
         $this->_data = array();
         $dbData = array();
 
@@ -204,7 +211,7 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
         }
 
         $this->_routed = array();
-        
+
         if ($plural === null) {
             return $this->_literalReturn($originMessageId);
         }
@@ -260,13 +267,18 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
     {
         $this->_dbAdapter = $dbAdapter;
     }
-    
-    
+
+
     protected function _literalReturn($string)
     {
-        
+
         return $string;
         //return '<div class="literalEditable">' . $string . '</div>';
-        
+
+    }
+
+    public function isTranslated($messageId, $original = false, $locale = null)
+    {
+        return parent::isTranslated(mb_strtolower($messageId), $original, $locale);
     }
 }
