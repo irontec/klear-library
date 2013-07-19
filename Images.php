@@ -65,7 +65,7 @@ class Iron_Images
     {
         $this->_resolution = array($x, $y);
         //$this->_image->setResolution($x, $y);
-        $this->_image->resampleImage($x,$y,imagick::FILTER_UNDEFINED,1);
+        $this->_image->resampleImage($x, $y, imagick::FILTER_UNDEFINED, 1);
 
         return $this;
     }
@@ -79,7 +79,7 @@ class Iron_Images
 
                 $this->_image->setCompression(Imagick::COMPRESSION_JPEG);
                 $this->_image->setCompressionQuality($quality);
-                $this->_image->setImageFormat( "jpg" );
+                $this->_image->setImageFormat("jpg");
                 break;
 
             default:
@@ -104,12 +104,12 @@ class Iron_Images
         while ($this->_image->previousImage()) {
 
             $resp = $this->_image->resizeImage(
-                                     $dimensions->optimalWidth,
-                                     $dimensions->optimalHeight,
-                                     \Imagick::FILTER_LANCZOS,
-                                     0.9,
-                                     false
-                                   );
+                $dimensions->optimalWidth,
+                $dimensions->optimalHeight,
+                \Imagick::FILTER_LANCZOS,
+                0.9,
+                false
+            );
 
         }
 
@@ -136,7 +136,7 @@ class Iron_Images
         while ($this->_image->previousImage()) {
 
             $resp = $this->_image->cropImage($optimalWidth, $optimalHeight, $x, $y);
-            $this->_image->setImagePage(0,0,0,0);
+            $this->_image->setImagePage(0, 0, 0, 0);
         }
 
         $this->_loadGeometry();
@@ -225,7 +225,7 @@ class Iron_Images
 
         list($x, $y) = $this->_calculateWatermarkPosition($width, $height, $position);
 
-        return $this->_image->compositeImage($watermark, Imagick::COMPOSITE_OVER, $x,$y);
+        return $this->_image->compositeImage($watermark, Imagick::COMPOSITE_OVER, $x, $y);
     }
 
     /**
@@ -288,8 +288,8 @@ class Iron_Images
         return $this->_image->getImageFormat();
     }
 
-    private function _loadImageAndDimensions($file) {
-
+    private function _loadImageAndDimensions($file) 
+    {
         $this->_image = new \Imagick($file);
         $this->_loadGeometry();
     }

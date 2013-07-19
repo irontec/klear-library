@@ -152,6 +152,6 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
      */
     protected function _fileCopy($filePathDestino, $filePathOrigen)
     {
-        return copy($filePathOrigen ,$filePathDestino);
+        return copy($filePathOrigen, $filePathDestino);
     }
 }
