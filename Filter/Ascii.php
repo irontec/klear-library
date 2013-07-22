@@ -41,10 +41,11 @@ class Iron_Filter_Ascii implements Zend_Filter_Interface
             array_walk(
                 $this->_currentLocales,
                 function ($locale) {
-                    setlocale($locale[0], $locale[1]);
+                    if (defined($locale[0])) {
+                        setlocale(constant($locale[0]), $locale[1]);
+                    }
                 }
             );
         }
-
     }
 }
