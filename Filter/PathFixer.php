@@ -5,7 +5,7 @@
  * Comprueba las rutas de imágenes internas, reemplazando las rutas en caso de discordancia de baseUrl
  *
  */
-class Iron_Model_PathFixer
+class Iron_Filter_PathFixer
 {
     protected $_originalHtml;
 
