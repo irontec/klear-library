@@ -16,7 +16,7 @@ class Iron_Filter_PathFixer
         }
 
         $dom = new \DomDocument;
-        $dom->loadHTML(utf8_decode($html));
+        @$dom->loadHTML(utf8_decode($html));
         $images = $dom->getElementsByTagName('img');
 
         $view = \Zend_Controller_Front::getInstance()->getParam('bootstrap')->getResource('view');
