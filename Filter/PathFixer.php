@@ -7,13 +7,12 @@
  */
 class Iron_Filter_PathFixer
 {
-    protected $_originalHtml;
-
     public function fix($html)
     {
         if (empty($html)) {
             return $html;
         }
+        $fixedContent = false;
 
         $dom = new \DomDocument;
         @$dom->loadHTML(utf8_decode($html));
@@ -29,12 +28,16 @@ class Iron_Filter_PathFixer
 
                 if ($src !== $baseUrl . $uri) {
                     $image->setAttribute('src', $baseUrl . $uri);
+                    $fixedContent = true;
                 }
             }
         }
 
-        $body = $dom->getElementsByTagName('body')->item(0);
+        if (!$fixedContent) {
+            return $html;
+        }
 
+        $body = $dom->getElementsByTagName('body')->item(0);
         if (!$body) {
             return $html;
         }
