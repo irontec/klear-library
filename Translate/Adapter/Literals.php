@@ -96,19 +96,6 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
      */
     public function translate($messageId, $locale = null)
     {
-        $originMessageId = trim($messageId);
-        $messageId =  trim(mb_strtolower($messageId, 'UTF-8'));
-
-        /**
-         * BUGFIX: No metemos en la BBDD nada que no tenga letras.
-         */
-        if (preg_match('/[a-zA-Z]/', $messageId) === 0) {
-            return $this->_literalReturn($messageId);
-        }
-
-        if ($locale === null) {
-            $locale = $this->_options['locale'];
-        }
         $plural = null;
         if (is_array($messageId)) {
             if (count($messageId) > 2) {
@@ -125,6 +112,20 @@ class Iron_Translate_Adapter_Literals extends Zend_Translate_Adapter
             } else {
                 $messageId = $messageId[0];
             }
+        }
+
+        $originMessageId = trim($messageId);
+        $messageId =  trim(mb_strtolower($messageId, 'UTF-8'));
+
+        /**
+         * BUGFIX: No metemos en la BBDD nada que no tenga letras.
+         */
+        if (preg_match('/[a-zA-Z]/', $messageId) === 0) {
+            return $this->_literalReturn($messageId);
+        }
+
+        if ($locale === null) {
+            $locale = $this->_options['locale'];
         }
 
         if (!Zend_Locale::isLocale($locale, true, false)) {
