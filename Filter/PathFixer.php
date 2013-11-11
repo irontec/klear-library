@@ -5,8 +5,13 @@
  * Comprueba las rutas de imágenes internas, reemplazando las rutas en caso de discordancia de baseUrl
  *
  */
-class Iron_Filter_PathFixer
+class Iron_Filter_PathFixer implements Zend_Filter_Interface
 {
+    public function filter($value)
+    {
+        return $this->fix($value);
+    }
+
     public function fix($html)
     {
         if (empty($html)) {
