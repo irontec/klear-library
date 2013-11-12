@@ -14,7 +14,7 @@ require_once 'Zend/Validate/Abstract.php';
  */
 require_once 'Zend/Locale/Format.php';
 
-class Iron_Validate_Dni extends Zend_Validate_Abstract
+class Iron_Validate_Nif extends Zend_Validate_Abstract
 {
     const INVALID = 'notValid';
 
