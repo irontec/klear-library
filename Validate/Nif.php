@@ -28,7 +28,7 @@ class Iron_Validate_Nif extends Zend_Validate_Abstract
     protected $_locale;
 
     /**
-     * Constructor for the float validator
+     * Constructor for the Nif validator
      *
      * @param string|Zend_Config|Zend_Locale $locale
      */
@@ -79,7 +79,7 @@ class Iron_Validate_Nif extends Zend_Validate_Abstract
     /**
      * Defined by Zend_Validate_Interface
      *
-     * Returns true if and only if $value is a floating-point value
+     * Returns true if and only if $value is a nif value
      *
      * @param  string $value
      * @return boolean
@@ -94,83 +94,65 @@ class Iron_Validate_Nif extends Zend_Validate_Abstract
             18 => 'H', 19 => 'L', 20 => 'C', 21 => 'K',22 => 'E'
         );
 
+        $isValid = false;
+
         //Comprobar si es un DNI
         if (preg_match('/^[0-9]{8}[A-Z]$/i', $value)) {
+
             //Comprobar letra
             if (
-                strtoupper($value[strlen($value) - 1]) != $valoresLetra[((int) substr($value, 0, strlen($value) - 1)) % 23]
+                strtoupper($value[strlen($value) - 1]) == $valoresLetra[((int) substr($value, 0, strlen($value) - 1)) % 23]
             ) {
-                $this->_error(self::INVALID);
-                return false;
+                $isValid = true;
             }
-
-            //Todo fue bien
-            return true;
 
         //Comprobar si es un NIE (tarjeta de residencia)
         } else if (preg_match('/^[XYZ][0-9]{7}[A-Z]$/i', $value)) {
 
             //Comprobar letra
             if (
-                strtoupper($value[strlen($value) - 1]) != $valoresLetra[((int) substr($value, 1, strlen($value) - 2)) % 23]
+                strtoupper($value[strlen($value) - 1]) == $valoresLetra[((int) substr($value, 1, strlen($value) - 2)) % 23]
             ) {
-                $this->_error(self::INVALID);
-                return false;
+                $isValid = true;
             }
-
-            //Todo fue bien
-            return true;
 
         //Comprobar si es un CIF
         } else if (preg_match('/^[ABCDEFGHJNPQRSUVW]{1}/', $value)) {
+            /*
+                Letra:
+                A - Sociedad Anónima.
+                B - Sociedad de Responsabilidad Limitada.
+                ...
+                P - Corporación local.
+                S - Organos de la Administración del Estado y Comunidades Autónomas
 
-            $cifCodes = 'JABCDEFGHI';
-            $sum = (string) $this->_getCifSum ($value);
-            $n = (10 - substr ($sum, -1)) % 10;
+                Cod. Control:
+                Es una letra si la clave de la  organización es K, P, Q ó S y es un número si la clave de la organización es A, B, E ó H.
+                Para el resto de claves indentificativas del tipo de organización podrá ser tanto número como letra.
 
-            $isValid =  false;
+               +info: http://www.aplicacionesinformaticas.com/programas/gratis/cif.php
+            */
+            $suma = $value[2] + $value[4] + $value[6];
 
-            if (preg_match ('/^[ABCDEFGHJNPQRSUVW]{1}/', $value)) {
-                if (in_array($value[0], array('A','B','E','H'))) {
-                    // Numerico
-                    $isValid = $value[8] == $n;
-
-                } elseif (in_array($value[0], array('K','P','Q','S'))) {
-                    // Letras
-                    $isValid = $value[8] == $cifCodes[$n];
-
-                } else {
-
-                    // Alfanumérico
-                    if (is_numeric($value[8])) {
-                        $isValid = ($value[8] == $n);
-                    } else {
-                        $isValid = ($value[8] == $cifCodes[$n]);
-                    }
-                }
+            for ($i = 1; $i < 8; $i += 2) {
+                $suma += substr((2 * $value[$i]),0,1) + substr((2 * $value[$i]), 1, 1);
             }
 
-            if ($isValid) {
-                return true;
+            $n = 10 - substr($suma, strlen($suma) - 1, 1);
+            if ($value[8] == chr(64 + $n) || $value[8] == substr($n, strlen($n) - 1, 1)) {
+                $isValid = true;
             }
 
-            //Cadena no válida
-            $this->_error(self::INVALID);
-            return false;
-        }
-    }
-
-    private function _getCifSum ($cif) {
-        $sum = $cif[2] + $cif[4] + $cif[6];
-
-        for ($i = 1; $i<8; $i += 2) {
-            $tmp = (string) (2 * $cif[$i]);
-
-            $tmp = $tmp[0] + ((strlen ($tmp) == 2) ?  $tmp[1] : 0);
-
-            $sum += $tmp;
+        } else {
+            $isValid = false;
         }
 
-        return $sum;
+        if ($isValid) {
+            return true;
+        }
+
+        //Cadena no válida
+        $this->_error(self::INVALID);
+        return false;
     }
 }
