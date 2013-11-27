@@ -67,23 +67,38 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
             return $this->_config['language'];
         }
 
+        
         return array(
-            'es' => array(
-                'title' => 'Español',
-                'language' => 'es',
-                'locale' => 'es_ES'
-            ),
-            'en' => array(
-                'title' => 'English',
-                'language' => 'en',
-                'locale' => 'en_US'
-            ),
-            'eu' => array(
-                'title' => 'Euskara',
-                'language' => 'eu',
-                'locale' => 'eu_ES'
-            )
+                'es' => array(
+                        'title' => 'Español',
+                        'language' => 'es',
+                        'locale' => 'es_ES'),
+                'eu' => array(
+                        'title' => 'Euskara',
+                        'language' => 'eu',
+                        'locale' => 'eu_ES'),
+                'ca' => array(
+                        'title' => 'Català',
+                        'language' => 'ca',
+                        'locale' => 'ca_ES'),
+                'ga' => array(
+                        'title' => 'Galego',
+                        'language' => 'gl',
+                        'locale' => 'gl_ES'),
+                'en' => array(
+                        'title' => 'English',
+                        'language' => 'en',
+                        'locale' => 'en_US'),
+                'fr' => array(
+                        'title' => 'Français',
+                        'language' => 'fr',
+                        'locale' => 'fr_FR'),
+                'pt' => array(
+                        'title' => 'Português',
+                        'language' => 'pt',
+                        'locale' => 'pt_PT')
         );
+      
     }
 
     protected function _getDefaultLang(array $langsConfig)
