@@ -38,7 +38,7 @@ class Iron_Gearman_Manager
         $gmclient= new \GearmanClient();
         $servers = self::getServers();
         $gmclient->addServers($servers);
-        if (isset(self::$_options['client']) && 
+        if (isset(self::$_options['client']) &&
             isset(self::$_options['client']['timeout'])) {
             $gmclient->setTimeout(self::$_options['client']['timeout']);
         }
@@ -55,7 +55,7 @@ class Iron_Gearman_Manager
     {
         $worker = new GearmanWorker();
         $servers = self::getServers();
-        
+
         $worker->addServers($servers);
 
         return $worker;
@@ -72,7 +72,11 @@ class Iron_Gearman_Manager
     public static function runWorker($workerName, $logFile = null)
     {
         $workerName .= 'Worker';
-        $workerFile = APPLICATION_PATH . '/workers/' . $workerName . '.php';
+
+        $front = Zend_Controller_Front::getInstance();
+        $moduleDirectory = $front->getModuleDirectory($this->getRequest()->getParam('moduleName'));
+
+        $workerFile = $moduleDirectory. '/workers/' . $workerName . '.php';
 
         if (!file_exists($workerFile)) {
             throw new InvalidArgumentException(
