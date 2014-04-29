@@ -74,7 +74,13 @@ class Iron_Gearman_Manager
         $workerName .= 'Worker';
 
         $front = Zend_Controller_Front::getInstance();
-        $moduleDirectory = $front->getModuleDirectory($front->getRequest()->getParam('moduleName'));
+
+        if (is_null($front->getRequest()) || !$front->getRequest()->getParam('moduleName',false)) {
+            $moduleDirectory = APPLICATION_PATH;
+        } else {
+            $moduleName = $front->getRequest()->getParam('moduleName');
+            $moduleDirectory = $front->getModuleDirectory($moduleName);
+        }
 
         $workerFile = $moduleDirectory. '/workers/' . $workerName . '.php';
 
