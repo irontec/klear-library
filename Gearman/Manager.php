@@ -75,10 +75,10 @@ class Iron_Gearman_Manager
 
         $front = Zend_Controller_Front::getInstance();
 
-        if (is_null($front->getRequest()) || !$front->getRequest()->getParam('moduleName',false)) {
+        if (is_null($front->getRequest()) || !$front->getRequest()->getModuleName())  {
             $moduleDirectory = APPLICATION_PATH;
         } else {
-            $moduleName = $front->getRequest()->getParam('moduleName');
+            $moduleName = $front->getRequest()->getModuleName();
             $moduleDirectory = $front->getModuleDirectory($moduleName);
         }
 
