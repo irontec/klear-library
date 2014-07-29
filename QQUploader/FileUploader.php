@@ -1,14 +1,16 @@
 <?php
-
 class Iron_QQUploader_FileUploader {
 
     private $allowedExtensions = array();
     private $sizeLimit = 10485760;
     private $file;
 
-    function __construct(array $allowedExtensions = array(), $sizeLimit = 10485760){
-        $allowedExtensions = array_map("strtolower", $allowedExtensions);
+    protected $_translator;
 
+    function __construct(array $allowedExtensions = array(), $sizeLimit = 10485760)
+    {
+
+        $allowedExtensions = array_map("strtolower", $allowedExtensions);
         $this->allowedExtensions = $allowedExtensions;
 
         if (!empty($sizeLimit)) {
@@ -24,20 +26,24 @@ class Iron_QQUploader_FileUploader {
         } else {
             $this->file = false;
         }
+
+        if (Zend_Registry::isRegistered(Iron_Plugin_Translator::DEFAULT_REGISTRY_KEY)) {
+            $this->_translator = Zend_Registry::get(Iron_Plugin_Translator::DEFAULT_REGISTRY_KEY);
+        } else if (Zend_Registry::isRegistered('Zend_Translate')) {
+            $this->_translator = Zend_Registry::get('Zend_Translate');
+        }
     }
 
     private function checkServerSettings()
     {
-
         $postSize = $this->_toBytes(ini_get('post_max_size'));
         $uploadSize = $this->_toBytes(ini_get('upload_max_filesize'));
 
         if ($postSize < $this->sizeLimit || $uploadSize < $this->sizeLimit){
             $size = max(1, $this->sizeLimit / 1024 / 1024) . 'M';
-
-            Throw new Zend_Exception("Increase post_max_size and upload_max_filesize to $size", 1001);
+            $msg = $this->_translate("Increase post_max_size and upload_max_filesize to");
+            Throw new Zend_Exception($msg . " " . $size, 1001);
         }
-
     }
 
     private function _toBytes($str){
@@ -57,23 +63,26 @@ class Iron_QQUploader_FileUploader {
      */
     function handleUpload($uploadDirectory, $replaceOldFile = false, $newFileName = false, $extension = false)
     {
-
         if (!is_writable($uploadDirectory)) {
-            Throw new Zend_Exception("Server error. Upload directory isn't writable.",1002);
+            $msg = $this->_translate("Server error. Upload directory isn't writable.");
+            Throw new Zend_Exception($msg, 1002);
         }
 
         if (!$this->file){
-            Throw new Zend_Exception("No files were uploaded.",1003);
+            $msg = $this->_translate("No files were uploaded.");
+            Throw new Zend_Exception($msg, 1003);
         }
 
         $size = $this->file->getSize();
 
         if ($size == 0) {
-            Throw new Zend_Exception("No files were uploaded.",1004);
+            $msg = $this->_translate("No files were uploaded.");
+            Throw new Zend_Exception($msg, 1004);
         }
 
         if ($size > $this->sizeLimit) {
-            Throw new Zend_Exception("File is too large.",1005);
+            $msg = $this->_translate("File is too large.");
+            Throw new Zend_Exception($msg, 1005);
         }
 
         $pathinfo = pathinfo($this->file->getName());
@@ -87,7 +96,8 @@ class Iron_QQUploader_FileUploader {
 
         if($this->allowedExtensions && !in_array(strtolower($ext), $this->allowedExtensions)){
             $these = implode(', ', $this->allowedExtensions);
-            return array('error' => 'File has an invalid extension, it should be one of '. $these . '.',1006);
+            $msg = $this->_translate('File has an invalid extension, it should be one of ');
+            return array('error' => $msg. $these . '.',1006);
         }
 
         // Debemos renombrar la extensión del archivo? O quitarla?
@@ -130,8 +140,17 @@ class Iron_QQUploader_FileUploader {
                    );
         } else {
 
-            Throw new Zend_Exception('Could not save uploaded file.', 1007);
+            $msg = $this->_translate('Could not save uploaded file.');
+            Throw new Zend_Exception($msg, 1007);
+        }
+    }
+
+    protected function _translate($str)
+    {
+        if (is_null($this->_translator) || empty($str)) {
+            return $str;
         }
 
+        return $this->_translator->translate($str);
     }
 }
