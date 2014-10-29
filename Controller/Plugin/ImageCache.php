@@ -186,9 +186,10 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
             $extension = substr(strrchr($this->getBasename(), "."), 1);
 
             $image = new Imagick($this->getFilePath());
-
             $image->setImageFormat($extension);
 
+            \Iron_Utils_PngFix::process($image);
+            
             if ($sizeCongif->changeSize == 'crop') {
                 $image->cropthumbnailimage(
                     $this->getWidth(),
