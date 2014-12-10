@@ -23,7 +23,7 @@ class Image_Bootstrap extends Zend_Application_Module_Bootstrap
             'controller' => 'index',
             'action' => 'index',
             'module' => 'image',
-            'section' => NULL,
+            'profiel' => NULL,
             'routeMap' => NULL
         );
 

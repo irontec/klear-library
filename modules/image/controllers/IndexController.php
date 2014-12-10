@@ -19,6 +19,26 @@
  * una separación de '.' para la extención de archivo. Con esto se buscara por Primary Key y por "name"
  * y al crear la imagen se dara la extención asignada con el respectivo mime type en las cabeceras.
  *
+ * images.profile
+ * "profiel" es el elemento donde se escribira la configuración de la imagen.
+ *
+ * images.profile.model = model ;"Requerido"
+ * "model" es el nombre del model que tiene la información de la imagen.
+ *
+ * images.profile.fso = fso ;"Requerido"
+ * "fso" es el tag con el que los generadores crear BaseName/FileSize/MimeType
+ *
+ * images.profile.changeSize = 'no' ;"Requerido"
+ * "changeSize" tiene 3 posibles ejecuciones:
+ *   + 'no': Crea la imagen a con sus medidas originales.
+ *   + 'crop': Crop necesita obligatoriamente width & height para hacer un correcto crop.
+ *   + 'resize': Es recomendado definir width & height, pero con definir uno de los 2,
+ *               el sistema calcula en que no se a definido para hacer un resize sin romper la imagen.
+ *
+ * images.profileList.extend = profile
+ * "extend" obtiene los parametros de otro "profile" para no definirlos de nuevo si se quiere otras medidas
+ * de una misma imagen.
+ *
  * @author ddniel16 <daniel@irontec.com>
  */
 class Image_IndexController extends Zend_Controller_Action
