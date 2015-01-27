@@ -173,11 +173,12 @@ class Iron_Model_Fso
             throw new Exception('Nothing to flush');
         }
 
-        if (!is_numeric($pk)) {
+        if (!$this->_isValidPk($pk)) {
             throw new Exception('Invalid Primary Key');
         }
 
         $targetPath = $this->_basePath . DIRECTORY_SEPARATOR . $this->_pk2path($pk);
+
         $targetFile = $targetPath . $pk;
 
         if (!file_exists($targetPath)) {
@@ -222,6 +223,11 @@ class Iron_Model_Fso
      */
     protected function _pk2path($pk)
     {
+
+        if (!is_numeric($pk)) {
+            return implode(DIRECTORY_SEPARATOR, array($pk)) . DIRECTORY_SEPARATOR;
+        }
+
         $aId = str_split((string)$pk);
         array_pop($aId);
         if (!sizeof($aId)) {
@@ -229,6 +235,7 @@ class Iron_Model_Fso
         }
 
         return implode(DIRECTORY_SEPARATOR, $aId) . DIRECTORY_SEPARATOR;
+
     }
 
     /**
@@ -238,7 +245,7 @@ class Iron_Model_Fso
     public function fetch()
     {
         $pk = $this->_model->getPrimaryKey();
-        if (!is_numeric($pk) ) {
+        if (!$this->_isValidPk($pk) ) {
             throw new Exception("Empty object. No PK found");
         }
 
@@ -262,7 +269,7 @@ class Iron_Model_Fso
     {
         $pk = $this->_model->getPrimaryKey();
 
-        if (!is_numeric($pk)) {
+        if (!$this->_isValidPk($pk)) {
             throw new Exception('Empty object. No PK found');
         }
 
@@ -291,5 +298,18 @@ class Iron_Model_Fso
     public function getFilePath()
     {
         return $this->_srcFile;
+    }
+
+    protected function _isValidPk($pk)
+    {
+        if (is_numeric($pk)) {
+            return true;
+        }
+
+        if (count(explode("-", $pk)) == 5) {
+            return true;
+        }
+
+        return false;
     }
 }
