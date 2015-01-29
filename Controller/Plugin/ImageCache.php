@@ -28,7 +28,6 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
 
         $this->_frontInstance = \Zend_Controller_Front::getInstance();
 
-
         $this->_imageCacheConfig = Zend_Registry::get('imageCacheConfig');
 
         $this->_configImages = $this->_imageCacheConfig->images;
@@ -43,7 +42,7 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
             throw new Exception('life not defined');
         }
 
-        $this->_life = $imageCacheConfig->config->life;
+        $this->_life = $this->_imageCacheConfig->config->life;
         $this->_cacheDir = APPLICATION_PATH . '/cache/';
 
     }
@@ -173,7 +172,7 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
 
         $cacheKey = md5_file(
             $this->getFilePath()
-        ) . $this->_sizeInstance . 'x' . $fso;
+        ) . $this->_sizeInstance . 'x' . $this->getFso();
 
         Zend_Registry::set('cache', $cache);
 
@@ -189,7 +188,7 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
             $image->setImageFormat($extension);
 
             \Iron_Utils_PngFix::process($image);
-            
+
             if ($sizeCongif->changeSize == 'crop') {
                 $image->cropthumbnailimage(
                     $this->getWidth(),

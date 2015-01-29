@@ -28,13 +28,6 @@
  * images.profile.fso = fso ;"Requerido"
  * "fso" es el tag con el que los generadores crear BaseName/FileSize/MimeType
  *
- * images.profile.changeSize = 'no' ;"Requerido"
- * "changeSize" tiene 3 posibles ejecuciones:
- *   + 'no': Crea la imagen a con sus medidas originales.
- *   + 'crop': Crop necesita obligatoriamente width & height para hacer un correcto crop.
- *   + 'resize': Es recomendado definir width & height, pero con definir uno de los 2,
- *               el sistema calcula en que no se a definido para hacer un resize sin romper la imagen.
- *
  * images.profileList.extend = profile
  * "extend" obtiene los parametros de otro "profile" para no definirlos de nuevo si se quiere otras medidas
  * de una misma imagen.
@@ -86,9 +79,7 @@ class Image_IndexController extends Zend_Controller_Action
     public function indexAction()
     {
 
-        $currentProfile = $this->_currentProfile;
-
-        $this->getConfigChangeSize($currentProfile);
+        $config = $this->_setConfiguration($this->_currentProfile);
 
         try {
 
@@ -129,8 +120,7 @@ class Image_IndexController extends Zend_Controller_Action
         );
 
         $piecesKey = array(
-            $this->getWidth() . 'x' .$this->getHeight(),
-            ucfirst($this->_currentProfile->changeSize),
+            ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
             ucfirst($this->getFso())
         );
 
@@ -156,22 +146,67 @@ class Image_IndexController extends Zend_Controller_Action
 
             $image = new Imagick($this->getFilePath());
             $image->setImageFormat($extension);
-            $identifyimage = $image->identifyimage();
 
             \Iron_Utils_PngFix::process($image);
 
-            if ($currentProfile->changeSize == 'crop') {
-                $image->cropthumbnailimage(
-                    $this->getWidth(),
-                    $this->getHeight()
-                );
-            } else {
-                $image->resizeImage(
-                    $this->getWidth(),
-                    $this->getHeight(),
-                    imagick::FILTER_LANCZOS,
-                    1
-                );
+            if (isset($this->_currentProfile->negate)) {
+                if ($this->_currentProfile->negate == 'yes') {
+                    $image->negateImage(0, 134217727);
+                }
+            }
+
+            if (isset($this->_currentProfile->flop)) {
+                if ($this->_currentProfile->flop == 'yes') {
+                    $image->flopImage();
+                }
+            }
+
+            switch ($config['changeSize']) {
+                case 'original':
+                    continue;
+                    break;
+
+                case 'crop':
+                    \Iron_Imagick_Crop::init($image, $config);
+                    break;
+
+                case 'resize':
+                    \Iron_Imagick_Resize::init($image, $config);
+                    break;
+
+                case 'crop-resize':
+                    \Iron_Imagick_CropResize::init($image, $config);
+                    break;
+
+                case 'resize-crop':
+                    \Iron_Imagick_ResizeCrop::init($image, $config);
+                    break;
+
+                case 'scale':
+                    \Iron_Imagick_Scale::init($image, $config);
+                    break;
+
+                case 'circle':
+                    \Iron_Imagick_Circle::init($image, $config);
+                    break;
+
+                default:
+                    throw new Exception(
+                        'El parametro "changeSize" invalido.'
+                    );
+                    break;
+            }
+
+            if (isset($this->_currentProfile->vignette)) {
+                \Iron_Imagick_Vignette::init($image, $config['vignette']);
+            }
+
+            if (isset($this->_currentProfile->border)) {
+                \Iron_Imagick_Border::init($image, $config['border']);
+            }
+
+            if (isset($this->_currentProfile->framing)) {
+                \Iron_Imagick_Framing::init($image, $config['framing']);
             }
 
             $cache->save($image->getImagesBlob(), $cacheKey);
@@ -188,59 +223,6 @@ class Image_IndexController extends Zend_Controller_Action
                 $this->getHeaders(false, $cache, $cacheKey, $extension);
             }
 
-        }
-
-    }
-
-    /**
-     * Prepara la configuración del tamaño de la imagen.
-     * + crop: width & width == Require
-     * + resize: width - width == si estan los 2 definidos se usan.
-     *           si solo hay uno definido se calcula el otro automaticamente.
-     * + no: width & width == auto
-     * @param $currentProfile
-     */
-    public function getConfigChangeSize($currentProfile)
-    {
-
-        switch ($currentProfile->changeSize) {
-            case 'crop':
-
-                if (
-                is_null($currentProfile->height)
-                ||
-                is_null($currentProfile->width)
-                ) {
-                    throw new Exception(
-                        'Crop required height and width'
-                    );
-                } else {
-                    $this->setHeight($currentProfile->width);
-                    $this->setWidth($currentProfile->width);
-                }
-
-                break;
-
-            case 'resize':
-
-                if (is_null($currentProfile->height)) {
-                    $this->setHeight(0);
-                } else {
-                    $this->setHeight($currentProfile->height);
-                }
-
-                if (is_null($currentProfile->width)) {
-                    $this->setWidth(0);
-                } else {
-                    $this->setWidth($currentProfile->width);
-                }
-
-                break;
-
-            default:
-                $this->setHeight('auto');
-                $this->setWidth('auto');
-                break;
         }
 
     }
@@ -352,6 +334,102 @@ class Image_IndexController extends Zend_Controller_Action
 
     }
 
+    protected function _setConfiguration($currentProfile)
+    {
+
+        $config = array();
+
+        if (isset($currentProfile->changeSize)) {
+            $config['changeSize'] = $currentProfile->changeSize;
+        } else {
+            throw new Exception(
+                'El parametro "changeSize" es obligatorio.'
+            );
+        }
+
+        if (isset($currentProfile->size)) {
+            $config['size'] = $currentProfile->size;
+        }
+
+        if (isset($currentProfile->width)) {
+            $config['width'] = $currentProfile->width;
+        }
+
+        if (isset($currentProfile->height)) {
+            $config['height'] = $currentProfile->height;
+        }
+
+        if (isset($currentProfile->vignette)) {
+
+            $vignette = $currentProfile->vignette;
+
+            $config['vignette'] = array();
+
+            if (isset($vignette->blackPoint)) {
+                $config['vignette']['blackPoint'] = $vignette->blackPoint;
+            }
+            if (isset($vignette->whitePoint)) {
+                $config['vignette']['whitePoint'] = $vignette->whitePoint;
+            }
+            if (isset($vignette->x)) {
+                $config['vignette']['x'] = $vignette->x;
+            }
+            if (isset($vignette->y)) {
+                $config['vignette']['y'] = $vignette->y;
+            }
+
+        }
+
+        if (isset($currentProfile->border)) {
+
+            $border = $currentProfile->border;
+
+            $config['border'] = array();
+
+            if (isset($border->color)) {
+                $config['border']['color'] = $border->color;
+            }
+            if (isset($border->width)) {
+                $config['border']['width'] = $border->width;
+            }
+            if (isset($border->height)) {
+                $config['border']['height'] = $border->height;
+            }
+
+        }
+
+        if (isset($currentProfile->framing)) {
+
+            $framing = $currentProfile->framing;
+
+            $config['framing'] = array();
+
+            if (isset($framing->color)) {
+                $config['framing']['color'] = $framing->color;
+            }
+
+            if (isset($framing->width)) {
+                $config['framing']['width'] = $framing->width;
+            }
+
+            if (isset($framing->height)) {
+                $config['framing']['height'] = $framing->height;
+            }
+
+            if (isset($framing->innerBevel)) {
+                $config['framing']['innerBevel'] = $framing->innerBevel;
+            }
+
+            if (isset($framing->outerBevel)) {
+                $config['framing']['outerBevel'] = $framing->outerBevel;
+            }
+
+        }
+
+        return $config;
+
+    }
+
     /**
      * Crea o Carga los Headers para la cache
      * @param Boolena $isCache
@@ -362,8 +440,6 @@ class Image_IndexController extends Zend_Controller_Action
     {
 
         $mimeType = $this->_getMimeTypeByExtencion($extencion);
-
-        file_put_contents('/tmp/mimimi', $mimeType . '\n', FILE_APPEND | LOCK_EX);
 
         $response = $this->_frontInstance->getResponse();
 
@@ -459,7 +535,11 @@ class Image_IndexController extends Zend_Controller_Action
      */
     public function getHeight()
     {
-        return $this->height;
+        if (isset($this->height)) {
+            return $this->height;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -478,7 +558,11 @@ class Image_IndexController extends Zend_Controller_Action
      */
     public function getWidth()
     {
-        return $this->width;
+        if (isset($this->width)) {
+            return $this->width;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -549,7 +633,10 @@ class Image_IndexController extends Zend_Controller_Action
             }
 
             if (empty($lang)) {
-                $lang = $conf->translate['defaultLanguage'];
+
+                if (isset($conf->translate)) {
+                    $lang = $conf->translate['defaultLanguage'];
+                }
             }
 
         }
