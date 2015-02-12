@@ -98,6 +98,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 ->addActionContext('head', 'json')
                 ->addActionContext('put', 'json')
                 ->addActionContext('delete', 'json')
+                ->addActionContext('options', 'json')
                 ->initContext('json');
 
     }
