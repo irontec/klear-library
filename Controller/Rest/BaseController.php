@@ -11,6 +11,10 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $bootstrap = $this->_invokeArgs['bootstrap'];
 
+        $plugins = $bootstrap->getContainer()->frontcontroller->getPlugins();
+
+        $this->_checkPluginInit($plugins);
+
         if (!Zend_Registry::isRegistered("syslogger")) {
 
             $writer = new Zend_Log_Writer_Syslog(
@@ -30,6 +34,25 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         if (get_class($this) != "Api_ErrorController") {
             $this->_logRequest();
+        }
+
+    }
+
+    protected function _checkPluginInit($plugins)
+    {
+
+        $init = false;
+
+        foreach ($plugins as $plugin) {
+            if (get_class($plugin) === 'Iron_Plugin_RestParamsParser') {
+                $init = true;
+            }
+        }
+
+        if (!$init) {
+            throw new Exception(
+                'No esta inicializado el plugin "Iron_Plugin_RestParamsParser"'
+            );
         }
 
     }
