@@ -159,6 +159,7 @@ class Iron_Model_Rest_StatusResponse
      */
     protected function _parseAndCleanExceptionTrace(\Exception $e)
     {
+
         $trace = $e->getTrace();
         $cleanTrace = array();
 
@@ -191,8 +192,17 @@ class Iron_Model_Rest_StatusResponse
            $str .= $item['class'] . $item['type'] . $item['function'] ."()";
 
            if (isset($item['args'])) {
+
                $str .= "\n>>> Args[]: >>>>\n";
-               $str .= implode("\n", $item['args']);
+               foreach ($item['args'] as $arg) {
+
+                   if (is_string($arg)) {
+                       $str .= $arg;
+                       continue;
+                   }
+                   $str .= print_r($arg, true);
+
+               }
 
                if (strlen($str) > 1003) {
                    $str = substr($str, 0, 1000) . "...";
@@ -200,9 +210,11 @@ class Iron_Model_Rest_StatusResponse
            }
 
            $cleanTraceString .= $str . "\n";
+
         }
 
-        return($cleanTraceString);
+        return $cleanTraceString;
+
     }
 
     public function setMessage($message)
