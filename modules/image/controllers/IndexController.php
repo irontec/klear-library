@@ -46,6 +46,7 @@ class Image_IndexController extends Zend_Controller_Action
     protected $_life;
 
     protected $_currentProfile;
+    protected $_profileName;
     protected $_ext;
 
     public function init()
@@ -120,6 +121,7 @@ class Image_IndexController extends Zend_Controller_Action
         );
 
         $piecesKey = array(
+            ucfirst($this->_profileName),
             ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
             ucfirst($this->getFso())
         );
@@ -247,6 +249,8 @@ class Image_IndexController extends Zend_Controller_Action
         foreach ($this->_configImages->$profile as $key => $val) {
             $currentProfile->$key = $val;
         }
+
+        $this->_profileName = $profile;
 
         if (isset($currentProfile->extend)) {
             $extend = $currentProfile->extend;
