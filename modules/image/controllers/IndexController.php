@@ -212,15 +212,9 @@ class Image_IndexController extends Zend_Controller_Action
             }
 
             if (isset($this->_currentProfile->compressionQuality)) {
-
-                if ($image->getimageformat() === 'png') {
-                    $image->setImageFormat("png8");
-                }
-
                 $image->setimagecompressionquality(
-                    $this->_currentprofile->compressionquality
+                    $this->_currentProfile->compressionquality
                 );
-
             }
 
             $cache->save($image->getImagesBlob(), $cacheKey);
