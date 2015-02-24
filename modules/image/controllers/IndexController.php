@@ -211,6 +211,18 @@ class Image_IndexController extends Zend_Controller_Action
                 \Iron_Imagick_Framing::init($image, $config['framing']);
             }
 
+            if (isset($this->_currentProfile->compressionQuality)) {
+
+                if ($image->getimageformat() === 'png') {
+                    $image->setImageFormat("png8");
+                }
+
+                $image->setimagecompressionquality(
+                    $this->_currentprofile->compressionquality
+                );
+
+            }
+
             $cache->save($image->getImagesBlob(), $cacheKey);
 
             $this->getHeaders(false, $cache, $cacheKey, $extension);
