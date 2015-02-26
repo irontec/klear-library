@@ -213,7 +213,7 @@ class Image_IndexController extends Zend_Controller_Action
 
             if (isset($this->_currentProfile->compressionQuality)) {
                 $image->setimagecompressionquality(
-                    $this->_currentProfile->compressionquality
+                    $this->_currentProfile->compressionQuality
                 );
             }
 
