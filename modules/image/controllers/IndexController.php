@@ -700,7 +700,7 @@ class Image_IndexController extends Zend_Controller_Action
     protected function _getMimeTypeByExtencion($extension)
     {
 
-        switch ($extension) {
+        switch (strtolower($extension)) {
             case 'js':
                 return 'application/x-javascript';
             case 'json':
