@@ -1,10 +1,18 @@
 <?php
+/**
+ * @author Mikel Madariaga Madariaga <mikel@irontec.com>
+ * @author Daniel Rendon <dani@irontec.com>
+ */
 
 class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 {
 
     public $status;
-    public $syslog;
+
+    public $loggers = array();
+
+    protected $_logActive;
+    protected $_publicHashError;
 
     public function init()
     {
@@ -15,25 +23,89 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $this->_checkPluginInit($plugins);
 
-        if (!Zend_Registry::isRegistered("syslogger")) {
+        $optionsApp = $bootstrap->getOptions();
 
-            $writer = new Zend_Log_Writer_Syslog(
-                array(
-                    'application' => $bootstrap->getAppNamespace() . '-Rest'
-                )
+        if (!isset($optionsApp['restLog'])) {
+            $msg = '"restLog" no esta configurado en el application.ini';
+            throw new \Exception($msg, 500);
+        }
+
+        $this->_logSystemConfig(
+            $optionsApp['restLog']
+        );
+
+        $this->_debugParams();
+
+        $this->status = new \Iron_Model_Rest_StatusResponse;
+
+        $front = \Zend_Controller_Front::getInstance();
+        $request = $front->getRequest();
+
+        if ($request->getActionName() != "rest-error" && $this->_logActive) {
+            $this->_logRequest();
+        }
+
+        $errorHandler = $front->getPlugin('Zend_Controller_Plugin_ErrorHandler');
+        $errorHandler->setErrorHandlerAction('rest-error')
+                     ->setErrorHandlerController($request->getControllerName())
+                     ->setErrorHandlerModule($request->getModuleName());
+
+    }
+
+    public function restErrorAction()
+    {
+
+        $errors = $this->_getParam('error_handler');
+
+        if (!$errors || !$errors instanceof ArrayObject) {
+            $this->view->message = 'You have reached the error page';
+            return;
+        }
+
+        $this->status->setApplicationError($errors->exception);
+
+    }
+
+    protected function _logSystemConfig($config)
+    {
+
+        if (!isset($config['log'])) {
+            $this->_logActive = false;
+            return;
+        }
+
+        $declarableEventLoggers = array("access", "error");
+
+        foreach ($declarableEventLoggers as $eventLogger) {
+
+            if (!isset($config['log'][$eventLogger])) {
+                continue;
+            }
+            $this->_logActive = true;
+
+            $logConfig = $config['log'][$eventLogger];
+            $timesFormat = "Y-m-d H:s:i";
+
+            $zendLogConfig = array(
+                'timestampFormat' => $timesFormat
             );
 
-            Zend_Registry::set("syslogger", new Zend_Log($writer));
+            foreach ($logConfig as $key => $value) {
+                $zendLogConfig[] = $value;
+            }
+
+            $this->loggers[$eventLogger] = Zend_Log::factory($zendLogConfig);
 
         }
 
-        $this->_debugParams();
-        $this->status = new \Iron_Model_Rest_StatusResponse;
-
-        $this->syslog = Zend_Registry::get("syslogger");
-
-        if (get_class($this) != "Api_ErrorController") {
-            $this->_logRequest();
+        if (!isset($config['publicHashError'])) {
+            $this->_publicHashError = false;
+        } else {
+            if ($config['publicHashError'] == 1 ? true : false) {
+                $this->_publicHashError = true;
+            } else {
+                $this->_publicHashError = false;
+            }
         }
 
     }
@@ -60,6 +132,10 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     private function _logRequest()
     {
 
+        if (!$this->loggers['access'] instanceof \Zend_Log) {
+            return;
+        }
+
         $module = $this->_request->getParam("module");
         $controller = $this->_request->getParam("controller");
         $action = $this->_request->getParam("action");
@@ -76,13 +152,13 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $requestLog .= " from " . $_SERVER["REMOTE_ADDR"];
 
-        $this->syslog->debug(
+        $this->loggers['access']->debug(
             "Requesting " . $requestLog
         );
 
         $resquestParams = str_replace("\n", "", $requestParamString);
 
-        $this->syslog->debug(
+        $this->loggers['access']->debug(
             "Request params: " . $resquestParams
         );
 
@@ -91,21 +167,29 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     private function _logResponse()
     {
 
-        $statusResume = $this->status->getStatusArray();
+        $statusResume = $this->status->getStatusArray(true);
 
         if (array_key_exists('exception', $statusResume)) {
 
+            if (!$this->loggers['error'] instanceof \Zend_Log) {
+                return;
+            }
+
             $msg = "Exception thrown: " . $statusResume['exception'];
-            $this->syslog->debug($msg);
+            $this->loggers['error']->debug($msg);
 
             $msg = "Exception Ref: " . $statusResume['developerRef'];
-            $this->syslog->debug($msg);
+            $this->loggers['error']->debug($msg);
 
+        }
+
+        if (!$this->loggers['access'] instanceof \Zend_Log) {
+            return;
         }
 
         $msg = "Request finished with status code " . $this->status->getCode();
         $msg .= " [" . $this->status->getMessage() . "]";
-        $this->syslog->debug($msg);
+        $this->loggers['access']->debug($msg);
 
     }
 
@@ -116,6 +200,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $contextSwitch
                 ->addActionContext('index', 'json')
                 ->addActionContext('error', 'json')
+                ->addActionContext('rest-error', 'json')
                 ->addActionContext('get', 'json')
                 ->addActionContext('post', 'json')
                 ->addActionContext('head', 'json')
@@ -139,7 +224,9 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             return;
         }
 
-        $this->_logResponse();
+        if ($this->_logActive) {
+            $this->_logResponse();
+        }
 
     }
 
@@ -157,7 +244,8 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $view = $this->view;
 
-        if ($this->status->anyError()) {
+        if ($this->status->anyError() && $this->_logActive) {
+
             $debug = $view->debug;
             $view->clearVars();
 
@@ -166,7 +254,11 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             }
         }
 
-        foreach ($this->status->getStatusArray() as $key => $val) {
+        $statusArrayData = $this->status->getStatusArray(
+            $this->_publicHashError
+        );
+
+        foreach ($statusArrayData as $key => $val) {
             $view->$key = $val;
         }
 

@@ -1,7 +1,6 @@
 <?php
 /**
  * @author Mikel Madariaga Madariaga <mikel@irontec.com>
- *
  */
 
 class Iron_Model_Rest_StatusResponse
@@ -88,7 +87,7 @@ class Iron_Model_Rest_StatusResponse
         510 => 'Not Extended'
     );
 
-    private $_twoWayEncryptPasswd = "OutboundDialer";
+    private $_twoWayEncryptPasswd = "IronErrorCryptSecret";
 
     public function __construct()
     {
@@ -102,10 +101,12 @@ class Iron_Model_Rest_StatusResponse
 
     protected function _initCodes ()
     {
+
         $this->_availableCodes = $this->_successCodes +
                                  $this->_clientErrorCodes +
                                  $this->_serverErrorCodes;
         $this->setCode(200);
+
     }
 
     /**
@@ -126,6 +127,7 @@ class Iron_Model_Rest_StatusResponse
 
     public function setCode($code)
     {
+
         if (!array_key_exists($code, $this->_availableCodes)) {
             throw new Exception("Unkown error");
         }
@@ -134,6 +136,7 @@ class Iron_Model_Rest_StatusResponse
         $this->setMessage($this->_availableCodes[$code]);
 
         return $this;
+
     }
 
     public function getMessage()
@@ -143,6 +146,7 @@ class Iron_Model_Rest_StatusResponse
 
     public function setApplicationError(\Exception $e)
     {
+
         $this->_exception = $e;
         $this->_exceptionTrace = $this->_parseAndCleanExceptionTrace($e);
 
@@ -152,6 +156,7 @@ class Iron_Model_Rest_StatusResponse
         }
 
         $this->_developerRef = $e->getFile() . "(". $e->getLine() .")";
+
     }
 
     /**
@@ -165,9 +170,10 @@ class Iron_Model_Rest_StatusResponse
 
         foreach ($trace as $key => $item) {
 
-            if ($key == 0) {
-                //continue;
+            if (!isset($item['file'])) {
+                continue;
             }
+
             if ($key !== 0 && strpos($item['file'], "Zend") !== false) {
                 continue;
             }
@@ -190,30 +196,24 @@ class Iron_Model_Rest_StatusResponse
            $str = "";
            $str .= "#" . $key . " " . $item['file'] . "(". $item['line'] ."): ";
            $str .= $item['class'] . $item['type'] . $item['function'] ."()";
-
-           if (isset($item['args'])) {
-
-               $str .= "\n>>> Args[]: >>>>\n";
-               foreach ($item['args'] as $arg) {
-
-                   if (is_string($arg)) {
-                       $str .= $arg;
-                       continue;
-                   }
-                   $str .= print_r($arg, true);
-
-               }
-
-               if (strlen($str) > 1003) {
-                   $str = substr($str, 0, 1000) . "...";
-               }
-           }
-
            $cleanTraceString .= $str . "\n";
-
         }
 
-        return $cleanTraceString;
+
+        $request = Zend_Controller_Front::getInstance()->getRequest();
+        $simpleArguments = array();
+        foreach ($request->getParams() as $key => $param) {
+            if (is_object($param)) {
+                continue;
+            }
+            $simpleArguments[$key] = $param;
+        }
+
+        $arguments = "\n>> Arguments >> \n" . var_export($simpleArguments, true);
+
+        return $e->getMessage() . "\n" .
+               $cleanTraceString . "\n" .
+               $arguments;
 
     }
 
@@ -223,8 +223,9 @@ class Iron_Model_Rest_StatusResponse
         return $this;
     }
 
-    public function getStatusArray()
+    public function getStatusArray($showPublicHash = false)
     {
+
         $response = array(
             'code' => $this->_code,
             'message' => $this->_message,
@@ -240,17 +241,23 @@ class Iron_Model_Rest_StatusResponse
 
             $cleanDevRef = $this->_developerRef . "\n" . $this->_exceptionTrace;
             $devRef = $this->_developerRefEncrypt($cleanDevRef);
-            $response += array(
-                'exception' => $this->_exception->getMessage(),
-                'developerRef' => $devRef
-            );
+
+            if ($showPublicHash) {
+                $response += array(
+                    'exception' => $this->_exception->getMessage(),
+                    'developerRef' => $devRef
+                );
+            }
+
         }
 
         return $response;
+
     }
 
     protected function _developerRefEncrypt($string)
     {
+
         if (false && !in_array(APPLICATION_ENV, array('production', 'testing'))) {
             return $string;
         }
@@ -264,10 +271,12 @@ class Iron_Model_Rest_StatusResponse
         );
 
         return urlencode(base64_encode($hash));
+
     }
 
     public function uncryptDeveloperRefMessage($encrypted)
     {
+
         $string = mcrypt_decrypt(
             MCRYPT_RIJNDAEL_256,
             md5($this->_twoWayEncryptPasswd),
@@ -277,5 +286,7 @@ class Iron_Model_Rest_StatusResponse
         );
 
         return rtrim($string, "\0");
+
     }
+
 }
