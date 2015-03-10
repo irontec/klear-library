@@ -18,6 +18,11 @@ class Iron_Model_Fso
     protected $_md5Sum = '';
 
     protected $_mustFlush = false;
+    
+    protected $_modifiers = array(
+        'keepExtension' => false,
+        'baseFolder' => false
+    );
 
     public function __construct($model, $specs)
     {
@@ -29,6 +34,13 @@ class Iron_Model_Fso
         $modelClassName = $this->_getModelClassName();
         $modelAttrPath = strtolower($modelClassName . self::CLASS_ATTR_SEPARATOR . $specs['basePath']);
         $this->_basePath = $storagePath . $modelAttrPath;
+    }
+    
+    public function addModifier($modifier) 
+    {
+        if (isset($this->_modifiers[$modifier])) {
+            $this->_modifiers[$modifier] = true;
+        }
     }
 
     protected function _getConfig()
@@ -177,14 +189,16 @@ class Iron_Model_Fso
             throw new Exception('Invalid Primary Key');
         }
 
-        $targetPath = $this->_basePath . DIRECTORY_SEPARATOR . $this->_pk2path($pk);
-
-        $targetFile = $targetPath . $pk;
-
+        
+        $targetFile = $this->_buildFilePath($pk);
+        $targetPath = dirname($targetFile);
+        
         if (!file_exists($targetPath)) {
+                    
             if (!mkdir($targetPath, 0755, true)) {
                 throw new Exception('Could not create dir ' . $targetPath);
             }
+            
         }
 
         $srcFileSize = filesize($this->_srcFile);
@@ -225,7 +239,7 @@ class Iron_Model_Fso
     {
 
         if (!is_numeric($pk)) {
-            return implode(DIRECTORY_SEPARATOR, array($pk)) . DIRECTORY_SEPARATOR;
+            return implode(DIRECTORY_SEPARATOR, explode("-",$pk)) . DIRECTORY_SEPARATOR;
         }
 
         $aId = str_split((string)$pk);
@@ -273,7 +287,7 @@ class Iron_Model_Fso
             throw new Exception('Empty object. No PK found');
         }
 
-        $file = $this->_basePath . DIRECTORY_SEPARATOR . $this->_pk2path($pk) . $pk;
+        $file = $this->_buildFilePath($pk);
 
         if (file_exists($file)) {
             unlink($file);
@@ -300,6 +314,27 @@ class Iron_Model_Fso
         return $this->_srcFile;
     }
 
+    public function _buildFilePath($pk)
+    {
+        $path = array();
+        $path[] = $this->_basePath;
+        
+        if ($this->_modifiers['baseFolder'] === false) {
+            $path[] = $this->_pk2path($pk);
+        }
+        
+        if ($this->_modifiers ['keepExtension'] !== false) {
+            $ext = '.' . pathinfo($this->getBaseName(), PATHINFO_EXTENSION);
+        } else {
+            $ext = '';
+        }
+        
+        $path[] = $pk . $ext;
+        
+        
+        return implode(DIRECTORY_SEPARATOR, $path);
+    }
+    
     protected function _isValidPk($pk)
     {
         if (is_numeric($pk)) {
