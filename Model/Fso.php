@@ -263,19 +263,19 @@ class Iron_Model_Fso
             throw new Exception("Empty object. No PK found");
         }
 
-        $file = $this->_basePath . DIRECTORY_SEPARATOR . $this->_pk2path($pk) . $pk;
+        $baseNameGetter = 'get' . ucfirst($this->_modelSpecs['baseNameName']);
+        $this->setBaseName($this->_model->$baseNameGetter());
+        
+        $file = $this->_buildFilePath($pk);
         if (!file_exists($file)) {
             throw new Exception("File $file not found");
         }
-
+        
         $this->_setSize(filesize($file));
         $this->_setSrcFile($file);
         $this->_setMimeType($file);
         $this->_setMd5Sum($file);
-
-        $baseNameGetter = 'get' . ucfirst($this->_modelSpecs['baseNameName']);
-        $this->setBaseName($this->_model->$baseNameGetter());
-
+        
         return $this;
     }
 
