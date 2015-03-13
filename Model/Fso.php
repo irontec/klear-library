@@ -5,76 +5,59 @@
 */
 class Iron_Model_Fso
 {
-    const CLASS_ATTR_SEPARATOR = '.';
 
     protected $_model;
     protected $_modelSpecs;
-    protected $_basePath = '';
-
-    protected $_srcFile;
+    
+    
+    /**
+     * @var string path to FSO file in FS
+     */
+    protected $_filePath;
+    
     protected $_size = null;
     protected $_mimeType;
     protected $_baseName = '';
     protected $_md5Sum = '';
 
+    protected $_fileToBeFlushed;
     protected $_mustFlush = false;
     
     protected $_modifiers = array(
-        'keepExtension' => false,
-        'baseFolder' => false
+        // modificadores de fso soportados (ninguno de momento)
+        'fso'           => array(
+                
+        ),
+        // modificadores de pathName soportados
+        'pathResolver'  => array(
+            'keepExtension' => false,
+            'baseFolder' => false
+        )
     );
-
+    
+    protected $_storagePathResolverName = '\Iron_Model_Fso_Adapter_StoragePathResolver_Default';
+    
     public function __construct($model, $specs)
     {
-        $storagePath = $this->_getLocalStorage($this->_getConfig());
-
         $this->_model = $model;
         $this->_modelSpecs = $specs;
-
-        $modelClassName = $this->_getModelClassName();
-        $modelAttrPath = strtolower($modelClassName . self::CLASS_ATTR_SEPARATOR . $specs['basePath']);
-        $this->_basePath = $storagePath . $modelAttrPath;
+    }
+    
+    public function overwriteStoragePathResolver($className)
+    {
+        $this->_storagePathResolverName = $className;
     }
     
     public function addModifier($modifier) 
     {
-        if (isset($this->_modifiers[$modifier])) {
-            $this->_modifiers[$modifier] = true;
+        if (isset($this->_modifiers['fso'][$modifier])) {
+            $this->_modifiers['fso'][$modifier] = true;
+        }
+        
+        if (isset($this->_modifiers['pathResolver'][$modifier])) {
+            $this->_modifiers['pathResolver'][$modifier] = true;
         }
     }
-
-    protected function _getConfig()
-    {
-        $bootstrap = \Zend_Controller_Front::getInstance()->getParam('bootstrap');
-
-        if (is_null($bootstrap)) {
-            $conf = new \Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
-        } else {
-            $conf = (Object) $bootstrap->getOptions();
-        }
-
-        return $conf;
-    }
-
-    protected function _getLocalStorage($conf)
-    {
-        if (isset($conf->localStoragePath)) {
-
-            $storagePath = $conf->localStoragePath;
-            if (substr($storagePath, -1) != DIRECTORY_SEPARATOR) {
-                $storagePath .= DIRECTORY_SEPARATOR;
-            }
-
-            return $storagePath;
-        }
-        return APPLICATION_PATH . '/../storage/';
-    }
-
-    protected function _getModelClassName()
-    {
-        return str_replace('\\', '_', get_class($this->_model));
-    }
-
     public function getSize()
     {
         return $this->_size;
@@ -110,7 +93,7 @@ class Iron_Model_Fso
         }
 
         $this->setBaseName(basename($file));
-        $this->_setSrcFile($file);
+        $this->_setFileToBeFlushed($file);
         $this->_setSize(filesize($file));
         $this->_setMimeType($file);
         $this->_setMd5Sum($file);
@@ -125,9 +108,9 @@ class Iron_Model_Fso
         return $this;
     }
 
-    protected function _setSrcFile($filepath)
+    protected function _setFileToBeFlushed($filepath)
     {
-        $this->_srcFile = $filepath;
+        $this->_fileToBeFlushed = $filepath;
         return $this;
     }
 
@@ -185,33 +168,20 @@ class Iron_Model_Fso
             throw new Exception('Nothing to flush');
         }
 
-        if (!$this->_isValidPk($pk)) {
-            throw new Exception('Invalid Primary Key');
-        }
-
-        
+        //TO-DO remove $pk?
         $targetFile = $this->_buildFilePath($pk);
-        $targetPath = dirname($targetFile);
-        
-        if (!file_exists($targetPath)) {
-                    
-            if (!mkdir($targetPath, 0755, true)) {
-                throw new Exception('Could not create dir ' . $targetPath);
-            }
-            
-        }
 
-        $srcFileSize = filesize($this->_srcFile);
+        $srcFileSize = filesize($this->_fileToBeFlushed);
 
         if ($this->getSize() != $srcFileSize) {
-            unlink($this->_srcFile);
+            unlink($this->_fileToBeFlushed);
             throw new Exception('Something went wrong. New filesize: ' . $srcFileSize . '. Expected: ' . $this->getSize());
         }
 
-        if (true === copy($this->_srcFile, $targetFile)) {
-            unlink($this->_srcFile);
+        if (true === copy($this->_fileToBeFlushed, $targetFile)) {
+            unlink($this->_fileToBeFlushed);
         } else {
-            throw new Exception("Could not rename file " . $this->_srcFile . " to " . $targetFile);
+            throw new Exception("Could not rename file " . $this->_fileToBeFlushed . " to " . $targetFile);
         }
 
         $this->_mustFlush = false;
@@ -228,44 +198,19 @@ class Iron_Model_Fso
     }
 
     /**
-     * Converts id to path:
-     *  1 => 0/1
-     *  10 => 1/10
-     *  15 => 1/15
-     *  214 => 2/1/214
-     * @return string
-     */
-    protected function _pk2path($pk)
-    {
-
-        if (!is_numeric($pk)) {
-            return implode(DIRECTORY_SEPARATOR, explode("-",$pk)) . DIRECTORY_SEPARATOR;
-        }
-
-        $aId = str_split((string)$pk);
-        array_pop($aId);
-        if (!sizeof($aId)) {
-            $aId = array('0');
-        }
-
-        return implode(DIRECTORY_SEPARATOR, $aId) . DIRECTORY_SEPARATOR;
-
-    }
-
-    /**
      * Prepara el módelo para permitir la descarga del fichero llamando a getBinary()
      * @return Iron_Model_Fso
      */
     public function fetch()
     {
         $pk = $this->_model->getPrimaryKey();
-        if (!$this->_isValidPk($pk) ) {
-            throw new Exception("Empty object. No PK found");
-        }
 
+        
         $baseNameGetter = 'get' . ucfirst($this->_modelSpecs['baseNameName']);
         $this->setBaseName($this->_model->$baseNameGetter());
         
+        
+        // TO-DO remove pk?
         $file = $this->_buildFilePath($pk);
         if (!file_exists($file)) {
             throw new Exception("File $file not found");
@@ -283,10 +228,7 @@ class Iron_Model_Fso
     {
         $pk = $this->_model->getPrimaryKey();
 
-        if (!$this->_isValidPk($pk)) {
-            throw new Exception('Empty object. No PK found');
-        }
-
+        //TO-DO remove PK
         $file = $this->_buildFilePath($pk);
 
         if (file_exists($file)) {
@@ -311,40 +253,24 @@ class Iron_Model_Fso
 
     public function getFilePath()
     {
-        return $this->_srcFile;
+        return $this->_buildFilePath();
     }
 
     public function _buildFilePath($pk)
     {
-        $path = array();
-        $path[] = $this->_basePath;
-        
-        if ($this->_modifiers['baseFolder'] === false) {
-            $path[] = $this->_pk2path($pk);
+        if ($this->_filePath === null) {
+            
+            $className = $this->_storagePathResolverName;
+            
+            $resolver = new $className();
+            
+            $resolver->setModel($this->_model);
+            $resolver->setModelSpecs($this->_modelSpecs);
+            $resolver->setModifiers($this->_modifiers['pathResolver']);
+            
+            $this->_filePath = $resolver->getPath();
         }
         
-        if ($this->_modifiers ['keepExtension'] !== false) {
-            $ext = '.' . pathinfo($this->getBaseName(), PATHINFO_EXTENSION);
-        } else {
-            $ext = '';
-        }
-        
-        $path[] = $pk . $ext;
-        
-        
-        return implode(DIRECTORY_SEPARATOR, $path);
-    }
-    
-    protected function _isValidPk($pk)
-    {
-        if (is_numeric($pk)) {
-            return true;
-        }
-
-        if (count(explode("-", $pk)) == 5) {
-            return true;
-        }
-
-        return false;
+        return $this->_filePath;
     }
 }
