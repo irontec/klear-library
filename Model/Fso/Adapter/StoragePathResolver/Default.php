@@ -102,14 +102,18 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default
     protected function _buildRealBaseName()
     {
         $pk = $this->_model->getPrimaryKey();
-        
-        if ($this->_modifiers ['keepExtension'] !== false) {
+
+        if(empty($pk)) {
+            throw new \Exception("Cannot build filepath before it has a primary key");
+        }
+
+        if ($this->_modifiers['keepExtension'] !== false) {
             $baseNamegetter = 'get' . $this->_modelSpecs['baseNameName'];
             $ext = '.' . pathinfo($this->_model->{$baseNamegetter}(), PATHINFO_EXTENSION);
         } else {
             $ext = '';
         }
-        
+
         return $pk . $ext;
     }
     
@@ -143,7 +147,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default
             return implode(DIRECTORY_SEPARATOR, $aId) . DIRECTORY_SEPARATOR;
         }
         
-        throw Exception("unsupported pk received!");
+        throw new \Exception("unsupported pk received!");
         
 
     }
