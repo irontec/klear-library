@@ -77,6 +77,8 @@ class Iron_Model_Fso
                 $adapterInstances[$adapterType] = new $ironAdapter($model, $specs, $localStoragePath, $modifiers);
                 continue;
             }
+            
+            die("" . $ironAdapter . " - Iron_Model_Fso_Adapter_StoragePathResolver_Default" );
 
             if (class_exists($driver)) {
                 $adapterInstances[$adapterType] = new $driver($model, $specs, $localStoragePath, $modifiers);
@@ -120,7 +122,7 @@ class Iron_Model_Fso
         return array(
             'localStoragePath' => $defaultStoragePath,
             'adapters'  => array(
-                'storgePathResolver' => Array (
+                'storagePathResolver' => Array (
                         'driver' => 'Default',
                         'params' => array (
                             'keepExtension' => false,
