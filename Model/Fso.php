@@ -5,16 +5,14 @@
 */
 class Iron_Model_Fso
 {
-
     protected $_model;
     protected $_modelSpecs;
-    
-    
+
     /**
      * @var string path to FSO file in FS
      */
     protected $_filePath;
-    
+
     protected $_size = null;
     protected $_mimeType;
     protected $_baseName = '';
@@ -24,75 +22,184 @@ class Iron_Model_Fso
     protected $_mustFlush = false;
 
     /**
-     * @var string old file path
+     * @var string previously stored file path
      */
     protected $_originalFilePath;
 
     /**
-     * check _setDefaultModifiers()
-     * @var array
+     * @var Iron_Model_Fso_Adapter_StoragePathResolver_Interface
      */
-    protected $_modifiers = array();
+    protected $_pathResolverAdapter;
 
-    protected $_storagePathResolverName = '\Iron_Model_Fso_Adapter_StoragePathResolver_Default';
-
-    public function __construct($model, $specs)
+    public function __construct($model, $specs, $config = array())
     {
         $this->_model = $model;
         $this->_modelSpecs = $specs;
-        $this->_setDefaultModifiers();
+
+        $fsoConfiguration = $this->_buildConfiguration($config);
+        $adapters = $fsoConfiguration['adapters'];
+
+        $adapterInstances = $this->_adapterBuilder($model, $specs, $fsoConfiguration);
+        if (isset($adapterInstances['storagePathResolver'])) {
+            $this->setPathResolver($adapterInstances['storagePathResolver']);
+        }
     }
 
-    protected function _setDefaultModifiers()
+    /**
+     * @return array of adapters
+     */
+    protected function _adapterBuilder($model, $specs, $fsoConfiguration) 
     {
-        $this->_modifiers = array(
-            // Modificadores soportados 
-            'fso'           => array(
-                // Ninguno de momento
-            ),
-            // modificadores de pathName soportados
-            'pathResolver'  => array(
-                'keepExtension' => false,
-                'baseFolder' => false
+        $localStoragePath = $fsoConfiguration['localStoragePath'];
+        $adapters = $fsoConfiguration['adapters'];
+
+        if (!isset($adapters)) {
+            return array (
+                'storagePathResolver' => $this->_getDefaultAdapter($model, $specs, $localStoragePath)
+            );
+        }
+
+        $classBase = "Iron_Model_Fso_Adapter_";
+
+        $autoLoader = Zend_Loader_Autoloader::getInstance();
+        $autoLoader->suppressNotFoundWarnings(true);
+        
+        $adapterInstances = array();
+        foreach ($adapters as $adapterType => $config) {
+
+            $modifiers = isset($config['params']) ? $config['params'] : array(); 
+            $driver = ucfirst($config['driver']);
+            
+            $adapterClass = ucfirst($adapterType) . '_' . $driver;
+            $ironAdapter = $classBase . $adapterClass;
+
+            if (class_exists($ironAdapter)) {
+                $adapterInstances[$adapterType] = new $ironAdapter($model, $specs, $localStoragePath, $modifiers);
+                continue;
+            }
+
+            if (class_exists($driver)) {
+                $adapterInstances[$adapterType] = new $driver($model, $specs, $localStoragePath, $modifiers);
+                continue;
+            }
+
+            throw new \Exception("Adapter not found: " . $driver);
+        }
+
+        $autoLoader->suppressNotFoundWarnings(false);
+        return $adapterInstances;
+    }
+
+    protected function _getDefaultAdapter($model, $specs, $localStoragePath)
+    {
+        return new \Iron_Model_Fso_Adapter_StoragePathResolver_Default(
+            $model, 
+            $specs, 
+            $localStoragePath
+        );
+    }
+
+    protected function _buildConfiguration($config = array()) 
+    {
+        $defaultConfiguration = $this->_getDefaultConfig();
+        $applicationConfig = $this->_getApplicationConfig();
+
+        return array_merge(
+            $defaultConfiguration, 
+            $applicationConfig, //TODO Pensar ¿Switch orden de $applicationConfig & $config ?
+            $config
+        );
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getDefaultConfig()
+    {
+        $defaultStoragePath = APPLICATION_PATH . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'storage';
+        return array(
+            'localStoragePath' => $defaultStoragePath,
+            'adapters'  => array(
+                'storgePathResolver' => Array (
+                        'driver' => 'Default',
+                        'params' => array (
+                            'keepExtension' => false,
+                            'storeInBaseFolder' => false
+                        )
+                    )
             )
         );
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getApplicationConfig()
+    {
+        $bootstrap = \Zend_Controller_Front::getInstance()->getParam('bootstrap');
+        if (is_null($bootstrap)) {
+            $conf = new \Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
+        } else {
+            $conf = (Object) $bootstrap->getOptions();
+        }
+
+        if (!isset($conf->Iron) || !isset($conf->Iron['fso'])) {
+            return array();
+        }
+
+        if (isset($conf->localStoragePath)) {
+            trigger_error(
+                "localStoragePath app configuration param is deprecated. Please use Iron.fso.localStoragePath instead", 
+                E_USER_WARNING
+            );
+
+            $conf->Iron['fso']['localStoragePath'] = $conf->localStoragePath;
+        }
+
+        if (!isset($conf->Iron['fso']['entity'])) {
+            return $conf->Iron['fso'];
+        }
+        
+        $modelClass = get_class($this->_model);
+        $entity = str_replace("\\", "_", $modelClass);
+
+        $entityConfig = $this->_getEntityConfig($conf->Iron['fso']['entity'], $entity);
+        unset($conf->Iron['fso']['entity']);
+
+        return array_merge($conf->Iron['fso'], $entityConfig);
+    }
+    
+    protected function _getEntityConfig($configuration, $entity) 
+    {
+        if (empty($configuration)) {
+            return array();
+        }
+        $entity = strtolower($entity);
+
+        foreach ($configuration as $modelClass => $modelConfig) {
+            
+            if (strtolower($modelClass) == $entity) {
+                return $modelConfig;
+            }
+        }
+
+        return array();
+    }
+
+    public function setPathResolver(Iron_Model_Fso_Adapter_StoragePathResolver_Interface $pathResolverAdapter) 
+    {
+        $this->_pathResolverAdapter = $pathResolverAdapter;
+        return $this;
+    }
+
+    public function getPathResolver()
+    {
+        return $this->_pathResolverAdapter;
     }
 
     public function overwriteStoragePathResolver($className)
     {
         $this->_storagePathResolverName = $className;
-    }
-
-    /**
-     * @param array $modifiers
-     */
-    public function setModifiers(array $modifiers)
-    {
-        $this->resetModifiers();
-        foreach ($modifiers as $modifier) {
-            $this->addModifier($modifier);
-        }
-    }
-
-    public function addModifier($modifier) 
-    {
-        if (isset($this->_modifiers['fso'][$modifier])) {
-            $this->_modifiers['fso'][$modifier] = true;
-
-        } else if (isset($this->_modifiers['pathResolver'][$modifier])) {
-            $this->_modifiers['pathResolver'][$modifier] = true;
-
-        } else {
-            throw new \Exception("Unknown modifier " . $modifier);
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function resetModifiers()
-    {
-        $this->_setDefaultModifiers();
     }
 
     public function getSize()
@@ -279,7 +386,6 @@ class Iron_Model_Fso
         }
 
         $this->_setSize(filesize($file));
-        //$this->_setSrcFile($file);
         $this->_setMimeType($file);
         $this->_setMd5Sum($file);
 
@@ -298,7 +404,6 @@ class Iron_Model_Fso
         $this->_binary = null;
 
         $this->_updateModelSpecs();
-
         return $this;
     }
     
@@ -324,18 +429,9 @@ class Iron_Model_Fso
     public function _buildFilePath()
     {
         if ($this->_filePath === null || $this->mustFlush()) {
-            
-            $className = $this->_storagePathResolverName;
-            
-            $resolver = new $className();
-            
-            $resolver->setModel($this->_model);
-            $resolver->setModelSpecs($this->_modelSpecs);
-            $resolver->setModifiers($this->_modifiers['pathResolver']);
-            
-            $this->_filePath = $resolver->getPath();
+            $this->_filePath = $this->_pathResolverAdapter->getPath();
         }
-        
+
         return $this->_filePath;
     }
 }
