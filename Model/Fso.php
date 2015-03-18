@@ -63,13 +63,13 @@ class Iron_Model_Fso
 
         $autoLoader = Zend_Loader_Autoloader::getInstance();
         $autoLoader->suppressNotFoundWarnings(true);
-        
+
         $adapterInstances = array();
         foreach ($adapters as $adapterType => $config) {
 
             $modifiers = isset($config['params']) ? $config['params'] : array(); 
             $driver = ucfirst($config['driver']);
-            
+
             $adapterClass = ucfirst($adapterType) . '_' . $driver;
             $ironAdapter = $classBase . $adapterClass;
 
@@ -418,7 +418,7 @@ class Iron_Model_Fso
 
     public function getBinary()
     {
-        return file_get_contents($this->_srcFile);
+        return file_get_contents($this->getFilePath());
     }
 
     public function getFilePath()
