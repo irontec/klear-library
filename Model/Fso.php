@@ -63,6 +63,9 @@ class Iron_Model_Fso
 
         $autoLoader = Zend_Loader_Autoloader::getInstance();
         $autoLoader->suppressNotFoundWarnings(true);
+        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
+           //Avoid custom warning handlers  
+        }, E_WARNING); 
 
         $adapterInstances = array();
         foreach ($adapters as $adapterType => $config) {
@@ -86,6 +89,7 @@ class Iron_Model_Fso
             throw new \Exception("Adapter not found: " . $driver);
         }
 
+        restore_error_handler();
         $autoLoader->suppressNotFoundWarnings(false);
         return $adapterInstances;
     }
