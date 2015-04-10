@@ -101,7 +101,10 @@ class Image_IndexController extends Zend_Controller_Action
             );
 
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), 404);
+            throw new Zend_Controller_Action_Exception(
+                'Image not found',
+                404
+            );
         }
 
         $frontend = array(
