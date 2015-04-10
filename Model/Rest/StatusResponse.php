@@ -42,7 +42,8 @@ class Iron_Model_Rest_StatusResponse
         204 => 'No Content',
         205 => 'Reset Content',
         206 => 'Partial Content',
-        207 => 'Multi-Status'
+        207 => 'Multi-Status',
+        304 => 'Not Modified'
     );
 
     private $_clientErrorCodes = array(
@@ -258,6 +259,10 @@ class Iron_Model_Rest_StatusResponse
     protected function _developerRefEncrypt($string)
     {
 
+        if (!function_exists('mcrypt_decrypt')) {
+            return '';
+        }
+
         if (false && !in_array(APPLICATION_ENV, array('production', 'testing'))) {
             return $string;
         }
@@ -276,6 +281,10 @@ class Iron_Model_Rest_StatusResponse
 
     public function uncryptDeveloperRefMessage($encrypted)
     {
+
+        if (!function_exists('mcrypt_decrypt')) {
+            return $encrypted;
+        }
 
         $string = mcrypt_decrypt(
             MCRYPT_RIJNDAEL_256,
