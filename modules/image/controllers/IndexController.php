@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Image
@@ -453,6 +454,9 @@ class Image_IndexController extends Zend_Controller_Action
      */
     public function getHeaders($isCache, $cache, $cacheKey, $mimeType)
     {
+
+        ob_end_clean();
+        ob_clean();
 
         $response = $this->_frontInstance->getResponse();
 
