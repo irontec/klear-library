@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Image
@@ -132,10 +131,16 @@ class Image_IndexController extends Zend_Controller_Action
 
         $key = implode('', $piecesKey);
 
-        $mimeType = mime_content_type($this->getFilePath());
+        $finfo = new finfo();
+        $mimeType = $finfo->file(
+            $this->getFilePath(),
+            FILEINFO_MIME
+        );
 
-        $cacheKey = md5_file(
-            $this->getFilePath()
+        $fileMTime = filemtime($this->getFilePath());
+
+        $cacheKey = md5(
+            $fileMTime . '-' . $this->getBasename()
         ) . $key;
 
         Zend_Registry::set('cache', $cache);
@@ -455,10 +460,14 @@ class Image_IndexController extends Zend_Controller_Action
     public function getHeaders($isCache, $cache, $cacheKey, $mimeType)
     {
 
-        ob_end_clean();
-        ob_clean();
-
         $response = $this->_frontInstance->getResponse();
+
+        if ($isCache) {
+            $response->setHttpResponseCode(304);
+            $response->sendHeaders();
+            return;
+        }
+
 
         $expire = gmdate('D, d M Y H:i:s', time() + $this->_life);
         $modified = gmdate('D, d M Y H:i:s', time()).' GMT';
@@ -472,14 +481,9 @@ class Image_IndexController extends Zend_Controller_Action
         $response->setHeader('ETag', $cacheKey, true);
         $response->setHeader('Content-Type', $mimeType, true);
         $response->setHeader('Content-transfer-encoding', 'binary', true);
+        $response->sendHeaders();
+        $response->setBody($cache->load($cacheKey));
 
-        if ($isCache) {
-            $response->setHttpResponseCode(304);
-            $response->sendHeaders();
-        } else {
-            $response->setBody($cache->load($cacheKey));
-            $response->sendHeaders();
-        }
 
     }
 
