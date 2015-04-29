@@ -37,6 +37,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
      */
     public function sendFile($file, $options = array(), $isRaw = false)
     {
+
         if ($this->_fileNotFound($file, $isRaw)) {
             throw new Zend_Controller_Action_Exception('File not found', 404);
         }
@@ -47,37 +48,38 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->setOptions($options);
         $this->_disableOtherOutput();
-        
+
         $this->_sendHeaders($this->_options);
-        
+
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
             $f = fopen($this->_file, 'r');
-            while(!feof($f)){
+            while (!feof($f)) {
                 print fgets($f, 1024);
             }
             fclose($f);
         }
     }
-    
+
     protected function _fileNotFound($file, $isRaw)
     {
         return !$isRaw && !file_exists($file);
     }
 
-
-    
     public function setOptions($options)
     {
-        if (isset($options['disposition'])) {
 
+        if (isset($options['no-gzip']) && $options['no-gzip']) {
+            apache_setenv('no-gzip', 1);
+        }
+
+        if (isset($options['disposition'])) {
             $options['Content-Disposition'] = $options['disposition'];
             unset($options['disposition']);
         }
 
         if (isset($options['type'])) {
-
             $options['Content-type'] = $options['type'];
             unset($options['type']);
         }
@@ -85,7 +87,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $this->_options = $options;
 
         $size = $this->_isRaw? strlen($this->_file) : filesize($this->_file);
-        
+
         $defaultOptions = array(
                 'filename' => $this->_isRaw? 'file' : basename($this->_file),
                 'Content-Disposition' => 'attachment',
@@ -182,7 +184,6 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $this->_outputBufferingAllowed = (bool)$flag;
     }
 
-
     /**
      * Envia el fichero al cliente
      *
@@ -197,4 +198,5 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     {
         return $this->sendFile($file, $options, $isRaw);
     }
+
 }

@@ -70,6 +70,11 @@ class Iron_Images
         return $this;
     }
 
+    public function setCompressionQuality($quality)
+    {
+        $this->_image->setImageCompressionQuality($quality);
+    }
+
     public function setFormat($format, $quality = 100)
     {
         switch(strtolower($format)) {

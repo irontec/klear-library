@@ -85,12 +85,14 @@ class Iron_Auth_RestBasic extends Zend_Controller_Plugin_Abstract
     protected function _errorAuth()
     {
 
+        $front = Zend_Controller_Front::getInstance();
+
         $resutl = array(
             'success' => false,
             'message' => 'Authorization incorrecta'
         );
 
-        $response = $this->getResponse();
+        $response = $front->getResponse();
         $response->setHttpResponseCode(401);
         $response->setBody(json_encode($resutl));
         $response->sendResponse();
