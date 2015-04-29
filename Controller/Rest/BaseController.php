@@ -12,7 +12,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     public $loggers = array();
 
     protected $_logActive;
-    protected $_publicHashError;
+    protected $_viewData;
 
     public function init()
     {
@@ -33,8 +33,6 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->_logSystemConfig(
             $optionsApp['restLog']
         );
-
-        $this->_debugParams();
 
         $this->status = new \Iron_Model_Rest_StatusResponse;
 
@@ -98,16 +96,6 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         }
 
-        if (!isset($config['publicHashError'])) {
-            $this->_publicHashError = false;
-        } else {
-            if ($config['publicHashError'] == 1 ? true : false) {
-                $this->_publicHashError = true;
-            } else {
-                $this->_publicHashError = false;
-            }
-        }
-
     }
 
     protected function _checkPluginInit($plugins)
@@ -167,7 +155,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     private function _logResponse()
     {
 
-        $statusResume = $this->status->getStatusArray(true);
+        $statusResume = $this->status->getException();
 
         if (array_key_exists('exception', $statusResume)) {
 
@@ -244,46 +232,24 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $view = $this->view;
 
-        if ($this->status->anyError() && $this->_logActive) {
-
-            $debug = $view->debug;
-            $view->clearVars();
-
-            if ($debug) {
-                $view->debug = $debug;
-            }
+        $exceptionData = $this->status->getException();
+        if (!empty($exceptionData)) {
+            $exceptionEncode = json_encode($exceptionData);
+            $this->getResponse()->setHeader('exception', $exceptionEncode);
         }
 
-        $statusArrayData = $this->status->getStatusArray(
-            $this->_publicHashError
-        );
-
-        foreach ($statusArrayData as $key => $val) {
-            $view->$key = $val;
+        $dataView = $this->_viewData;
+        if (!empty($dataView)) {
+            foreach ($dataView as $key => $val) {
+                $view->$key = $val;
+            }
         }
 
     }
 
-    protected function _debugParams($ignoreEnviroment = false)
+    public function addViewData($data)
     {
-
-        $env = array(
-            'production',
-            'testing'
-        );
-
-        if ($ignoreEnviroment || !in_array(APPLICATION_ENV, $env)) {
-
-            $requestParams = $this->_request->getParams();
-
-            if (array_key_exists('error_handler', $requestParams)) {
-                unset($requestParams['error_handler']);
-            }
-
-            $this->view->debug = $requestParams;
-
-        }
-
+        $this->_viewData = $data;
     }
 
     /**

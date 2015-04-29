@@ -16,6 +16,11 @@ class Iron_Model_Rest_StatusResponse
     protected $_message;
 
     /**
+     * @var array
+     */
+    protected $_data;
+
+    /**
      * @var Exception
      */
      protected $_exception;
@@ -35,7 +40,7 @@ class Iron_Model_Rest_StatusResponse
     protected $_availableCodes = array();
 
     private $_successCodes = array(
-        200 => 'OK',
+        200 => 'Ok',
         201 => 'Created',
         202 => 'Accepted',
         203 => 'Non-Authoritative Information',
@@ -224,17 +229,15 @@ class Iron_Model_Rest_StatusResponse
         return $this;
     }
 
-    public function getStatusArray($showPublicHash = false)
+    public function getException()
     {
 
-        $response = array(
-            'code' => $this->_code,
-            'message' => $this->_message,
-        );
+        $response = array();
 
         if ($this->_exception instanceof \Exception) {
 
-            if ($this->_exception->getCode() != 0 && $this->_exception->getCode() != $this->_code) {
+            $exceptionCode = $this->_exception->getCode();
+            if ($exceptionCode != 0 && $exceptionCode != $this->_code) {
                 $response +=  array(
                     'exceptionCode' => $this->_exception->getCode(),
                 );
@@ -243,12 +246,10 @@ class Iron_Model_Rest_StatusResponse
             $cleanDevRef = $this->_developerRef . "\n" . $this->_exceptionTrace;
             $devRef = $this->_developerRefEncrypt($cleanDevRef);
 
-            if ($showPublicHash) {
-                $response += array(
-                    'exception' => $this->_exception->getMessage(),
-                    'developerRef' => $devRef
-                );
-            }
+            $response += array(
+                'exception' => $this->_exception->getMessage(),
+                'developerRef' => $devRef
+            );
 
         }
 
