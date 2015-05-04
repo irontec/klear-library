@@ -61,6 +61,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         }
 
         $this->status->setApplicationError($errors->exception);
+        $this->view->error = $errors->exception->getMessage();
 
     }
 
