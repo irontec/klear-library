@@ -45,6 +45,8 @@ class Iron_Auth_RestBasic extends Zend_Controller_Plugin_Abstract
             $this->_errorAuth();
         }
 
+        return $user;
+
     }
 
     /**
