@@ -52,7 +52,11 @@ class Image_IndexController extends Zend_Controller_Action
     public function init()
     {
 
-        $this->_helper->layout->disableLayout();
+        $layout = Zend_Layout::getMvcInstance();
+        if (null !== $layout) {
+            $layout->disableLayout();
+        }
+
         $this->_helper->viewRenderer->setNoRender(TRUE);
 
         $this->_frontInstance = \Zend_Controller_Front::getInstance();
