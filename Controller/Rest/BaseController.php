@@ -50,6 +50,17 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
     }
 
+    public function location()
+    {
+
+        $location = $this->view->serverUrl(
+            $this->view->url()
+        );
+
+        return $location;
+
+    }
+
     public function restErrorAction()
     {
 
