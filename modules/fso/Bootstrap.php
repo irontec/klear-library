@@ -2,14 +2,18 @@
 /**
  * @author ddniel16 <daniel@irontec.com>
  */
-class Image_Bootstrap extends Zend_Application_Module_Bootstrap
+
+class Fso_Bootstrap extends Zend_Application_Module_Bootstrap
 {
 
-    protected function _initImage()
+    protected function _initFso()
     {
 
         $front = Zend_Controller_Front::getInstance();
-        $front->registerPlugin(new Image_Plugin_Init());
+
+        $fsoPlugin = new Fso_Plugin_Init();
+
+        $front->registerPlugin($fsoPlugin);
 
     }
 
@@ -23,50 +27,50 @@ class Image_Bootstrap extends Zend_Application_Module_Bootstrap
             return;
         }
 
-        if (!isset($ironModule['image'])) {
+        if (!isset($ironModule['fso'])) {
             return;
         }
 
-        if ($ironModule['image'] != true) {
+        if ($ironModule['fso'] != true) {
             return;
         }
 
-        $frontController = Zend_Controller_Front::getInstance();
+        $frontController = \Zend_Controller_Front::getInstance();
 
-        $imagesPath = APPLICATION_PATH . '/configs/images.ini';
+        $fsoPath = APPLICATION_PATH . '/configs/fso.ini';
         $defaultsRoutes = array(
             'controller' => 'index',
             'action' => 'index',
-            'module' => 'image',
+            'module' => 'fso',
             'profiel' => NULL,
             'routeMap' => NULL
         );
 
-        if (!file_exists($imagesPath)) {
+        if (!file_exists($fsoPath)) {
             throw new Exception(
-                'No Existe el fichelo de configuracion images.ini',
+                'No Existe el fichelo de configuracion fso.ini',
                 404
             );
         }
 
-        $imageCacheConfig = new \Zend_Config_Ini(
-            $imagesPath,
+        $fsoConfig = new \Zend_Config_Ini(
+            $fsoPath,
             APPLICATION_ENV
         );
 
         $route = new Zend_Controller_Router_Route(
-            '/image/:profile/:routeMap',
+            '/fso/:profile/:routeMap',
             $defaultsRoutes
         );
 
         $frontController->getRouter()->addRoute(
-            'image',
+            'fso',
             $route
         );
 
         Zend_Registry::set(
-            'imageCacheConfig',
-            $imageCacheConfig
+            'fsoConfig',
+            $fsoConfig
         );
 
     }
