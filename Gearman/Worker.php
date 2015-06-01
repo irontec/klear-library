@@ -40,6 +40,8 @@ class Iron_Gearman_Worker
 
     protected $_logFile = null;
 
+    protected $_logger;
+
     /**
      * Constructor
      * Checks for the required gearman extension,
@@ -89,6 +91,18 @@ class Iron_Gearman_Worker
         if (!empty($this->_logFile)) {
             //Model_Gearman_Manager::getLogger($this->_logFile)->log('[Worker initialized]', Zend_Log::INFO);
         }
+
+        $bootstrap = \Zend_Controller_Front::getInstance()->getParam('bootstrap');
+        $this->_logger = $bootstrap->getResource('log');
+        if (is_null($this->_logger)) {
+            $params = array(
+                    array(
+                            'writerName' => 'Null'
+                    )
+            );
+            $this->_logger = \Zend_Log::factory($params);
+        }
+
 
         while ($this->_worker->work() ||
                 $this->_worker->returnCode() == GEARMAN_TIMEOUT) {
