@@ -81,8 +81,8 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
 
         $serverDigest = hash_hmac(
             'sha256',
-            $tokenKey,
-            $tokenKey . '+' . $requestDate . '+' . $secret
+            $tokenKey . '+' . $requestDate . '+' . $secret,
+            $tokenKey
         );
 
         $digest = trim($digest, '[');
