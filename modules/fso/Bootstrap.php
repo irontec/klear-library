@@ -42,7 +42,7 @@ class Fso_Bootstrap extends Zend_Application_Module_Bootstrap
             'controller' => 'index',
             'action' => 'index',
             'module' => 'fso',
-            'profiel' => NULL,
+            'profile' => NULL,
             'routeMap' => NULL
         );
 

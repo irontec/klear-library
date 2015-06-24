@@ -30,6 +30,12 @@ class Iron_Model_Fso
      * @var Iron_Model_Fso_Adapter_StoragePathResolver_Interface
      */
     protected $_pathResolverAdapter;
+    
+
+    /**
+     * @var Iron_Model_Fso_Adapter_BaseNameResolver_Interface
+     */
+    protected $_baseNameResolverAdapter;
 
     public function __construct($model, $specs, $config = array())
     {
@@ -43,6 +49,10 @@ class Iron_Model_Fso
         if (isset($adapterInstances['storagePathResolver'])) {
             $this->setPathResolver($adapterInstances['storagePathResolver']);
         }
+
+        if (isset($adapterInstances['baseNameResolver'])) {
+            $this->setBaseNameResolver($adapterInstances['baseNameResolver']);
+        }
     }
 
     /**
@@ -55,7 +65,8 @@ class Iron_Model_Fso
 
         if (!isset($adapters)) {
             return array (
-                'storagePathResolver' => $this->_getDefaultAdapter($model, $specs, $localStoragePath)
+                'storagePathResolver' => $this->_getDefaultPathAdapter($model, $specs, $localStoragePath),
+                'baseNameResolver' => $this->_getDefaultBaseNameAdapter($model, $specs, $localStoragePath),
             );
         }
 
@@ -94,12 +105,21 @@ class Iron_Model_Fso
         return $adapterInstances;
     }
 
-    protected function _getDefaultAdapter($model, $specs, $localStoragePath)
+    protected function _getDefaultPathAdapter($model, $specs, $localStoragePath)
     {
         return new \Iron_Model_Fso_Adapter_StoragePathResolver_Default(
-            $model, 
-            $specs, 
-            $localStoragePath
+                $model,
+                $specs,
+                $localStoragePath
+        );
+    }
+
+    protected function _getDefaultBaseNameAdapter($model, $specs, $localStoragePath)
+    {
+        return new \Iron_Model_Fso_Adapter_BaseNameResolver_Default(
+                $model,
+                $specs,
+                $localStoragePath
         );
     }
 
@@ -107,8 +127,7 @@ class Iron_Model_Fso
     {
         $defaultConfiguration = $this->_getDefaultConfig();
         $applicationConfig = $this->_getApplicationConfig();
-
-        return array_merge(
+        return array_replace_recursive(
             $defaultConfiguration, 
             $applicationConfig, //TODO Pensar ¿Switch orden de $applicationConfig & $config ?
             $config
@@ -130,7 +149,13 @@ class Iron_Model_Fso
                             'keepExtension' => false,
                             'storeInBaseFolder' => false
                         )
-                    )
+                ),
+                'baseNameResolver' => Array (
+                        'driver' => 'Default',
+                        'params' => array (
+                            'unique' => false,
+                        )
+                ),
             )
         );
     }
@@ -195,10 +220,21 @@ class Iron_Model_Fso
         $this->_pathResolverAdapter = $pathResolverAdapter;
         return $this;
     }
+    
+    public function setBaseNameResolver(Iron_Model_Fso_Adapter_BaseNameResolver_Interface $baseNameResolverAdapter)
+    {
+        $this->_baseNameResolverAdapter = $baseNameResolverAdapter;
+        return $this;
+    }
 
     public function getPathResolver()
     {
         return $this->_pathResolverAdapter;
+    }
+    
+    public function getBaseNameResolver()
+    {
+        return $this->_baseNameResolverAdapter;
     }
 
     public function overwriteStoragePathResolver($className)
@@ -249,7 +285,7 @@ class Iron_Model_Fso
             }
         }
 
-        $this->setBaseName(basename($file));
+        $this->setBaseName(basename($file), false);
         $this->_setFileToBeFlushed($file);
         $this->_setSize(filesize($file));
         $this->_setMimeType($file);
@@ -260,9 +296,12 @@ class Iron_Model_Fso
         return $this;
     }
 
-    public function setBaseName($name)
+    public function setBaseName($name, $applyAdapter = true)
     {
-        $this->_baseName = $name;
+        if ($applyAdapter) {
+            $name = $this->_baseNameResolverAdapter->getBaseName($name);
+        }
+        $this->_baseName = $name; 
         return $this;
     }
 
@@ -381,7 +420,7 @@ class Iron_Model_Fso
         $pk = $this->_model->getPrimaryKey();
 
         $baseNameGetter = 'get' . ucfirst($this->_modelSpecs['baseNameName']);
-        $this->setBaseName($this->_model->$baseNameGetter());
+        $this->setBaseName($this->_model->$baseNameGetter(), false);
 
         // TO-DO remove pk?
         $file = $this->_buildFilePath($pk);

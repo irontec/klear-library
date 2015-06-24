@@ -14,7 +14,8 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
     protected $_localStoragePath;
     protected $_modifiers = array(
         'keepExtension' => false,
-        'storeInBaseFolder' => false
+        'storeInBaseFolder' => false,
+        'uniqueBaseName' => false,
     ); 
 
     /**
