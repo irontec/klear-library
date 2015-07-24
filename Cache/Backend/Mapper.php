@@ -46,16 +46,14 @@ class Iron_Cache_Backend_Mapper
             $backend
         );
 
-        Zend_Registry::set('cache', $cache);
+        $this->_cache = $cache;
 
     }
 
     public function getData($etag)
     {
 
-        $cache = Zend_Registry::get('cache');
-        $data = $cache->load(md5($etag));
-
+        $data = $this->_cache->load($etag);
         return $data;
 
     }
@@ -63,11 +61,7 @@ class Iron_Cache_Backend_Mapper
     public function saveData($data, $etag)
     {
 
-        $cache = Zend_Registry::get('cache');
-        $data = $cache->load(md5($etag));
-
-        $cache->save($data);
-
+        $this->_cache->save($data);
         return $data;
 
     }
