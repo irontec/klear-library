@@ -25,28 +25,31 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
     public function init()
     {
-
         $bootstrap = $this->_invokeArgs['bootstrap'];
         $plugins = $bootstrap->getContainer()->frontcontroller->getPlugins();
 
         $this->_checkPluginInit($plugins);
 
         $optionsApp = $bootstrap->getOptions();
-        if (!isset($optionsApp['restLog'])) {
+        $fallbackLogger = $bootstrap->getResource('log');
+
+        $noDeclaredLogger = !(isset($optionsApp['restLog']) || $fallbackLogger); 
+        if ($noDeclaredLogger) {
             $msg = '"restLog" no esta configurado en el application.ini';
             throw new \Exception($msg, 500);
         }
 
-        $this->_logSystemConfig(
-            $optionsApp['restLog']
-        );
+        if (isset($optionsApp['restLog'])) {
+            $this->_logSystemConfig(
+                $optionsApp['restLog']
+            );
+        } else {
+            $this->_setFallbackLogger($fallbackLogger);    
+        }
 
         $this->status = new \Iron_Model_Rest_StatusResponse;
-
         $this->startErrorHandler();
-
         $this->_helper->viewRenderer->setNoRender(true);
-
     }
 
     public function startErrorHandler()
@@ -84,6 +87,13 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         }
         $this->status->setApplicationError($errors->exception);
         $this->view->error = $errors->exception->getMessage();
+    }
+
+    protected function _setFallbackLogger(\Zend_Log $fallbackLogger) 
+    {
+        $_logActive = true;
+        $this->loggers["access"] = $fallbackLogger;
+        $this->loggers["error"] = $fallbackLogger;   
     }
 
     protected function _logSystemConfig($config)
