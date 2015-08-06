@@ -5,34 +5,68 @@
  */
 class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 {
+
     public $status;
     public $loggers = array();
+
     protected $_logActive;
     protected $_viewData;
+    protected $_contexts = array(
+        'index',
+        'error',
+        'rest-error',
+        'get',
+        'post',
+        'head',
+        'put',
+        'delete',
+        'options'
+    );
+
     public function init()
     {
+
         $bootstrap = $this->_invokeArgs['bootstrap'];
         $plugins = $bootstrap->getContainer()->frontcontroller->getPlugins();
+
         $this->_checkPluginInit($plugins);
+
         $optionsApp = $bootstrap->getOptions();
         if (!isset($optionsApp['restLog'])) {
             $msg = '"restLog" no esta configurado en el application.ini';
             throw new \Exception($msg, 500);
         }
+
         $this->_logSystemConfig(
             $optionsApp['restLog']
         );
+
         $this->status = new \Iron_Model_Rest_StatusResponse;
+
+        $this->startErrorHandler();
+
+        $this->_helper->viewRenderer->setNoRender(true);
+
+    }
+
+    public function startErrorHandler()
+    {
+
         $front = \Zend_Controller_Front::getInstance();
         $request = $front->getRequest();
-        if ($request->getActionName() != "rest-error" && $this->_logActive) {
+        if ($request->getActionName() != 'rest-error' && $this->_logActive) {
             $this->_logRequest();
         }
-        $errorHandler = $front->getPlugin('Zend_Controller_Plugin_ErrorHandler');
-        $errorHandler->setErrorHandlerAction('rest-error')
-                     ->setErrorHandlerController($request->getControllerName())
-                     ->setErrorHandlerModule($request->getModuleName());
+
+        $errorHandler = $front->getPlugin(
+            'Zend_Controller_Plugin_ErrorHandler'
+        );
+        $errorHandler
+            ->setErrorHandlerAction('rest-error')
+            ->setErrorHandlerController($request->getControllerName())
+            ->setErrorHandlerModule($request->getModuleName());
     }
+
     public function location()
     {
         $location = $this->view->serverUrl(
@@ -40,6 +74,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         );
         return $location;
     }
+
     public function restErrorAction()
     {
         $errors = $this->_getParam('error_handler');
@@ -50,6 +85,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->status->setApplicationError($errors->exception);
         $this->view->error = $errors->exception->getMessage();
     }
+
     protected function _logSystemConfig($config)
     {
         if (!isset($config['log'])) {
@@ -73,6 +109,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             $this->loggers[$eventLogger] = Zend_Log::factory($zendLogConfig);
         }
     }
+
     protected function _checkPluginInit($plugins)
     {
         $init = false;
@@ -87,6 +124,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             );
         }
     }
+
     private function _logRequest()
     {
         if (!$this->loggers['access'] instanceof \Zend_Log) {
@@ -110,6 +148,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             "Request params: " . $resquestParams
         );
     }
+
     private function _logResponse()
     {
         $statusResume = $this->status->getException();
@@ -129,24 +168,29 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $msg .= " [" . $this->status->getMessage() . "]";
         $this->loggers['access']->debug($msg);
     }
+
+    /**
+     * Context json to methods rest $this->_contexts
+     * @see Zend_Controller_Action::preDispatch()
+     */
     public function preDispatch()
     {
-        $contextSwitch = $this->getHelper("contextSwitch");
-        $contextSwitch
-                ->addActionContext('index', 'json')
-                ->addActionContext('error', 'json')
-                ->addActionContext('rest-error', 'json')
-                ->addActionContext('get', 'json')
-                ->addActionContext('post', 'json')
-                ->addActionContext('head', 'json')
-                ->addActionContext('put', 'json')
-                ->addActionContext('delete', 'json')
-                ->addActionContext('options', 'json')
-                ->initContext('json');
+
+        $contextSwitch = $this->_helper->getHelper('contextSwitch');
+
+        foreach ($this->_contexts as $context) {
+            $contextSwitch->addActionContext($context, 'json');
+        }
+
+        $contextSwitch->initContext('json');
+
     }
+
     public function postDispatch()
     {
+
         $this->_responseContent();
+
         if (
             $this->_request->getUserParam("controller") !=
             $this->_request->getControllername() &&
@@ -154,36 +198,46 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         ) {
             return;
         }
+
         if ($this->_logActive) {
             $this->_logResponse();
         }
+
     }
+
     protected function _responseContent()
     {
         $this->getResponse()->setHttpResponseCode(
             $this->status->getCode()
         );
+
         $this->getResponse()->setHeader(
             'Content-type',
             'application/json; charset=UTF-8;'
         );
+
         $view = $this->view;
         $exceptionData = $this->status->getException();
+
         if (!empty($exceptionData)) {
             $exceptionEncode = json_encode($exceptionData);
             $this->getResponse()->setHeader('exception', $exceptionEncode);
         }
+
         $dataView = $this->_viewData;
         if (!empty($dataView)) {
             foreach ($dataView as $key => $val) {
                 $view->$key = $val;
             }
         }
+
     }
+
     public function addViewData($data)
     {
         $this->_viewData = $data;
     }
+
     /**
      * The index action handles index/list requests; it should respond with a
      * list of the requested resources.
@@ -192,6 +246,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->_methodNotAllowed();
     }
+
     /**
      * The get action handles GET requests and receives an 'id' parameter; it
      * should respond with the server resource state of the resource identified
@@ -201,6 +256,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->_methodNotAllowed();
     }
+
     /**
      * The head action handles HEAD requests and receives an 'id' parameter; it
      * should respond with the server resource state of the resource identified
@@ -210,6 +266,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->_methodNotAllowed();
     }
+
     /**
      * The post action handles POST requests; it should accept and digest a
      * POSTed resource representation and persist the resource state.
@@ -218,6 +275,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->_methodNotAllowed();
     }
+
     /**
      * The put action handles PUT requests and receives an 'id' parameter; it
      * should update the server resource state of the resource identified by
@@ -227,6 +285,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->_methodNotAllowed();
     }
+
     /**
      * The delete action handles DELETE requests and receives an 'id'
      * parameter; it should update the server resource state of the resource
@@ -236,10 +295,12 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->_methodNotAllowed();
     }
+
     public function optionsAction()
     {
         $this->_methodNotAllowed();
     }
+
     private function _methodNotAllowed()
     {
         $this->status->setCode(405);
