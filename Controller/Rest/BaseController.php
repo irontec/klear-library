@@ -33,7 +33,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $optionsApp = $bootstrap->getOptions();
         $fallbackLogger = $bootstrap->getResource('log');
 
-        $noDeclaredLogger = !(isset($optionsApp['restLog']) || $fallbackLogger); 
+        $noDeclaredLogger = !(isset($optionsApp['restLog']) || $fallbackLogger);
         if ($noDeclaredLogger) {
             $msg = '"restLog" no esta configurado en el application.ini';
             throw new \Exception($msg, 500);
@@ -44,7 +44,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 $optionsApp['restLog']
             );
         } else {
-            $this->_setFallbackLogger($fallbackLogger);    
+            $this->_setFallbackLogger($fallbackLogger);
         }
 
         $this->status = new \Iron_Model_Rest_StatusResponse;
@@ -89,11 +89,11 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->view->error = $errors->exception->getMessage();
     }
 
-    protected function _setFallbackLogger(\Zend_Log $fallbackLogger) 
+    protected function _setFallbackLogger(\Zend_Log $fallbackLogger)
     {
         $_logActive = true;
         $this->loggers["access"] = $fallbackLogger;
-        $this->loggers["error"] = $fallbackLogger;   
+        $this->loggers["error"] = $fallbackLogger;
     }
 
     protected function _logSystemConfig($config)
@@ -315,4 +315,61 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
         $this->status->setCode(405);
     }
+
+    /**
+     * Offset to pagination
+     */
+    protected function _prepareOffset($params = array())
+    {
+
+        if (isset($params["page"]) && $params["page"] > 0) {
+            return ($params["page"] - 1) * $params["limit"];
+        }
+
+        return 0;
+
+    }
+
+    /**
+     * Order to list
+     */
+    protected function _prepareOrder($orderParam)
+    {
+
+        if ($orderParam === false || trim($orderParam) === '') {
+            return 'id DESC';
+        }
+
+        return $orderParam;
+
+    }
+
+    /**
+     * Where para busquedas, la variable $search espera un json_encode con los parametros de busqueda.
+     */
+    protected function _prepareWhere($search)
+    {
+
+        if ($search === false || trim($search) === '') {
+            return NULL;
+        }
+
+        $search = json_decode($search);
+        $itemsSearch = array();
+        foreach ($search as $key => $val) {
+            if ($val != '') {
+                $itemsSearch[] = $key . ' = "' . $val . '"';
+            }
+        }
+
+        if (empty($itemsSearch)) {
+            return '';
+        }
+
+        $whereSearch = implode(' AND ', $itemsSearch);
+
+        return $whereSearch;
+
+    }
+
 }
