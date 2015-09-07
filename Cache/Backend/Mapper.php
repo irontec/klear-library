@@ -72,7 +72,12 @@ class Mapper
             }
         }
 
-        return $this->_etagChange($table);
+        $mapper = $this->_namespace . "\\Mapper\\Sql\\EtagVersions";
+        $mapper = new $mapper();
+        $etagsList = $mapper->fetchAll();
+        $this->setEtagVersions($etagsList);
+
+        return $this->setEtagChange($table);
 
     }
 
@@ -100,16 +105,40 @@ class Mapper
         $cache->remove('cache');
     }
 
-    protected function _etagChange($table)
+    public function setEtagChange($table)
     {
 
         $date = new \Zend_Date();
         $date->setTimezone('UTC');
         $nowUTC = $date->toString('yyyy-MM-dd HH:mm:ss');
 
-        $mappper = $this->_namespace . "\\Model\\EtagVersions";
-        $etag = new $mappper();
-        $etag->setTable($table);
+        $model = $this->_namespace . "\\Model\\EtagVersions";
+        $mappper = $this->_namespace . "\\Mapper\\Sql\\EtagVersions";
+
+        $etags = new $mappper();
+        $etagModel = $etags->findOneByField('table', $table);
+
+        if (empty($etagModel)) {
+            $etagModel = new $model();
+            $etagModel->setTable($table);
+        }
+
+        $rand = $this->_stringRandom();
+        $tokenEtag = md5($nowUTC . $rand);
+
+        $etagModel->setEtag($tokenEtag);
+        $etagModel->setLastChange($nowUTC);
+        $etagModel->save();
+
+        $etagsList = $etags->fetchAll();
+        $this->setEtagVersions($etagsList);
+
+        return $tokenEtag;
+
+    }
+
+    protected function _stringRandom()
+    {
 
         $random = substr(
             str_shuffle(
@@ -117,16 +146,12 @@ class Mapper
                     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
                     5
                 )
-            ), 0, 5
+            ),
+            0,
+            5
         );
 
-        $tokenEtag = md5($nowUTC . $random);
-
-        $etag->setEtag($tokenEtag);
-        $etag->setLastChange($nowUTC);
-        $etag->save();
-
-        return $tokenEtag;
+        return $random;
 
     }
 
