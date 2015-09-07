@@ -3,8 +3,8 @@
  *
  * @author ddniel16 <dani@irontec.com>
  */
-
-class Iron_Cache_Backend_Mapper
+namespace Iron\Cache\Backend;
+class Mapper
 {
 
     protected $_namespace;
@@ -16,7 +16,7 @@ class Iron_Cache_Backend_Mapper
     public function __construct($frontend = array(), $backend = array())
     {
 
-        $front = Zend_Controller_Front::getInstance();
+        $front = \Zend_Controller_Front::getInstance();
         $this->_namespace = $front
             ->getParam('bootstrap')
             ->getOption('appNamespace');
@@ -39,7 +39,7 @@ class Iron_Cache_Backend_Mapper
             $backend = array_replace($defaultBackend, $backend);
         }
 
-        $cache = Zend_Cache::factory(
+        $cache = \Zend_Cache::factory(
             'Core',
             'File',
             $frontend,
@@ -47,6 +47,32 @@ class Iron_Cache_Backend_Mapper
         );
 
         $this->_cache = $cache;
+
+    }
+
+    public function setEtagVersions($etagsList)
+    {
+
+        $token = 'EtagVersion';
+        $this->_cache->save($etagsList, $token);
+
+    }
+
+    public function getEtagVersions($table)
+    {
+
+        $token = 'EtagVersion';
+        $etags = $this->_cache->load($token);
+
+        if ($etags !== false) {
+            foreach ($etags as $etag) {
+                if ($etag->getTable() === $table) {
+                    return $etag->getEtag();
+                }
+            }
+        }
+
+        return $this->_etagChange($table);
 
     }
 
@@ -61,7 +87,7 @@ class Iron_Cache_Backend_Mapper
     public function saveData($data, $etag)
     {
 
-        $this->_cache->save($data);
+        $this->_cache->save($data, $etag);
         return $data;
 
     }
@@ -72,6 +98,36 @@ class Iron_Cache_Backend_Mapper
         $cache = Zend_Registry::get('cache');
         $cache->clean();
         $cache->remove('cache');
+    }
+
+    protected function _etagChange($table)
+    {
+
+        $date = new \Zend_Date();
+        $date->setTimezone('UTC');
+        $nowUTC = $date->toString('yyyy-MM-dd HH:mm:ss');
+
+        $mappper = $this->_namespace . "\\Model\\EtagVersions";
+        $etag = new $mappper();
+        $etag->setTable($table);
+
+        $random = substr(
+            str_shuffle(
+                str_repeat(
+                    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+                    5
+                )
+            ), 0, 5
+        );
+
+        $tokenEtag = md5($nowUTC . $random);
+
+        $etag->setEtag($tokenEtag);
+        $etag->setLastChange($nowUTC);
+        $etag->save();
+
+        return $tokenEtag;
+
     }
 
 }
