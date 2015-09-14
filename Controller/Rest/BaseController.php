@@ -9,6 +9,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     public $status;
     public $loggers = array();
 
+    protected $_sendEtag = true;
     protected $_logActive;
     protected $_viewData;
     protected $_contexts = array(
@@ -31,6 +32,13 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->_checkPluginInit($plugins);
 
         $optionsApp = $bootstrap->getOptions();
+
+		$restConfigIsDeclared = $optionsApp['restConfig'];
+		$cacheResponseIsDeclared = $restConfigIsDeclared && isset($optionsApp['restConfig']['cacheResponses']);
+		if ($cacheResponseIsDeclared) {
+			$this->_sendEtag = $optionsApp['restConfig']['cacheResponses'];
+		}
+
         $fallbackLogger = $bootstrap->getResource('log');
 
         $noDeclaredLogger = !(isset($optionsApp['restLog']) || $fallbackLogger);
@@ -51,6 +59,13 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->startErrorHandler();
         $this->_helper->viewRenderer->setNoRender(true);
     }
+
+	protected function _sendEtag($currentEtag)
+	{
+		if ($this->_sendEtag) {
+			$this->getResponse()->setHeader('Etag', $currentEtag);
+		}
+	}
 
     public function startErrorHandler()
     {
