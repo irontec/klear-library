@@ -67,7 +67,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
             return $this->_config['language'];
         }
 
-        
+
         return array(
                 'es' => array(
                         'title' => 'Español',
@@ -98,7 +98,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
                         'language' => 'pt',
                         'locale' => 'pt_PT')
         );
-      
+
     }
 
     protected function _getDefaultLang(array $langsConfig)
@@ -163,7 +163,8 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
 
     protected function _cookiesEnabled()
     {
-        return isset($this->_config['cookies']['enabled']) && (bool)$this->_config['cookies']['enabled'];
+
+        return (php_sapi_name() !== 'cli') && isset($this->_config['cookies']['enabled']) && (bool)$this->_config['cookies']['enabled'];
     }
 
     protected function _createCookie($currentLang)
