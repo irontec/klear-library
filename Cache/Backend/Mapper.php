@@ -39,6 +39,11 @@ class Mapper
             $backend = array_replace($defaultBackend, $backend);
         }
 
+        $cacheDir = $backend['cache_dir'];
+        if (!file_exists($cacheDir)) {
+            mkdir($cacheDir, 0755, true);
+        }
+
         $cache = \Zend_Cache::factory(
             'Core',
             'File',
