@@ -13,7 +13,6 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
 
     public function authenticate($mapper)
     {
-
         $bootstrap = Zend_Controller_Front::getInstance()->getParam('bootstrap');
         
         if (!is_null($bootstrap)) {
@@ -22,7 +21,7 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
             $conf = new \Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
             $config = (Object) $conf->toArray();
         }
-        
+
         if (isset($config->auth['session']["name"])) {
             $sessionName = $config->auth['session']["name"];
         }
@@ -37,13 +36,11 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
             $this->_errorAuth();
             return;
         }
-        $id = $identity->getId();
+        $id = $identity->getPrimaryKey();
         $user = $mapper->find($id);
 
         return $user;
-
     }
-
 
     /**
      * Mensaje de error en la autenticación.
