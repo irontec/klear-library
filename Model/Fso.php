@@ -30,7 +30,7 @@ class Iron_Model_Fso
      * @var Iron_Model_Fso_Adapter_StoragePathResolver_Interface
      */
     protected $_pathResolverAdapter;
-    
+
 
     /**
      * @var Iron_Model_Fso_Adapter_BaseNameResolver_Interface
@@ -58,7 +58,7 @@ class Iron_Model_Fso
     /**
      * @return array of adapters
      */
-    protected function _adapterBuilder($model, $specs, $fsoConfiguration) 
+    protected function _adapterBuilder($model, $specs, $fsoConfiguration)
     {
         $localStoragePath = $fsoConfiguration['localStoragePath'];
         $adapters = $fsoConfiguration['adapters'];
@@ -75,13 +75,13 @@ class Iron_Model_Fso
         $autoLoader = Zend_Loader_Autoloader::getInstance();
         $autoLoader->suppressNotFoundWarnings(true);
         set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
-           //Avoid custom warning handlers  
-        }, E_WARNING); 
+           //Avoid custom warning handlers
+        }, E_WARNING);
 
         $adapterInstances = array();
         foreach ($adapters as $adapterType => $config) {
 
-            $modifiers = isset($config['params']) ? $config['params'] : array(); 
+            $modifiers = isset($config['params']) ? $config['params'] : array();
             $driver = ucfirst($config['driver']);
 
             $adapterClass = ucfirst($adapterType) . '_' . $driver;
@@ -123,12 +123,12 @@ class Iron_Model_Fso
         );
     }
 
-    protected function _buildConfiguration($config = array()) 
+    protected function _buildConfiguration($config = array())
     {
         $defaultConfiguration = $this->_getDefaultConfig();
         $applicationConfig = $this->_getApplicationConfig();
         return array_replace_recursive(
-            $defaultConfiguration, 
+            $defaultConfiguration,
             $applicationConfig, //TODO Pensar ¿Switch orden de $applicationConfig & $config ?
             $config
         );
@@ -178,7 +178,7 @@ class Iron_Model_Fso
 
         if (isset($conf->localStoragePath)) {
             trigger_error(
-                "localStoragePath app configuration param is deprecated. Please use Iron.fso.localStoragePath instead", 
+                "localStoragePath app configuration param is deprecated. Please use Iron.fso.localStoragePath instead",
                 E_USER_WARNING
             );
 
@@ -188,7 +188,7 @@ class Iron_Model_Fso
         if (!isset($conf->Iron['fso']['entity'])) {
             return $conf->Iron['fso'];
         }
-        
+
         $modelClass = get_class($this->_model);
         $entity = str_replace("\\", "_", $modelClass);
 
@@ -197,8 +197,8 @@ class Iron_Model_Fso
 
         return array_merge($conf->Iron['fso'], $entityConfig);
     }
-    
-    protected function _getEntityConfig($configuration, $entity) 
+
+    protected function _getEntityConfig($configuration, $entity)
     {
         if (empty($configuration)) {
             return array();
@@ -206,7 +206,7 @@ class Iron_Model_Fso
         $entity = strtolower($entity);
 
         foreach ($configuration as $modelClass => $modelConfig) {
-            
+
             if (strtolower($modelClass) == $entity) {
                 return $modelConfig;
             }
@@ -215,12 +215,12 @@ class Iron_Model_Fso
         return array();
     }
 
-    public function setPathResolver(Iron_Model_Fso_Adapter_StoragePathResolver_Interface $pathResolverAdapter) 
+    public function setPathResolver(Iron_Model_Fso_Adapter_StoragePathResolver_Interface $pathResolverAdapter)
     {
         $this->_pathResolverAdapter = $pathResolverAdapter;
         return $this;
     }
-    
+
     public function setBaseNameResolver(Iron_Model_Fso_Adapter_BaseNameResolver_Interface $baseNameResolverAdapter)
     {
         $this->_baseNameResolverAdapter = $baseNameResolverAdapter;
@@ -231,7 +231,7 @@ class Iron_Model_Fso
     {
         return $this->_pathResolverAdapter;
     }
-    
+
     public function getBaseNameResolver()
     {
         return $this->_baseNameResolverAdapter;
@@ -270,7 +270,7 @@ class Iron_Model_Fso
      *
      * TODO: Comprobar que el $model implementa todo lo necesario para ser un módelo válido para ¿KlearMatrix?
      */
-    public function put($file)
+    public function put($file, $flush = true)
     {
         if (empty($file) or !file_exists($file)) {
             throw new Exception('File not found');
@@ -281,7 +281,7 @@ class Iron_Model_Fso
                 $oldFilePath = $this->getFilePath();
                 $this->_originalFilePath = $oldFilePath;
             } catch (\Exception $e) {
-                //Go on 
+                //Go on
             }
         }
 
@@ -291,7 +291,7 @@ class Iron_Model_Fso
         $this->_setMimeType($file);
         $this->_setMd5Sum($file);
         $this->_updateModelSpecs();
-        $this->_mustFlush = true;
+        $this->_mustFlush = $flush;
 
         return $this;
     }
@@ -301,7 +301,7 @@ class Iron_Model_Fso
         if ($applyAdapter) {
             $name = $this->_baseNameResolverAdapter->getBaseName($name);
         }
-        $this->_baseName = $name; 
+        $this->_baseName = $name;
         return $this;
     }
 
@@ -384,7 +384,7 @@ class Iron_Model_Fso
         $this->_mustFlush = false;
 
         //Trash control
-        
+
         if (!empty($this->_originalFilePath)) {
             try {
                 $currentFilePath = $this->getFilePath();
@@ -393,9 +393,9 @@ class Iron_Model_Fso
                      $this->_removeFile($this->_originalFilePath);
                 }
             } catch (\Exception $e) {
-                
+
                 throw $e;
-                //Go on 
+                //Go on
             }
         }
 
@@ -449,7 +449,7 @@ class Iron_Model_Fso
         $this->_updateModelSpecs();
         return $this;
     }
-    
+
     protected function _removeFile($file)
     {
         if (file_exists($file)) {
