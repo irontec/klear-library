@@ -20,6 +20,7 @@ class Iron_Model_Fso
 
     protected $_fileToBeFlushed;
     protected $_mustFlush = false;
+    protected $_removeOnPut = true;
 
     /**
      * @var string previously stored file path
@@ -270,7 +271,7 @@ class Iron_Model_Fso
      *
      * TODO: Comprobar que el $model implementa todo lo necesario para ser un módelo válido para ¿KlearMatrix?
      */
-    public function put($file, $flush = true)
+    public function put($file)
     {
         if (empty($file) or !file_exists($file)) {
             throw new Exception('File not found');
@@ -291,7 +292,7 @@ class Iron_Model_Fso
         $this->_setMimeType($file);
         $this->_setMd5Sum($file);
         $this->_updateModelSpecs();
-        $this->_mustFlush = $flush;
+        $this->_mustFlush = true;
 
         return $this;
     }
@@ -376,7 +377,9 @@ class Iron_Model_Fso
         }
 
         if (true === copy($this->_fileToBeFlushed, $targetFile)) {
-            unlink($this->_fileToBeFlushed);
+            if ($this->_removeOnPut) {
+                unlink($this->_fileToBeFlushed);
+            }
         } else {
             throw new Exception("Could not rename file " . $this->_fileToBeFlushed . " to " . $targetFile);
         }
@@ -476,5 +479,10 @@ class Iron_Model_Fso
         }
 
         return $this->_filePath;
+    }
+
+    public function setNoRemoveSourceFileOnPut()
+    {
+        $this->_removeOnPut = false;
     }
 }
