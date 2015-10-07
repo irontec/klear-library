@@ -23,6 +23,14 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         'delete',
         'options'
     );
+    
+    protected $_acceptedAdvancedSearchConditions = array(
+//         'between',  
+//         'notin',
+//         'in',
+//         'like',
+//         'notlike',
+    );
 
     public function init()
     {
@@ -336,13 +344,15 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
      */
     protected function _prepareOffset($params = array())
     {
-
         if (isset($params["page"]) && $params["page"] > 0) {
+
+            if (!$params["limit"]) {
+                Throw new \Exception("Page parameter requires limit to be set");
+            } 
+
             return ($params["page"] - 1) * $params["limit"];
         }
-
         return 0;
-
     }
 
     /**
@@ -350,41 +360,92 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
      */
     protected function _prepareOrder($orderParam)
     {
-
         if ($orderParam === false || trim($orderParam) === '') {
             return 'id DESC';
         }
 
         return $orderParam;
-
     }
 
     /**
-     * Where para busquedas, la variable $search espera un json_encode con los parametros de busqueda.
+     * Where para busquedas, la variable $search espera un json_encode con los parámetros de búsqueda.
      */
     protected function _prepareWhere($search)
     {
-
         if ($search === false || trim($search) === '') {
             return NULL;
         }
 
         $search = json_decode($search);
+
         $itemsSearch = array();
         foreach ($search as $key => $val) {
-            if ($val != '') {
-                $itemsSearch[] = $key . ' = "' . $val . '"';
+
+            if (is_scalar($val)) {
+                $itemsSearch[] = $this->_prepareScalarCondition($key, $val);
+            } else if (is_object($val)){
+                $itemsSearch[] = $this->_prepareAdvancedCondition($key, $val);
             }
         }
 
         if (empty($itemsSearch)) {
             return '';
         }
-
-        $whereSearch = implode(' AND ', $itemsSearch);
-
-        return $whereSearch;
-
+        return implode(" AND ", $itemsSearch);
     }
 
+    protected function _prepareScalarCondition($key, $val) {
+
+        $dbAdapter = Zend_Db_Table::getDefaultAdapter();
+        if ($val != '') {
+
+            $key = $dbAdapter->quoteIdentifier($key) . " = ?";
+            return $dbAdapter->quoteInto($key, $val);
+        }
+        return array();
+    }
+
+    protected function _prepareAdvancedCondition($key, $val) {
+
+        $dbAdapter = Zend_Db_Table::getDefaultAdapter();
+        switch (strtolower(key($val))) {
+
+            case 'between':
+                $values = $this->_cleanArray($val);
+                return $dbAdapter->quoteIdentifier($key) . ' between '. $values[0] . ' AND ' . $values[1];
+                
+            case 'notin':
+
+                $values = $this->_cleanArray($val);
+                return $dbAdapter->quoteIdentifier($key) . ' not in ('. implode(",", $values) . ') ';
+
+            case 'in':
+                
+                $values = $this->_cleanArray($val);
+                return $dbAdapter->quoteIdentifier($key) . ' in ('. implode(",", $values) . ') ';
+
+            case 'like':
+                
+                $key = $dbAdapter->quoteIdentifier($key) . " like '%?%'";
+                return $dbAdapter->quoteInto($key, $val);
+
+            case 'notlike':
+                
+                $key = $dbAdapter->quoteIdentifier($key) . " not like '%?%'";
+                return $dbAdapter->quoteInto($key, $val);
+                break;
+        }
+
+        return '';
+    }
+
+    protected function _cleanArray($obj) {
+
+        $dbAdapter = Zend_Db_Table::getDefaultAdapter();
+        $values = array();
+        foreach ($obj as $k => $v) {
+            $values[] = $dbAdapter->quote($v); 
+        }
+        return $values;
+    }
 }

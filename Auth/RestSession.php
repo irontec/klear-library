@@ -36,7 +36,8 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
             $this->_errorAuth();
             return;
         }
-        $id = $identity->getPrimaryKey();
+        
+        $id = $identity->getId();
         $user = $mapper->find($id);
 
         return $user;
