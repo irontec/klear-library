@@ -85,6 +85,8 @@ class Fso_IndexController extends Zend_Controller_Action
             );
         }
 
+
+
         $frontend = array(
             'lifetime' => $this->_life,
             'automatic_serialization' => true
@@ -355,7 +357,6 @@ class Fso_IndexController extends Zend_Controller_Action
             $paramsResult,
             $model
         );
-
         $model = $mapper->fetchList(
             $where,
             NULL,
@@ -706,7 +707,6 @@ class Fso_IndexController extends Zend_Controller_Action
                         $where[$basename . ' like ?'] = $searchBasename . '.%';
                     }
                 } else {
-
                     if (isset($columnsList[$piece])) {
                         if (!empty($multiLangColumnsList)) {
                             if (isset($multiLangColumnsList[$piece])) {
@@ -714,6 +714,8 @@ class Fso_IndexController extends Zend_Controller_Action
                             } else {
                                 $where[$piece . ' = ?'] = $paramsResult[$key];
                             }
+                        } else {
+                            $where[$piece . ' = ?'] = $paramsResult[$key];
                         }
                     }
 
