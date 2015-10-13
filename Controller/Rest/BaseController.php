@@ -23,9 +23,9 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         'delete',
         'options'
     );
-    
+
     protected $_acceptedAdvancedSearchConditions = array(
-//         'between',  
+//         'between',
 //         'notin',
 //         'in',
 //         'like',
@@ -172,7 +172,9 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             unset($params[$key]);
         }
         $requestParamString = var_export($params, true);
-        $requestLog .= " from " . $_SERVER["REMOTE_ADDR"];
+        if (isset($_SERVER["REMOTE_ADDR"])) {
+            $requestLog .= " from " . $_SERVER["REMOTE_ADDR"];
+        }
         $this->loggers['access']->debug(
             "Requesting " . $requestLog
         );
@@ -348,7 +350,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
             if (!$params["limit"]) {
                 Throw new \Exception("Page parameter requires limit to be set");
-            } 
+            }
 
             return ($params["page"] - 1) * $params["limit"];
         }
@@ -413,24 +415,24 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             case 'between':
                 $values = $this->_cleanArray($val);
                 return $dbAdapter->quoteIdentifier($key) . ' between '. $values[0] . ' AND ' . $values[1];
-                
+
             case 'notin':
 
                 $values = $this->_cleanArray($val);
                 return $dbAdapter->quoteIdentifier($key) . ' not in ('. implode(",", $values) . ') ';
 
             case 'in':
-                
+
                 $values = $this->_cleanArray($val);
                 return $dbAdapter->quoteIdentifier($key) . ' in ('. implode(",", $values) . ') ';
 
             case 'like':
-                
+
                 $key = $dbAdapter->quoteIdentifier($key) . " like '%?%'";
                 return $dbAdapter->quoteInto($key, $val);
 
             case 'notlike':
-                
+
                 $key = $dbAdapter->quoteIdentifier($key) . " not like '%?%'";
                 return $dbAdapter->quoteInto($key, $val);
                 break;
@@ -444,7 +446,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         $values = array();
         foreach ($obj as $k => $v) {
-            $values[] = $dbAdapter->quote($v); 
+            $values[] = $dbAdapter->quote($v);
         }
         return $values;
     }
