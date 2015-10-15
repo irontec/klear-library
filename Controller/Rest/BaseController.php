@@ -414,7 +414,8 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         switch (strtolower(key($val))) {
 
-            case 'notEqual':
+            case 'not':
+            case 'notequal':
                 $key = $dbAdapter->quoteIdentifier($key) . " != ?";
                 return $dbAdapter->quoteInto($key, current($val));
                 break;
@@ -475,6 +476,8 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 }
                 return '('. implode(' OR ', $conditions) .')';
                 break;
+            default:
+                Throw new \Exception("Unkown rest condition " . key($val));
         }
         return '';
     }
