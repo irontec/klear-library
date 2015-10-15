@@ -7,6 +7,8 @@
 class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
 {
 
+    protected $_life = 10;
+
     public function __construct()
     {
 
@@ -104,13 +106,12 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
      */
     protected function _validDate($nowUTC, $dateHash)
     {
-
         $timeHash = strtotime($dateHash);
         $timeNow = strtotime($nowUTC);
 
         $diff = $timeNow - $timeHash;
 
-        if ($diff > 120) {
+        if ($diff > $this->_life || $diff < 0) {
             return false;
         }
 

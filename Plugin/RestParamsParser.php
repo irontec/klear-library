@@ -10,7 +10,13 @@ class Iron_Plugin_RestParamsParser extends \Zend_Controller_Plugin_Abstract
     public function routeShutdown(Zend_Controller_Request_Abstract $request)
     {
 
-        if (!preg_match("/^rest/", $request->getModuleName())) {
+        $options = \Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOptions();
+
+        if (isset($options['restConfig']["moduleName"])) {
+            if (!in_array($request->getModuleName(), $options['restConfig']["moduleName"])) {
+                return;
+            }
+        } else if (!preg_match("/^rest/", $request->getModuleName())) {
             return;
         }
 
@@ -22,6 +28,7 @@ class Iron_Plugin_RestParamsParser extends \Zend_Controller_Plugin_Abstract
 
     protected function _initParser(Zend_Controller_Request_Abstract $request)
     {
+
         if (
             !$request->isPut()
             && !$request->isDelete()
