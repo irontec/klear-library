@@ -277,7 +277,7 @@ class Iron_Model_Fso
             throw new Exception('File not found');
         }
 
-        if (empty($this->_originalFilePath)) {
+        if (empty($this->_originalFilePath) && $this->_model->getPrimaryKey()) {
             try {
                 $oldFilePath = $this->getFilePath();
                 $this->_originalFilePath = $oldFilePath;
@@ -392,7 +392,7 @@ class Iron_Model_Fso
             try {
                 $currentFilePath = $this->getFilePath();
                 //file_put_contents("/tmp/traza", "\n*Old file: " . $this->_originalFilePath . "\r\n", FILE_APPEND);
-                if ($this->_originalFilePath != $currentFilePath)  {
+                if ($this->_originalFilePath != $currentFilePath) {
                      $this->_removeFile($this->_originalFilePath);
                 }
             } catch (\Exception $e) {

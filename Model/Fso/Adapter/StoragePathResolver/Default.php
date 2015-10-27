@@ -16,12 +16,12 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         'keepExtension' => false,
         'storeInBaseFolder' => false,
         'uniqueBaseName' => false,
-    ); 
+    );
 
     /**
      * @var obj $model
      * @var array $modelSpecs
-     * @var array $modifiers 
+     * @var array $modifiers
      */
     public function __construct($model, $modelSpecs, $localStoragePath, $modifiers = array())
     {
@@ -43,21 +43,21 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         $this->_primaryKey = $pk;
         return $this;
     }
-    
-    public function setLocalStoragePath($path) 
+
+    public function setLocalStoragePath($path)
     {
         if (empty($path)) {
             throw new \Exception("Local storage path cannot be empty");
         }
 
-        $this->_localStoragePath = $path;    
+        $this->_localStoragePath = $path;
         return $this;
     }
 
-    public function setModelSpecs(array $modelSpecs) 
+    public function setModelSpecs(array $modelSpecs)
     {
-        $this->_modelSpecs = $modelSpecs;    
-        return $this;    
+        $this->_modelSpecs = $modelSpecs;
+        return $this;
     }
 
     /**
@@ -71,7 +71,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         return $this;
     }
 
-    public function setModifier($name, $value) 
+    public function setModifier($name, $value)
     {
         if (!array_key_exists($name, $this->_modifiers)) {
             throw new \Exception("Unknown path resolver modifier: " . $name);
@@ -98,7 +98,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         $filePath = implode(DIRECTORY_SEPARATOR, $path);
         $this->_buildDirectoryTree($filePath);
 
-        return $filePath;   
+        return $filePath;
     }
 
     public function isResoluble()
@@ -123,26 +123,26 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         $modelClassName = str_replace('\\', '_', get_class($this->_model));
 
         return strtolower(
-                $modelClassName . 
-                    self::CLASS_ATTR_SEPARATOR . 
+                $modelClassName .
+                    self::CLASS_ATTR_SEPARATOR .
                         $this->_modelSpecs['basePath']);
 
     }
-    
+
     protected function _buildFileTree()
     {
-        
+
         if (
             isset($this->_modifiers['storeInBaseFolder']) &&
             true === $this->_modifiers['storeInBaseFolder']
         ) {
             return null;
         }
-        
+
         $pk = $this->_model->getPrimaryKey();
         return $this->_pk2path($pk);
     }
-    
+
     protected function _buildRealBaseName()
     {
         $pk = $this->_model->getPrimaryKey();
@@ -160,7 +160,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
 
         return $pk . $ext;
     }
-    
+
     /**
      * Converts id to path:
      *  1 => 0/1
@@ -180,7 +180,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         }
 
         if (is_numeric($pk)) {
-            
+
             $aId = str_split((string)$pk);
             array_pop($aId);
             if (!sizeof($aId)) {
@@ -192,7 +192,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
 
         throw new \Exception("unsupported pk received!");
     }
-    
+
     protected function _buildDirectoryTree($filePath)
     {
         $targetDir = dirname($filePath);
@@ -202,10 +202,10 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
                 throw new Exception('Could not create dir ' . $targetDir);
             }
         }
-    
+
     }
 
-    protected function _getAppConfig() 
+    protected function _getAppConfig()
     {
         $bootstrap = \Zend_Controller_Front::getInstance()->getParam('bootstrap');
         if (is_null($bootstrap)) {
@@ -213,7 +213,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         } else {
             $conf = (Object) $bootstrap->getOptions();
         }
-        
+
         return $conf;
     }
 }
