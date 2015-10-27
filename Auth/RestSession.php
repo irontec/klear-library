@@ -27,7 +27,7 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
         }
         
         $auth = Zend_Auth::getInstance();
-        $authStorage = new Zend_Auth_Storage_Session($sessionName);
+        $authStorage = new \Zend_Auth_Storage_Session($sessionName);
         $auth->setStorage($authStorage);
         
         $identity = $auth->getIdentity();
