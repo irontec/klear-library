@@ -391,7 +391,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 $itemsSearch[] = $val->__toString();
             } else if (is_scalar($val)) {
                 $itemsSearch[] = $this->_prepareScalarCondition($key, $val);
-            } else if (is_object($val)){
+            } else if (is_object($val) || is_array($val)){
                 $itemsSearch[] = $this->_prepareAdvancedCondition($key, $val);
             }
         }
