@@ -301,6 +301,8 @@ class Fso_IndexController extends Zend_Controller_Action
         $this->_currentProfile = $currentProfile;
         if (!$currentProfile) {
             $this->_defaultImage();
+        } else if ($currentProfile->routeMap) {
+            $this->_routeMap = $currentProfile->routeMap; 
         }
 
         $mappers = $this->_namespace . '\\Mapper\\Sql\\' . $currentProfile->model;
