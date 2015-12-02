@@ -54,6 +54,14 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
+            /* Warning!!
+             Existe cierto problema sin sentido al enviar contenido text/*
+             Comenzando un último buffer de salida, parece que se solventa
+             Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
+             >> Es probable que haga falta al enviar contenido _isRaw == true
+             */
+            ob_start();
+
             $f = fopen($this->_file, 'r');
             while (!feof($f)) {
                 print fgets($f, 1024);
@@ -173,7 +181,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     protected function _cleanOutputBuffers()
     {
         if (!$this->_outputBufferingAllowed) {
-            while (ob_get_level()) {
+            while (ob_get_level() !== 0) {
                 ob_end_clean();
             }
         }
