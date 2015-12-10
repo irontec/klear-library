@@ -7,7 +7,7 @@
 class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
 {
 
-    protected $_life = 10;
+    protected $_life = 36000;
 
     public function __construct()
     {
@@ -46,7 +46,7 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
         $date->setTimezone('UTC');
         $nowUTC = $date->toString(Zend_Date::W3C);
 
-        if (!$this->_validDate($nowUTC, $dateHash)) {
+        if (!$this->_validDate($nowUTC, $requestDate)) {
             $this->_errorAuth('Token Expired');
         }
 
@@ -111,7 +111,7 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
 
         $diff = $timeNow - $timeHash;
 
-        if ($diff > $this->_life || $diff < 0) {
+        if ($diff > $this->_life || $diff < (-$this->_life)) {
             return false;
         }
 
