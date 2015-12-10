@@ -196,10 +196,17 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
     protected function _buildDirectoryTree($filePath)
     {
         $targetDir = dirname($filePath);
+        $filePathParts = explode(DIRECTORY_SEPARATOR, $targetDir);
 
-        if (!file_exists($targetDir)) {
-            if (!mkdir($targetDir, 0755, true)) {
-                throw new Exception('Could not create dir ' . $targetDir);
+        $currentDir = "";
+        foreach ($filePathParts as $dir) {
+            $currentDir = $currentDir. DIRECTORY_SEPARATOR. $dir;
+            if (!file_exists($currentDir)) {
+                if (!@mkdir($currentDir, 0755, true)) {
+                    if (!file_exists($currentDir)) {
+                        throw new Exception('Could not create dir ' . $currentDir);
+                    }
+                }
             }
         }
 
