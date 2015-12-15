@@ -378,13 +378,19 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             return NULL;
         }
 
-        $search = json_decode($search);
+        $search = (array) json_decode($search);
+        
         return implode(" AND ", $this->_parseWhere($search));
     }
 
-    protected function _parseWhere($search) 
+    protected function _parseWhere($search = array()) 
     {
         $itemsSearch = array();
+        
+        if (!is_array($search)) {
+            throw new \Exception("The provided search should be an array");
+        }
+        
         foreach ($search as $key => $val) {
 
             if ($val instanceof \Zend_Db_Expr) {
