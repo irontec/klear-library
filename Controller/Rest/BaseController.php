@@ -66,6 +66,18 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->status = new \Iron_Model_Rest_StatusResponse;
         $this->startErrorHandler();
         $this->_helper->viewRenderer->setNoRender(true);
+        
+        if ($this->getRequest()->isOptions()) {
+            $this->optionsAction();
+            $results = array(
+                    "GET" => $this->view->GET,
+                    "POST" => $this->view->POST,
+                    "PUT" => $this->view->PUT,
+                    "DELETE" => $this->view->DELETE,
+            );
+        
+            $this->getHelper('json')->sendJson($results);
+        }
     }
 
 	protected function _sendEtag($currentEtag)
