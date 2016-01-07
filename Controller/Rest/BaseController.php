@@ -66,7 +66,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->status = new \Iron_Model_Rest_StatusResponse;
         $this->startErrorHandler();
         $this->_helper->viewRenderer->setNoRender(true);
-        
+
         if ($this->getRequest()->isOptions()) {
             $this->optionsAction();
             $results = array(
@@ -75,7 +75,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                     "PUT" => $this->view->PUT,
                     "DELETE" => $this->view->DELETE,
             );
-        
+
             $this->getHelper('json')->sendJson($results);
         }
     }
@@ -390,19 +390,26 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             return NULL;
         }
 
-        $search = (array) json_decode($search);
-        
+        $search = json_decode($search, true);
+
         return implode(" AND ", $this->_parseWhere($search));
     }
 
-    protected function _parseWhere($search = array()) 
+    protected function _parseWhere($search = array())
     {
         $itemsSearch = array();
-        
-        if (!is_array($search)) {
-            throw new \Exception("The provided search should be an array");
+
+        /**
+         * Forzamos casteo a array para no provocar una regresión... no es lo ideal, pero bueno.
+         */
+        if ($search instanceof \stdClass) {
+            $search = (array)$search;
         }
-        
+
+        if (!is_array($search)) {
+            throw new \Exception("The provided search should be something iterable!");
+        }
+
         foreach ($search as $key => $val) {
 
             if ($val instanceof \Zend_Db_Expr) {
@@ -414,7 +421,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             }
         }
         return $itemsSearch;
-    }   
+    }
 
     protected function _prepareScalarCondition($key, $val) {
 
@@ -455,7 +462,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 $key = $dbAdapter->quoteIdentifier($key) . " >= ?";
                 return $dbAdapter->quoteInto($key, current($val));
                 break;
-                
+
             case 'lt':
                 $key = $dbAdapter->quoteIdentifier($key) . " < ?";
                 return $dbAdapter->quoteInto($key, current($val));
@@ -465,7 +472,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 $key = $dbAdapter->quoteIdentifier($key) . " <= ?";
                 return $dbAdapter->quoteInto($key, current($val));
                 break;
-                
+
             case 'between':
                 $values = $this->_cleanArray(current($val));
                 return $dbAdapter->quoteIdentifier($key) . ' between '. $values[0] . ' AND ' . $values[1];
