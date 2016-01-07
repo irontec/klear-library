@@ -494,6 +494,7 @@ class Fso_IndexController extends Zend_Controller_Action
         $expire = gmdate('D, d M Y H:i:s', time() + $this->_life);
         $modified = gmdate('D, d M Y H:i:s', time()).' GMT';
 
+        $response->setHeader('Content-Disposition', 'inline; filename="'.$this->getBaseName().'"');
         $response->setHeader('Pragma', 'public', true);
         $response->setHeader('Cache-Control', 'public', true);
         $response->setHeader('Cache-control', 'max-age=' . 60*60*24*14, true);
