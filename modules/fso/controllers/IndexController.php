@@ -85,7 +85,10 @@ class Fso_IndexController extends Zend_Controller_Action
             );
         }
 
-
+        if (isset($this->_currentProfile->onDownloadMethod)) {
+            $onDownloadMethod = $this->_currentProfile->onDownloadMethod;
+            $this->_model->{$onDownloadMethod}();
+        }
 
         $frontend = array(
             'lifetime' => $this->_life,
@@ -115,6 +118,15 @@ class Fso_IndexController extends Zend_Controller_Action
         $key = implode('', $piecesKey);
 
         $finfo = new finfo();
+        $filePath = $this->getFilePath();
+
+        if (!file_exists($filePath)) {
+            throw new Zend_Controller_Action_Exception(
+                    'File does not exist',
+                    404
+                    );
+        }
+
         $mimeType = $finfo->file(
             $this->getFilePath(),
             FILEINFO_MIME
@@ -302,7 +314,7 @@ class Fso_IndexController extends Zend_Controller_Action
         if (!$currentProfile) {
             $this->_defaultImage();
         } else if (isset($currentProfile->routeMap)) {
-            $this->_routeMap = $currentProfile->routeMap; 
+            $this->_routeMap = $currentProfile->routeMap;
         }
 
         $mappers = $this->_namespace . '\\Mapper\\Sql\\' . $currentProfile->model;
@@ -506,7 +518,6 @@ class Fso_IndexController extends Zend_Controller_Action
         $response->setHeader('Content-transfer-encoding', 'binary', true);
         $response->sendHeaders();
         $response->setBody($cache->load($cacheKey));
-
 
     }
 
