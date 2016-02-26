@@ -80,7 +80,7 @@ class Fso_IndexController extends Zend_Controller_Action
 
         } catch (\Exception $e) {
             throw new Zend_Controller_Action_Exception(
-                'Image not found',
+                'File not found',
                 404
             );
         }
@@ -89,6 +89,48 @@ class Fso_IndexController extends Zend_Controller_Action
             $onDownloadMethod = $this->_currentProfile->onDownloadMethod;
             $this->_model->{$onDownloadMethod}();
         }
+
+        if ($this->_profileType === 'binary') {
+
+            if (isset($this->_currentProfile->disposition)) {
+                $this->_downloadFile(
+                    $this->_currentProfile->disposition
+                );
+            } else {
+                $this->_downloadFile();
+            }
+
+        } elseif ($this->_profileType === 'image') {
+            $this->_showImage($config);
+        }
+
+    }
+
+    protected function _downloadFile($contentDisposition = 'attachment')
+    {
+
+        $finfo = new finfo();
+        $mimeType = $finfo->file(
+            $this->getFilePath(),
+            FILEINFO_MIME
+        );
+
+        $headers = array(
+            'filename' => $this->getBaseName(),
+            'Content-Disposition' => $contentDisposition,
+            'Pragma' => 'public',
+            'Cache-Control' => 'public',
+            'Content-Type' => $mimeType,
+            'Content-transfer-encoding' => 'binary'
+        );
+
+        $file = new Iron_Controller_Action_Helper_SendPartialFileToClient();
+        $file->sendFile($this->getFilePath(), $headers);
+
+    }
+
+    protected function _showImage($config)
+    {
 
         $frontend = array(
             'lifetime' => $this->_life,
@@ -106,12 +148,9 @@ class Fso_IndexController extends Zend_Controller_Action
             $backend
         );
 
-        /**
-         * TODO
-         */
         $piecesKey = array(
             ucfirst($this->_profileName),
-            //ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
+            ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
             ucfirst($this->getFso())
         );
 
@@ -121,10 +160,10 @@ class Fso_IndexController extends Zend_Controller_Action
         $filePath = $this->getFilePath();
 
         if (!file_exists($filePath)) {
-            throw new Zend_Controller_Action_Exception(
-                    'File does not exist',
-                    404
-                    );
+            throw new \Zend_Controller_Action_Exception(
+                'File does not exist',
+                404
+            );
         }
 
         $mimeType = $finfo->file(
@@ -152,12 +191,7 @@ class Fso_IndexController extends Zend_Controller_Action
 
         if (empty($loadCache)) {
 
-            if ($this->_profileType === 'binary') {
-                $file = file_get_contents($this->getFilePath());
-            } elseif ($this->_profileType === 'image') {
-                $file = $this->_prepareImageFile($extension, $config);
-            }
-
+            $file = $this->_prepareImageFile($extension, $config);
             $cache->save($file, $cacheKey);
 
             $this->getHeaders(false, $cache, $cacheKey, $mimeType);
@@ -175,6 +209,7 @@ class Fso_IndexController extends Zend_Controller_Action
         }
 
     }
+
 
     protected function _prepareImageFile($extension, $config)
     {

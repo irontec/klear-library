@@ -97,20 +97,21 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         $size = $this->_isRaw? strlen($this->_file) : filesize($this->_file);
 
         $defaultOptions = array(
-                'filename' => $this->_isRaw? 'file' : basename($this->_file),
-                'Content-Disposition' => 'attachment',
-                'Content-Transfer-Encoding' => 'binary',
-                'Content-Length' => $size,
-                'Pragma' =>'no-cache',
-                'Expires' => '0'
+            'filename' => $this->_isRaw? 'file' : basename($this->_file),
+            'Content-Disposition' => 'attachment',
+            'Content-Transfer-Encoding' => 'binary',
+            'Content-Length' => $size,
+            'Pragma' =>'no-cache',
+            'Expires' => '0'
         );
 
         // Metemos los valores por defecto en el array de options
         foreach ($defaultOptions as $key => $value) {
-
             if (!isset($this->_options[$key])) {
-
                 $this->_options[$key] = $value;
+            }
+            if (isset($options[$key])) {
+                $this->_options[$key] = $options[$key];
             }
         }
 

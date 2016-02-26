@@ -58,11 +58,11 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
             $size = filesize($this->_file);
         }
 
-
         if (!$fp) {
-
-            throw new Zend_Controller_Action_Exception('Internal Server Error', 500);
-
+            throw new Zend_Controller_Action_Exception(
+                'Internal Server Error',
+                500
+            );
         }
 
         $begin  = 0;
@@ -72,7 +72,7 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
 
             $range = $request->getServer('HTTP_RANGE');
 
-            if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i',$range, $matches)) {
+            if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $range, $matches)) {
                 $begin  = intval($matches[1]);
                 if (!empty($matches[2])) {
                     $end = intval($matches[2]);
@@ -88,14 +88,17 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
             $this->getResponse()->setHttpResponseCode(200);
         }
 
-        $options = array(
-                'Cache-Control' => 'public, must-revalidate, max-age=0',
-                'X-Pad' => 'avoid browser bug',
-                'Pragma' => 'no-cache',
-                'Accept-Ranges' => 'bytes',
-                'Content-length' => $size,
-                'Content-Range' => "bytes $begin-$end/$size"
-                );
+        $optionsFilePart = array(
+            'Cache-Control' => 'public, must-revalidate, max-age=0',
+            'X-Pad' => 'avoid browser bug',
+            'Pragma' => 'no-cache',
+            'Accept-Ranges' => 'bytes',
+            'Content-length' => $size,
+            'Content-Range' => "bytes $begin-$end/$size"
+        );
+        foreach ($optionsFilePart as $key => $val) {
+            $options[$key] = $val;
+        }
 
         if ($end != ($size-1)) {
             $options['Content-Length'] = ($end - $begin) + 1;
@@ -104,12 +107,10 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
         $this->setOptions($options);
         $this->_sendHeaders($this->_options);
 
-
-
         $cur = $begin;
         fseek($fp, $begin, 0);
 
-        while(!feof($fp) && $cur < $end && (connection_status() == 0)) {
+        while (!feof($fp) && $cur < $end && (connection_status() == 0)) {
             print fread($fp, min(1024 * 16, ($end + 1) - $cur));
             $cur += 1024 * 16;
         }
@@ -117,6 +118,5 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
         fclose($fp);
 
     }
-
 
 }
