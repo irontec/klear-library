@@ -9,6 +9,6 @@ Architecture: all
 Section: php
 Priority: optional
 Homepage: http://www.irontec.com
-Description: Klear External Library (Angel release)
+Description: Klear External Library (Chloe release)
  Zend Framework 1 external external library for public sites (Klear based sites)
  .
