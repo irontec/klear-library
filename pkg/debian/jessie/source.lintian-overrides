@@ -1,0 +1,2 @@
+# Debian complains about minimized JS in sources
+klear-library source: license-problem-json-evil Minify/JsMin.php

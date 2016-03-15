@@ -1,0 +1,15 @@
+Source: klear-library
+Section: php
+Priority: optional
+Build-Depends: debhelper
+Standards-Version: 3.9.6
+Maintainer: Irontec OASIS Team <oasis@irontec.com>
+
+Package: klear-library
+Architecture: all
+Section: php
+Priority: optional
+Homepage: http://www.irontec.com
+Description: Klear External Library (Chloe release)
+ Zend Framework 1 external external library for public sites (Klear based sites)
+ .
