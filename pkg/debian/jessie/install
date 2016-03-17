@@ -14,7 +14,6 @@ modules /opt/klear/library/Iron
 Phing /opt/klear/library/Iron
 Plugin /opt/klear/library/Iron
 QQUploader /opt/klear/library/Iron
-Resource /opt/klear/library/Iron
 Time.php /opt/klear/library/Iron
 Translate /opt/klear/library/Iron
 Utils /opt/klear/library/Iron
