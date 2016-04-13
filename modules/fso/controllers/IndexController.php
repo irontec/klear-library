@@ -53,11 +53,15 @@ class Fso_IndexController extends Zend_Controller_Action
 
         $this->_initParams();
 
+        if (isset($this->_currentProfile->preDownloadMethod)) {
+            $preDownloadMethod = $this->_currentProfile->preDownloadMethod;
+            $this->_model->{$preDownloadMethod}();
+        }
+
     }
 
     public function indexAction()
     {
-
         $config = $this->_setConfiguration($this->_currentProfile);
 
         try {

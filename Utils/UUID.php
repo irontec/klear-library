@@ -146,12 +146,19 @@ class UUID {
         $nodeLow = self::$_pid;
         $node    = self::$_node;
 
-        return sprintf(
+        $result = sprintf(
             "%08x-%04x-%04x-%02x%02x-%04x%08x",
             $timeLow, $timeMid & 0xffff, $timeHighAndVersion,
             $clockSeqHigh, $clockSeqLow,
             $nodeLow, $node
         );
+
+        if (strlen($result) > 36) {
+            $result = substr($result, 0, 36);
+        }
+
+        return $result;
+
     }
 
 }
