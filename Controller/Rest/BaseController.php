@@ -254,7 +254,13 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             $this->getResponse()->setHeader('exception', $exceptionEncode);
         }
 
-        $this->getHelper('json')->sendJson($this->_viewData);
+        if(isset($this->_viewData) && !empty($this->_viewData)) {
+            $this->getHelper('json')->sendJson($this->_viewData);
+        }
+        else {
+            $this->getHelper('json')->sendJson($this->view);
+        }
+
 
     }
 
