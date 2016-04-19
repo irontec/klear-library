@@ -216,22 +216,6 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         $this->loggers['access']->debug($msg);
     }
 
-    /**
-     * Context json to methods rest $this->_contexts
-     * @see Zend_Controller_Action::preDispatch()
-     */
-    public function preDispatch()
-    {
-
-        $contextSwitch = $this->_helper->getHelper('contextSwitch');
-
-        foreach ($this->_contexts as $context) {
-            $contextSwitch->addActionContext($context, 'json');
-        }
-
-        $contextSwitch->initContext('json');
-
-    }
 
     public function postDispatch()
     {
@@ -263,7 +247,6 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             'application/json; charset=UTF-8;'
         );
 
-        $view = $this->view;
         $exceptionData = $this->status->getException();
 
         if (!empty($exceptionData)) {
@@ -271,12 +254,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             $this->getResponse()->setHeader('exception', $exceptionEncode);
         }
 
-        $dataView = $this->_viewData;
-        if (!empty($dataView)) {
-            foreach ($dataView as $key => $val) {
-                $view->$key = $val;
-            }
-        }
+        $this->getHelper('json')->sendJson($this->_viewData);
 
     }
 
