@@ -41,11 +41,11 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $optionsApp = $bootstrap->getOptions();
 
-		$restConfigIsDeclared = $optionsApp['restConfig'];
-		$cacheResponseIsDeclared = $restConfigIsDeclared && isset($optionsApp['restConfig']['cacheResponses']);
-		if ($cacheResponseIsDeclared) {
-			$this->_sendEtag = $optionsApp['restConfig']['cacheResponses'];
-		}
+        $restConfigIsDeclared = $optionsApp['restConfig'];
+        $cacheResponseIsDeclared = $restConfigIsDeclared && isset($optionsApp['restConfig']['cacheResponses']);
+        if ($cacheResponseIsDeclared) {
+            $this->_sendEtag = $optionsApp['restConfig']['cacheResponses'];
+        }
 
         $fallbackLogger = $bootstrap->getResource('log');
 
@@ -80,12 +80,12 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         }
     }
 
-	protected function _sendEtag($currentEtag)
-	{
-		if ($this->_sendEtag) {
-			$this->getResponse()->setHeader('Etag', $currentEtag);
-		}
-	}
+    protected function _sendEtag($currentEtag)
+    {
+        if ($this->_sendEtag) {
+            $this->getResponse()->setHeader('Etag', $currentEtag);
+        }
+    }
 
     public function startErrorHandler()
     {
@@ -126,7 +126,6 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
     protected function _setFallbackLogger(\Zend_Log $fallbackLogger)
     {
-        $_logActive = true;
         $this->loggers["access"] = $fallbackLogger;
         $this->loggers["error"] = $fallbackLogger;
     }
@@ -254,13 +253,15 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             $this->getResponse()->setHeader('exception', $exceptionEncode);
         }
 
-        if(isset($this->_viewData) && !empty($this->_viewData)) {
-            $this->getHelper('json')->sendJson($this->_viewData);
+        if ($this->status->getCode() === 204) {
+            $this->_helper->json('', false, false);
+        } else {
+            if (isset($this->_viewData) && !empty($this->_viewData)) {
+                $this->getHelper('json')->sendJson($this->_viewData);
+            } else {
+                $this->getHelper('json')->sendJson($this->view);
+            }
         }
-        else {
-            $this->getHelper('json')->sendJson($this->view);
-        }
-
 
     }
 
@@ -400,14 +401,15 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
                 $itemsSearch[] = $val->__toString();
             } else if (is_scalar($val)) {
                 $itemsSearch[] = $this->_prepareScalarCondition($key, $val);
-            } else if (is_object($val) || is_array($val)){
+            } else if (is_object($val) || is_array($val)) {
                 $itemsSearch[] = $this->_prepareAdvancedCondition($key, $val);
             }
         }
         return $itemsSearch;
     }
 
-    protected function _prepareScalarCondition($key, $val) {
+    protected function _prepareScalarCondition($key, $val)
+    {
 
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         if ($val != '') {
@@ -418,7 +420,8 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         return array();
     }
 
-    protected function _prepareAdvancedCondition($key, $val) {
+    protected function _prepareAdvancedCondition($key, $val)
+    {
 
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         switch (strtolower(key($val))) {
@@ -491,7 +494,8 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         return '';
     }
 
-    protected function _cleanArray($obj) {
+    protected function _cleanArray($obj)
+    {
 
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
         $values = array();
@@ -500,4 +504,5 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
         }
         return $values;
     }
+
 }
