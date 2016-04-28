@@ -100,27 +100,27 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
     {
         $file = pathinfo($fileName);
         $cont = 0;
-        
+
         if(isset($file['extension'])){
             $file['extension'] = ".".$file['extension'];
         }
         else $file['extension'] = '';
-        
+
         $mapper = $this->_model->getMapper();
         $models = $mapper->fetchList($this->_modelSpecs['baseNameName'] . " like '" . $file['filename'] . "%" . $file['extension'] . "'");
-        
+
         foreach($models as $model) {
             $get = "get".ucfirst($this->_modelSpecs['baseNameName']);
-            
-            if(preg_match('/'.$file['filename'].'([0-9]+)'.$file['extension'].'/', $model->$get(), $matches)){
+
+            if(preg_match('/'.$file['filename'].'\(([0-9]+)\)'.$file['extension'].'/', $model->$get(), $matches)){
                 if(isset($matches[1]) && $matches[1] > $cont){
                     $cont = $matches[1];
                 }
             }
         }
-        
+
         $number = $cont+1;
-        $fileName = $file['filename'] . $number . $file['extension'];
+        $fileName = $file['filename'] . '(' . $number . ')' . $file['extension'];
         return $fileName;
     }
 }
