@@ -20,6 +20,7 @@ class Fso_IndexController extends Zend_Controller_Action
     public function init()
     {
 
+     
         $layout = \Zend_Layout::getMvcInstance();
         if (null !== $layout) {
             $layout->disableLayout();
@@ -63,7 +64,7 @@ class Fso_IndexController extends Zend_Controller_Action
     public function indexAction()
     {
         $config = $this->_setConfiguration($this->_currentProfile);
-
+file_put_contents('/tmp/files', 'entrando', FILE_APPEND);
         try {
 
             $fetchFso = 'fetch' . ucwords($this->getFso());
@@ -747,14 +748,17 @@ class Fso_IndexController extends Zend_Controller_Action
         $multiLangColumnsList = $model->getMultiLangColumnsList();
 
         foreach ($pieces as $key => $piece) {
+
             if ($piece !== 'ext') {
                 if ($piece === 'basename') {
 
                     $basename = $this->getFso() . 'BaseName';
 
-                    $extension = substr(strrchr($paramsResult[$key], '.'), 1);
-                    if ($extension === false) {
-                        $where[$basename . ' like ?'] = $paramsResult[$key] . '.%';
+                    $extension = pathinfo($basename, PATHINFO_EXTENSION);
+
+
+                    if (empty($extension)) {
+                        $where[$basename . ' = ?'] = $paramsResult[$key];
                     } else {
                         $searchBasename = str_replace('.' . $extension, '', $paramsResult[$key]);
                         $where[$basename . ' like ?'] = $searchBasename . '.%';
