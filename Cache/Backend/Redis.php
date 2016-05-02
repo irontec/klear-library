@@ -102,10 +102,15 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
             } else {
                 $result = $this->_redis->connect($server['host'], $server['port']);
             }
-            if ($result)
+
+            if ($result) {
+                if ($server['password']) {
+                    $this->_redis->auth($server['password']);
+                }
                 $this->_redis->select($server['dbindex']);
-            else
+            } else {
                 $this->_redis = null;
+            }
         }
     }
     /**
