@@ -64,7 +64,7 @@ class Fso_IndexController extends Zend_Controller_Action
     public function indexAction()
     {
         $config = $this->_setConfiguration($this->_currentProfile);
-file_put_contents('/tmp/files', 'entrando', FILE_APPEND);
+
         try {
 
             $fetchFso = 'fetch' . ucwords($this->getFso());
