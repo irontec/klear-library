@@ -88,7 +88,7 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
         }
 
 
-        if ($begin > 0 || $end < $size) {
+        if ($begin > 0 || $end < ($size - 1)) {
             $this->getResponse()->setHttpResponseCode(206);
             //header('HTTP/1.1 206 Partial Content');
         } else {
