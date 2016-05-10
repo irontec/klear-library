@@ -43,6 +43,14 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
             return $this->_sendCompleteFile();
         }
 
+
+        /* Warning!!
+         Existe cierto problema sin sentido al enviar contenido text/*
+         Comenzando un último buffer de salida, parece que se solventa
+         Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
+         >> Es probable que haga falta al enviar contenido _isRaw == true
+         */
+        ob_start();
         if ($this->_isRaw) {
 
             $fp = tmpfile();
@@ -52,14 +60,6 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
             $size = strlen($this->_file);
 
         } else {
-
-            /* Warning!!
-             Existe cierto problema sin sentido al enviar contenido text/*
-             Comenzando un último buffer de salida, parece que se solventa
-             Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
-             >> Es probable que haga falta al enviar contenido _isRaw == true
-             */
-            ob_start();
             $fp = fopen($this->_file, 'rb');
 
             $size = filesize($this->_file);
