@@ -45,7 +45,6 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         set_time_limit(0);
         $this->_isRaw = $isRaw;
         $this->_file = $file;
-
         $this->setOptions($options);
         $this->_disableOtherOutput();
 
@@ -56,11 +55,16 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
              Comenzando un último buffer de salida, parece que se solventa
              Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
              */
-        ob_start();
 
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
+
+            $mimetype = mime_content_type($this->_file);
+            if (preg_match("/text\/.*/", $mimetype)) {
+                ob_start();
+            }
+
             $f = fopen($this->_file, 'r');
             while (!feof($f)) {
                 print fgets($f, 1024);
