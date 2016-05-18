@@ -50,7 +50,7 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
          Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
          >> Es probable que haga falta al enviar contenido _isRaw == true
          */
-        ob_start();
+
         if ($this->_isRaw) {
 
             $fp = tmpfile();
@@ -60,6 +60,12 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
             $size = strlen($this->_file);
 
         } else {
+
+            $mimetype = mime_content_type($this->_file);
+            if (preg_match("/text\/.*/", $mimetype)) {
+                ob_start();
+            }
+
             $fp = fopen($this->_file, 'rb');
 
             $size = filesize($this->_file);
