@@ -207,6 +207,10 @@ class Image_IndexController extends Zend_Controller_Action
                     \Iron_Imagick_Circle::init($image, $config);
                     break;
 
+                case 'fit-resize':
+                    \Iron_Imagick_FitResize::init($image, $config);
+                    break;
+
                 default:
                     throw new Exception(
                         'El parametro "changeSize" invalido.'
@@ -382,6 +386,14 @@ class Image_IndexController extends Zend_Controller_Action
 
         if (isset($currentProfile->height)) {
             $config['height'] = $currentProfile->height;
+        }
+
+        if (isset($currentProfile->air)) {
+            $config['air'] = $currentProfile->air;
+        }
+
+        if (isset($currentProfile->aspect)) {
+            $config['aspect'] = $currentProfile->aspect;
         }
 
         if (isset($currentProfile->vignette)) {
