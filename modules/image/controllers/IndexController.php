@@ -392,10 +392,6 @@ class Image_IndexController extends Zend_Controller_Action
             $config['air'] = $currentProfile->air;
         }
 
-        if (isset($currentProfile->aspect)) {
-            $config['aspect'] = $currentProfile->aspect;
-        }
-
         if (isset($currentProfile->vignette)) {
 
             $vignette = $currentProfile->vignette;

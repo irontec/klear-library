@@ -1,5 +1,7 @@
 <?php
 /**
+ * Este metodo le da un "resize" a la imagen y un aire a los lados,
+ * dejando la imagen principal en el centro
  *
  * @param Imagick $imagick
  * @param Array $config
@@ -27,7 +29,7 @@ class Iron_Imagick_FitResize
         $width = $config['width'];
         $height = $config['height'];
         $air = $config['air'];
-        $asp = $config['aspect'];
+        $asp = $width / $height;
 
         if ($aspect < $asp) {
 
@@ -52,7 +54,7 @@ class Iron_Imagick_FitResize
 
                 $imagick->resizeImage(
                     $newWidth,
-                    $gHeight - ($air * 2) * 2,
+                    -1,
                     \Imagick::FILTER_LANCZOS,
                     1
                 );
