@@ -56,14 +56,14 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
              Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
              */
 
+        $mimetype = mime_content_type($this->_file);
+        if (preg_match("/text\/.*/", $mimetype) || strpos($mimetype, 'application/json') !== false) {
+            ob_start();
+        }
+
         if ($this->_isRaw) {
             echo $this->_file;
         } else {
-
-            $mimetype = mime_content_type($this->_file);
-            if (preg_match("/text\/.*/", $mimetype) || strpos($mimetype, 'application/json') !== false) {
-                ob_start();
-            }
 
             $f = fopen($this->_file, 'r');
             while (!feof($f)) {
