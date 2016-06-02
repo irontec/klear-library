@@ -61,7 +61,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
         } else {
 
             $mimetype = mime_content_type($this->_file);
-            if (preg_match("/text\/.*/", $mimetype)) {
+            if (preg_match("/text\/.*/", $mimetype) || strpos($mimetype, 'application/json') !== false) {
                 ob_start();
             }
 
