@@ -50,20 +50,21 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->_sendHeaders($this->_options);
 
-        /* Warning!!
+        // Si file tiene contenido binario
+        if ($this->_isRaw) {
+            echo $this->_file;
+        } else {
+        // Si file contine un path a un fichero
+
+            /* Warning!!
              Existe cierto problema sin sentido al enviar contenido text/*
              Comenzando un último buffer de salida, parece que se solventa
              Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
              */
-
-        $mimetype = mime_content_type($this->_file);
-        if (preg_match("/text\/.*/", $mimetype) || strpos($mimetype, 'application/json') !== false) {
-            ob_start();
-        }
-
-        if ($this->_isRaw) {
-            echo $this->_file;
-        } else {
+            $mimetype = mime_content_type($this->_file);
+            if (preg_match("/text\/.*/", $mimetype) || strpos($mimetype, 'application/json') !== false) {
+                ob_start();
+            }
 
             $f = fopen($this->_file, 'r');
             while (!feof($f)) {
