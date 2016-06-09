@@ -41,10 +41,12 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
 
         $optionsApp = $bootstrap->getOptions();
 
-        $restConfigIsDeclared = $optionsApp['restConfig'];
-        $cacheResponseIsDeclared = $restConfigIsDeclared && isset($optionsApp['restConfig']['cacheResponses']);
-        if ($cacheResponseIsDeclared) {
-            $this->_sendEtag = $optionsApp['restConfig']['cacheResponses'];
+        if (isset($optionsApp['restConfig'])) {
+            $restConfigIsDeclared = $optionsApp['restConfig'];
+            $cacheResponseIsDeclared = $restConfigIsDeclared && isset($optionsApp['restConfig']['cacheResponses']);
+            if ($cacheResponseIsDeclared) {
+                $this->_sendEtag = $optionsApp['restConfig']['cacheResponses'];
+            }
         }
 
         $fallbackLogger = $bootstrap->getResource('log');
