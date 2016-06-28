@@ -53,10 +53,19 @@ class Iron_Plugin_RestParamsParser extends \Zend_Controller_Plugin_Abstract
                 $this->_setBodyParams($request, $config->toArray());
                 break;
             default:
-                if ($request->isPut() || $request->isDelete()) {
-                    parse_str($rawBody, $params);
-                    $this->_setBodyParams($request, $params);
+                if (
+                    $request->isPut()
+                ||
+                    $request->isDelete()
+                ||
+                    $request->isPost()
+                ) {
+                    $this->_setBodyParams(
+                        $request,
+                        \Zend_Json::decode($rawBody)
+                    );
                 }
+
                 break;
         }
     }
