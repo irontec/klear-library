@@ -2,14 +2,15 @@
 /**
  * @author ddniel16 <daniel@irontec.com>
  */
-class Fso_IndexController extends Zend_Controller_Action
+class Fso_IndexController
+    extends Zend_Controller_Action
 {
 
     protected $_frontInstance;
     protected $_fsoConfig;
     protected $_namespace;
+
     protected $_routeMap;
-    protected $_defaultRoute;
     protected $_life;
 
     protected $_currentProfile;
@@ -20,7 +21,6 @@ class Fso_IndexController extends Zend_Controller_Action
     public function init()
     {
 
-     
         $layout = \Zend_Layout::getMvcInstance();
         if (null !== $layout) {
             $layout->disableLayout();
@@ -34,22 +34,32 @@ class Fso_IndexController extends Zend_Controller_Action
             'bootstrap'
         )->getOption('appnamespace');
 
-        $this->_fsoConfig = Zend_Registry::get('fsoConfig');
+        $this->setConfig(
+            \Zend_Registry::get('fsoConfig')
+        );
 
-        if (!$this->_fsoConfig->config->life) {
-            $this->_fsoConfig->config->life = 9999990;
+        $this->_routeMap = $this->getConfig('config', 'routeMap');
+
+        $life = $this->getConfig('config', 'life');
+        if (is_null($life) || !is_numeric($life)) {
+            $life = 9999990;
+        }
+        $this->_life = $life;
+
+        $this->_cacheDir = $this->getConfig('config', 'cacheDir');
+        if (is_null($this->_cacheDir)) {
+            $this->_cacheDir = APPLICATION_PATH . '/cache/';
         }
 
-        $this->_routeMap = $this->_fsoConfig->config->routeMap;
-        $this->_defaultRoute = $this->_fsoConfig->config->defaultRoute;
-        $this->_life = $this->_fsoConfig->config->life;
-        $this->_cacheDir = APPLICATION_PATH . '/cache/';
+        if (!is_dir($this->_cacheDir)) {
+            if (!mkdir($this->_cacheDir)) {
+                $msg = sprintf(
+                    'No existe y no se puede crear la carpeta de cache: "%s"',
+                    $this->_cacheDir
+                );
 
-        if (!file_exists($this->_cacheDir)) {
-            throw new Exception(
-                'Con exista la carpeta de cache: "' . $this->_cacheDir . '"',
-                404
-            );
+                throw new \Exception($msg, 404);
+            }
         }
 
         $this->_initParams();
@@ -109,6 +119,38 @@ class Fso_IndexController extends Zend_Controller_Action
             $this->_showImage($config);
         }
 
+    }
+
+    /**
+     * Define la configuración guardada en el fso.ini
+     * @param string $config Objeto de Zend con toda la configuración cargada
+     * @return Fso_IndexController
+     */
+    public function setConfig($config)
+    {
+        $this->_fsoConfig = $config;
+        return $this;
+    }
+
+    /**
+     * Obtiene la configuración del fso.ini
+     * @param string $config Nombre de la configuración que se quiere
+     * @param string $item Elemento de la configuración que se quiere
+     * @return null|string
+     */
+    public function getConfig($config, $item = false)
+    {
+
+        $data = $this->_fsoConfig->get($config);
+        if (is_null($data)) {
+            return $data;
+        }
+
+        if ($item === false) {
+            return $data;
+        }
+
+        return $data->get($item);
     }
 
     protected function _downloadFile($contentDisposition = 'attachment')

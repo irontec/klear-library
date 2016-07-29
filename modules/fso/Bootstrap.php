@@ -3,17 +3,17 @@
  * @author ddniel16 <daniel@irontec.com>
  */
 
-class Fso_Bootstrap extends Zend_Application_Module_Bootstrap
+class Fso_Bootstrap
+    extends Zend_Application_Module_Bootstrap
 {
 
     protected function _initFso()
     {
 
-        $front = Zend_Controller_Front::getInstance();
-
-        $fsoPlugin = new Fso_Plugin_Init();
-
-        $front->registerPlugin($fsoPlugin);
+        $front = \Zend_Controller_Front::getInstance();
+        $front->registerPlugin(
+            new Fso_Plugin_Init()
+        );
 
     }
 
@@ -47,7 +47,7 @@ class Fso_Bootstrap extends Zend_Application_Module_Bootstrap
         );
 
         if (!file_exists($fsoPath)) {
-            throw new Exception(
+            throw new \Exception(
                 'No Existe el fichelo de configuracion fso.ini',
                 404
             );
@@ -58,7 +58,7 @@ class Fso_Bootstrap extends Zend_Application_Module_Bootstrap
             APPLICATION_ENV
         );
 
-        $route = new Zend_Controller_Router_Route(
+        $route = new \Zend_Controller_Router_Route(
             '/fso/:profile/:routeMap',
             $defaultsRoutes
         );
@@ -68,7 +68,7 @@ class Fso_Bootstrap extends Zend_Application_Module_Bootstrap
             $route
         );
 
-        Zend_Registry::set(
+        \Zend_Registry::set(
             'fsoConfig',
             $fsoConfig
         );
