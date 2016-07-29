@@ -255,7 +255,9 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
             $this->getResponse()->setHeader('exception', $exceptionEncode);
         }
 
-        if ($this->status->getCode() === 204) {
+        $statusCode = $this->status->getCode();
+        $emptyCodes = array(204, 304);
+        if (in_array($statusCode, $emptyCodes)) {
             $this->_helper->json('', false, false);
         } else {
             if (isset($this->_viewData) && !empty($this->_viewData)) {
