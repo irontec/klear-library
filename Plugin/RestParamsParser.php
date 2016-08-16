@@ -45,13 +45,24 @@ class Iron_Plugin_RestParamsParser extends \Zend_Controller_Plugin_Abstract
         }
 
         switch (true) {
+
             case (strstr($contentType, 'application/json')):
-                $this->_setBodyParams($request, Zend_Json::decode($rawBody));
+                $this->_setBodyParams(
+                    $request,
+                    \Zend_Json::decode($rawBody)
+                );
                 break;
+
+            case (strstr($contentType, 'application/x-www-form-urlencoded')):
+                parse_str($rawBody, $params);
+                $this->_setBodyParams($request, $params);
+                break;
+
             case (strstr($contentType, 'application/xml')):
-                $config = new Zend_Config_Xml($rawBody);
+                $config = new \Zend_Config_Xml($rawBody);
                 $this->_setBodyParams($request, $config->toArray());
                 break;
+
             default:
                 if (
                     $request->isPut()
@@ -70,7 +81,10 @@ class Iron_Plugin_RestParamsParser extends \Zend_Controller_Plugin_Abstract
         }
     }
 
-    protected function _setBodyParams(Zend_Controller_Request_Abstract $request, $params)
+    protected function _setBodyParams(
+        \Zend_Controller_Request_Abstract $request,
+        $params
+    )
     {
         $request->setParams($params);
     }
