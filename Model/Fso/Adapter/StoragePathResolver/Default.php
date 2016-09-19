@@ -197,19 +197,35 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
     {
         $targetDir = dirname($filePath);
         $filePathParts = explode(DIRECTORY_SEPARATOR, $targetDir);
+        $mkdirMode = $this->_getMkdirMode();
 
         $currentDir = "";
         foreach ($filePathParts as $dir) {
             $currentDir = $currentDir. DIRECTORY_SEPARATOR. $dir;
             if (!file_exists($currentDir)) {
-                if (!@mkdir($currentDir, 0755, true)) {
+                if (!@mkdir($currentDir, $mkdirMode, true)) {
                     if (!file_exists($currentDir)) {
                         throw new Exception('Could not create dir ' . $currentDir);
                     }
+                } else {
+                    chmod($currentDir, $mkdirMode);
                 }
             }
         }
+    }
 
+    protected function _getMkdirMode()
+    {
+        $mkdirMode = "0755";
+
+        $conf = new \Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
+        $applicationIni = $conf->toArray();
+
+        if (isset($applicationIni['Iron']['fso']['localStorageChmod'])) {
+            $mkdirMode = $applicationIni['Iron']['fso']['localStorageChmod'];
+        }
+
+        return octdec($mkdirMode);
     }
 
     protected function _getAppConfig()
