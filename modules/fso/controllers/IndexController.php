@@ -2,9 +2,17 @@
 /**
  * @author ddniel16 <daniel@irontec.com>
  */
+
 class Fso_IndexController
-    extends Zend_Controller_Action
+    extends \Zend_Controller_Action
 {
+
+    /**
+     * Multiplicador de tamaños de las imagenes. Las vistas normales son x1
+     * y las vistas retina son x2 y x3, según el dispositivo.
+     * @var integer
+     */
+    protected $_multiplierRetina = 1;
 
     protected $_frontInstance;
     protected $_fsoConfig;
@@ -73,6 +81,7 @@ class Fso_IndexController
 
     public function indexAction()
     {
+
         $config = $this->_setConfiguration($this->_currentProfile);
 
         try {
@@ -188,7 +197,7 @@ class Fso_IndexController
             'cache_dir' => $this->_cacheDir,
         );
 
-        $cache = Zend_Cache::factory(
+        $cache = \Zend_Cache::factory(
             'core',
             'File',
             $frontend,
@@ -198,7 +207,8 @@ class Fso_IndexController
         $piecesKey = array(
             ucfirst($this->_profileName),
             ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
-            ucfirst($this->getFso())
+            ucfirst($this->getFso()),
+            $this->getMultiplierRetina() . 'x'
         );
 
         $key = implode('', $piecesKey);
@@ -224,9 +234,9 @@ class Fso_IndexController
             $fileMTime . '-' . $this->getBasename()
         ) . $key;
 
-        Zend_Registry::set('cache', $cache);
+        \Zend_Registry::set('cache', $cache);
 
-        $cache = Zend_Registry::get('cache');
+        $cache = \Zend_Registry::get('cache');
 
         $loadCache = $cache->load($cacheKey);
 
@@ -256,7 +266,6 @@ class Fso_IndexController
         }
 
     }
-
 
     protected function _prepareImageFile($extension, $config)
     {
@@ -485,15 +494,15 @@ class Fso_IndexController
         }
 
         if (isset($currentProfile->size)) {
-            $config['size'] = $currentProfile->size;
+            $config['size'] = $currentProfile->size * $this->getMultiplierRetina();
         }
 
         if (isset($currentProfile->width)) {
-            $config['width'] = $currentProfile->width;
+            $config['width'] = $currentProfile->width * $this->getMultiplierRetina();
         }
 
         if (isset($currentProfile->height)) {
-            $config['height'] = $currentProfile->height;
+            $config['height'] = $currentProfile->height * $this->getMultiplierRetina();
         }
 
         if (isset($currentProfile->vignette)) {
@@ -722,6 +731,25 @@ class Fso_IndexController
     }
 
     /**
+     * Multiplicador de tamaños de las imagenes
+     * @param integer $x
+     */
+    public function setMultiplierRetina($x)
+    {
+        $this->_multiplierRetina = $x;
+        return $this;
+    }
+
+    /**
+     * Multiplicador de tamaños de las imagenes
+     * @return integer
+     */
+    public function getMultiplierRetina()
+    {
+        return $this->_multiplierRetina;
+    }
+
+    /**
      * Prepare el where que buscara el modelo de de la imagen.
      * @param array $resultados
      * @param array $paramsResult
@@ -734,7 +762,6 @@ class Fso_IndexController
         $front = $this->_frontInstance
             ->getRouter()
             ->getFrontController();
-
 
         $availableLangs = $model->getAvailableLangs();
 
@@ -792,29 +819,49 @@ class Fso_IndexController
         foreach ($pieces as $key => $piece) {
 
             if ($piece !== 'ext') {
+                $currentParamResult = $paramsResult[$key];
+
+                $revinaB = strpos($currentParamResult, '@2x.');
+                $revinaC = strpos($currentParamResult, '@3x.');
+
+                if ($revinaB != false) {
+                    $this->setMultiplierRetina(2);
+                    $currentParamResult = str_replace(
+                        '@2x',
+                        '',
+                        $currentParamResult
+                    );
+                } elseif ($revinaC != false) {
+                    $this->setMultiplierRetina(3);
+                    $currentParamResult = str_replace(
+                        '@3x',
+                        '',
+                        $currentParamResult
+                    );
+                }
+
                 if ($piece === 'basename') {
 
                     $basename = $this->getFso() . 'BaseName';
 
                     $extension = pathinfo($basename, PATHINFO_EXTENSION);
 
-
                     if (empty($extension)) {
-                        $where[$basename . ' = ?'] = $paramsResult[$key];
+                        $where[$basename . ' = ?'] = $currentParamResult;
                     } else {
-                        $searchBasename = str_replace('.' . $extension, '', $paramsResult[$key]);
+                        $searchBasename = str_replace('.' . $extension, '', $currentParamResult);
                         $where[$basename . ' like ?'] = $searchBasename . '.%';
                     }
                 } else {
                     if (isset($columnsList[$piece])) {
                         if (!empty($multiLangColumnsList)) {
                             if (isset($multiLangColumnsList[$piece])) {
-                                $where[$piece . '_' . $lang . ' = ?'] = $paramsResult[$key];
+                                $where[$piece . '_' . $lang . ' = ?'] = $currentParamResult;
                             } else {
-                                $where[$piece . ' = ?'] = $paramsResult[$key];
+                                $where[$piece . ' = ?'] = $currentParamResult;
                             }
                         } else {
-                            $where[$piece . ' = ?'] = $paramsResult[$key];
+                            $where[$piece . ' = ?'] = $currentParamResult;
                         }
                     }
 
