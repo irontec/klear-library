@@ -107,7 +107,7 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
         else $file['extension'] = '';
 
         $mapper = $this->_model->getMapper();
-        $models = $mapper->fetchList($this->_modelSpecs['baseNameName'] . " like '" . $file['filename'] . "(%)" . $file['extension'] . "' or " . $this->_modelSpecs['baseNameName'] . " = " . $file['filename'] . $file['extension']);
+        $models = $mapper->fetchList($this->_modelSpecs['baseNameName'] . " like '" . $file['filename'] . "(%)" . $file['extension'] . "' or " . $this->_modelSpecs['baseNameName'] . " = '" . $file['filename'] . $file['extension'] . "'");
 
         foreach($models as $model) {
             $get = "get".ucfirst($this->_modelSpecs['baseNameName']);
