@@ -57,7 +57,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         $this->_config = $this->_bootstrap->getOption('translate');
 
         $this->_langsConfig = $this->_getLangsConfig();
-        $this->_defaultLang = $this->_getDefaultLang($this->_langsConfig);
+        $this->_defaultLang = $this->_getDefaultLang();
         $this->_session = new Zend_Session_Namespace($this->_getPublicUserSessionNamespace());
     }
 
@@ -101,18 +101,19 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
 
     }
 
-    protected function _getDefaultLang(array $langsConfig)
+    protected function _getDefaultLang()
     {
         $defaultLang = $this->_bootstrap->getOption('defaultLanguage'); //Deprecated
         if ($defaultLang) {
             return $defaultLang;
         }
 
-        if (isset($this->_config['defaultLanguage'])) {
-            return $this->_config['defaultLanguage'];
+        $defaultLanguage = isset($this->_config['defaultLanguage']) ? $this->_config['defaultLanguage'] : null;
+        if ($defaultLanguage && array_key_exists($defaultLanguage, $this->_langsConfig)) {
+            return $defaultLanguage;
         }
 
-        return key($langsConfig);
+        return key($this->_langsConfig);
     }
 
     protected function _getPublicUserSessionNamespace()
@@ -133,21 +134,22 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
 
         // Take session lang
         $currentSystemLanguage = $this->_session->currentSystemLanguage;
-        if (!is_null($currentSystemLanguage) && array_key_exists($currentSystemLanguage, $this->_langsConfig)) {
+        if ($currentSystemLanguage && array_key_exists($currentSystemLanguage, $this->_langsConfig)) {
             return $currentSystemLanguage;
         }
 
+        if ($this->_cookiesEnabled() && isset($_COOKIE[$this->_getLanguageParam()])) {
 
-        if ($this->_cookiesEnabled()) {
-            if (isset($_COOKIE[$this->_getLanguageParam()])) {
-                return $_COOKIE[$this->_getLanguageParam()];
+            $cookieValue = $_COOKIE[$this->_getLanguageParam()];
+            if ($cookieValue && array_key_exists($cookieValue, $this->_langsConfig)) {
+                return $cookieValue;
             }
         }
 
         if ($this->_detectFromBrowser()) {
             $locale = new Zend_Locale();
             $browserLanguage = $locale->getLanguage();
-            if (!is_null($browserLanguage) && array_key_exists($browserLanguage, $this->_langsConfig)) {
+            if ($browserLanguage && array_key_exists($browserLanguage, $this->_langsConfig)) {
                 return $browserLanguage;
             }
         }
@@ -163,7 +165,6 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
 
     protected function _cookiesEnabled()
     {
-
         return (php_sapi_name() !== 'cli') && isset($this->_config['cookies']['enabled']) && (bool)$this->_config['cookies']['enabled'];
     }
 
