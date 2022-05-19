@@ -13,7 +13,7 @@
 class Iron_Imagick_Border
 {
 
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
 
         if (

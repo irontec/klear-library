@@ -16,7 +16,7 @@ class Iron_Imagick_FitResize
      * @param int $size
      * @throws \Exception
      */
-    public function init(\Imagick $imagick, $config)
+    public static function init(\Imagick $imagick, $config)
     {
 
         $geometry = $imagick->getImageGeometry();

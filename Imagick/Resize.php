@@ -11,7 +11,7 @@
 class Iron_Imagick_Resize
 {
 
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
 
         if (!isset($config['width']) || !isset($config['height'])) {

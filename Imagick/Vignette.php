@@ -10,7 +10,7 @@
 class Iron_Imagick_Vignette
 {
 
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
 
         if (
