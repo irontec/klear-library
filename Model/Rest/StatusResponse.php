@@ -150,7 +150,7 @@ class Iron_Model_Rest_StatusResponse
         return $this->_message;
     }
 
-    public function setApplicationError(\Exception $e)
+    public function setApplicationError(\Throwable $e)
     {
 
         $this->_exception = $e;
@@ -168,7 +168,7 @@ class Iron_Model_Rest_StatusResponse
     /**
      * @return string
      */
-    protected function _parseAndCleanExceptionTrace(\Exception $e)
+    protected function _parseAndCleanExceptionTrace(\Throwable $e)
     {
 
         $trace = $e->getTrace();
