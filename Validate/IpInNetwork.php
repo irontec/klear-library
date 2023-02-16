@@ -19,11 +19,11 @@
 */
 class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
 
-    const NOT_IN_NETWORK  = 'notInNetwork';
-    const LOW_IN_NETWORK  = 'lowInNetwork';
-    const HIGH_IN_NETWORK = 'highInNetwork';
-    const INVALID_NETWORK = 'invalidNetwork';
-    const MISSING_NETWORK = 'missingNetwork';
+    final const NOT_IN_NETWORK  = 'notInNetwork';
+    final const LOW_IN_NETWORK  = 'lowInNetwork';
+    final const HIGH_IN_NETWORK = 'highInNetwork';
+    final const INVALID_NETWORK = 'invalidNetwork';
+    final const MISSING_NETWORK = 'missingNetwork';
 
     /**
      * A CIDR number (valid values 0-32)
@@ -200,8 +200,8 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
         // well then, finally verify the IP against the uppoer end of the range
 
         // add the decimal representation of the netmask to the network IP
-        $netmask_uDec1 = $netmask < 31 ? pow(2, (32-$netmask)) - 1 : 1 ;
-        $netmask_uDec = pow(2, 32-$netmask) - 1 ;
+        $netmask_uDec1 = $netmask < 31 ? 2 ** (32-$netmask) - 1 : 1 ;
+        $netmask_uDec = 2 ** (32-$netmask) - 1 ;
         $uNetwork_uDec = $lNetwork_uDec + $netmask_uDec;
 
         if ( $ip_addr_uDec > $uNetwork_uDec ) {
@@ -255,8 +255,8 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
      *  string $notation network/address (128.0.0.0/24) (128.0.0.0/255.255.255.0) or (128.0.0.0-128.0.0.255)
      * @return object|false Awd_Validate_IpInNetwork
      */
-    public function setNetworkNotation($notation) {
-        $network = false !== strpos($notation, '/') ? $this->_evaluateNetmask($notation) : false ;
+    public function setNetworkNotation($notation): object|false {
+        $network = str_contains((string) $notation, '/') ? $this->_evaluateNetmask($notation) : false ;
         if ( false !== $network) {
             // a valid CIDR/netmask has been found
             if ( true === parent::isValid($network) ) {
@@ -269,7 +269,7 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
             } else {
                 $this->_invalidNetwork(__LINE__);
             }
-        } elseif ( false !== strpos($notation, '-') ) {
+        } elseif ( str_contains((string) $notation, '-') ) {
             // the notation is looking like a from-to IP range
             if ( true === $this->_validateRange($notation) ) {
                 $this->_notation = $notation;
@@ -391,9 +391,9 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
      * @param string $notation
      * @return string|bool (false)
      */
-    protected function _evaluateNetmask($notation) {
+    protected function _evaluateNetmask($notation): string|bool {
         // split the notation in network and netmask information
-        list($network, $netmask) = explode('/', $notation, 2);
+        [$network, $netmask] = explode('/', $notation, 2);
         if ( is_numeric($netmask) ) {
             // does look like a CIDR netmask
             $between = new Zend_Validate_Between(array('min'=>1,'max'=>32));
@@ -437,7 +437,7 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
      * @param string $netmask
      * @return true|string
      */
-    protected function _validateNetmask($netmask) {
+    protected function _validateNetmask($netmask): bool|string {
         $classes = explode('.', $netmask);
         if ( 4 !== count($classes) ) {
             return __LINE__;
@@ -489,7 +489,8 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
      * @param string $network
      * @return true|string
      */
-    protected function _validateNetwork($network) {
+    protected function _validateNetwork($network): bool|string {
+        $hosts = null;
         $cidr   = $this->getCidr();
         $class  = $cidr / 8;
 
@@ -500,7 +501,7 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
         } else {
             $iClass   = (int) floor($class);
             $maskBits = (int) 8 - ($cidr - ($iClass * 8));
-            $hosts    = (int) pow(2, $maskBits);  // number of usable hosts in a subnet
+            $hosts    = (int) 2 ** $maskBits;  // number of usable hosts in a subnet
         }
 
         $segments = explode('.', $network);
@@ -558,7 +559,7 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
      * @return bool
      */
     protected function _validateRange($range) {
-        list($from,$to) = explode('-', $range);  // Note: we do NOT care if more IP ranges have been set, i.e. the range would be invalid
+        [$from, $to] = explode('-', $range);  // Note: we do NOT care if more IP ranges have been set, i.e. the range would be invalid
 
         if ( false === ($uInt_from = $this->_makeUnsignedAddress($from)) || false === ($uInt_to = $this->_makeUnsignedAddress($to)) ) {
             return $this->_invalidNetwork(__LINE__);  // at least one of the addresses is not a valid IP address
@@ -618,7 +619,7 @@ class Iron_Validate_IpInNetwork extends Zend_Validate_Ip {
      * @param string|int $line
      * @return bool (false)
      */
-    private function _invalidNetwork($line) {
+    private function _invalidNetwork(string|int $line) {
         $error_msg = 'The provided network information is not a recognized format [#'.$line.']';
         $this->_error(self::INVALID_NETWORK,$error_msg);
         $msg = '[AWD] Application error: '.$error_msg;

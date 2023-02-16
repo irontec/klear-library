@@ -19,7 +19,7 @@ class Iron_Filter_Ascii implements Zend_Filter_Interface
         $this->_saveCurrentLocales();
 
         setlocale(LC_ALL, $this->_locales);
-        $asciiValue = iconv('UTF-8', 'ASCII//TRANSLIT', $value);
+        $asciiValue = iconv('UTF-8', 'ASCII//TRANSLIT', (string) $value);
 
         $this->_restoreCurrentLocales();
         return $asciiValue;
@@ -28,14 +28,12 @@ class Iron_Filter_Ascii implements Zend_Filter_Interface
     protected function _saveCurrentLocales()
     {
         $localesString = setlocale(LC_ALL, 0);
-        if (false === strpos($localesString, ';')) {
+        if (!str_contains($localesString, ';')) {
             $this->_currentLocales = $localesString;
         } else {
             $localesArray = explode(';', $localesString);
             $this->_currentLocales = array_map(
-                function ($locale) {
-                    return explode('=', $locale);
-                },
+                fn($locale) => explode('=', (string) $locale),
                 $localesArray
             );
         }

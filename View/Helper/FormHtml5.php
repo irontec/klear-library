@@ -34,8 +34,10 @@ Abstract class Iron_View_Helper_FormHtml5 extends Zend_View_Helper_FormElement
      *
      * @return string The element XHTML.
      */
-    protected function _formHtml5Element($name, $value = null, $attribs = null)
+    protected function _formHtml5Element($name, mixed $value = null, $attribs = null)
     {
+        $disable = null;
+        $id = null;
         $info = $this->_getInfo($name, $value, $attribs);
         extract($info); // name, value, attribs, options, listsep, disable
 

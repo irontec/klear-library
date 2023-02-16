@@ -4,7 +4,7 @@
 */
 class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_Fso_Adapter_StoragePathResolver_Interface
 {
-    const CLASS_ATTR_SEPARATOR = '.';
+    final const CLASS_ATTR_SEPARATOR = '.';
 
     protected $_model;
     protected $_primaryKey;
@@ -60,9 +60,6 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
         return $this;
     }
 
-    /**
-     * @param array $modifiers
-     */
     public function setModifiers(array $modifiers)
     {
         foreach ($modifiers as $name => $value) {
@@ -111,8 +108,8 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
     protected function _buildStoragePath()
     {
         $storagePath = $this->_localStoragePath;
-        if (substr($storagePath, -1) === DIRECTORY_SEPARATOR) {
-            $storagePath = substr($storagePath,0,-1);
+        if (substr((string) $storagePath, -1) === DIRECTORY_SEPARATOR) {
+            $storagePath = substr((string) $storagePath,0,-1);
         }
 
         return $storagePath;
@@ -153,7 +150,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
 
         if ($this->_modifiers['keepExtension'] !== false) {
             $baseNamegetter = 'get' . $this->_modelSpecs['baseNameName'];
-            $ext = '.' . pathinfo($this->_model->{$baseNamegetter}(), PATHINFO_EXTENSION);
+            $ext = '.' . pathinfo((string) $this->_model->{$baseNamegetter}(), PATHINFO_EXTENSION);
         } else {
             $ext = '';
         }
@@ -171,7 +168,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
      */
     protected function _pk2path($pk)
     {
-        if (preg_match("/^([0-9a-f]{8})\-([0-9a-f]{4})\-([0-9a-f]{4})\-([0-9a-f]{4})\-[0-9a-f]{12}$/i", $pk, $result)) {
+        if (preg_match("/^([0-9a-f]{8})\-([0-9a-f]{4})\-([0-9a-f]{4})\-([0-9a-f]{4})\-[0-9a-f]{12}$/i", (string) $pk, $result)) {
 
             return $result[1] . DIRECTORY_SEPARATOR .
                      $result[2] . DIRECTORY_SEPARATOR .
@@ -195,7 +192,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
 
     protected function _buildDirectoryTree($filePath)
     {
-        $targetDir = dirname($filePath);
+        $targetDir = dirname((string) $filePath);
         $filePathParts = explode(DIRECTORY_SEPARATOR, $targetDir);
         $mkdirMode = $this->_getMkdirMode();
 
@@ -225,7 +222,7 @@ class Iron_Model_Fso_Adapter_StoragePathResolver_Default implements Iron_Model_F
             $mkdirMode = $applicationIni['Iron']['fso']['localStorageChmod'];
         }
 
-        return octdec($mkdirMode);
+        return octdec((string) $mkdirMode);
     }
 
     protected function _getAppConfig()

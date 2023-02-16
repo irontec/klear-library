@@ -77,7 +77,7 @@ class Iron_Images
 
     public function setFormat($format, $quality = 100)
     {
-        switch(strtolower($format)) {
+        switch(strtolower((string) $format)) {
 
             case 'jpg':
             case 'jpeg':
@@ -228,7 +228,7 @@ class Iron_Images
             $height = $watermark->getImageHeight();
         }
 
-        list($x, $y) = $this->_calculateWatermarkPosition($width, $height, $position);
+        [$x, $y] = $this->_calculateWatermarkPosition($width, $height, $position);
 
         return $this->_image->compositeImage($watermark, Imagick::COMPOSITE_OVER, $x, $y);
     }

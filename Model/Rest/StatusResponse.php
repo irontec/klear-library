@@ -39,7 +39,7 @@ class Iron_Model_Rest_StatusResponse
      */
     protected $_availableCodes = array();
 
-    private $_successCodes = array(
+    private array $_successCodes = array(
         200 => 'Ok',
         201 => 'Created',
         202 => 'Accepted',
@@ -51,7 +51,7 @@ class Iron_Model_Rest_StatusResponse
         304 => 'Not Modified'
     );
 
-    private $_clientErrorCodes = array(
+    private array $_clientErrorCodes = array(
         400 => 'Bad Request',
         401 => 'Unauthorized',
         402 => 'Payment Required',
@@ -80,7 +80,7 @@ class Iron_Model_Rest_StatusResponse
         450 => 'Blocked by Windows Parental Controls'
     );
 
-    private $_serverErrorCodes = array(
+    private array $_serverErrorCodes = array(
         500 => 'Internal Server Error',
         501 => 'Not Implemented',
         502 => 'Bad Gateway',
@@ -93,7 +93,7 @@ class Iron_Model_Rest_StatusResponse
         510 => 'Not Extended'
     );
 
-    private $_twoWayEncryptPasswd = "IronErrorCryptSecret";
+    private string $_twoWayEncryptPasswd = "IronErrorCryptSecret";
 
     public function __construct()
     {
@@ -180,7 +180,7 @@ class Iron_Model_Rest_StatusResponse
                 continue;
             }
 
-            if ($key !== 0 && strpos($item['file'], "Zend") !== false) {
+            if ($key !== 0 && str_contains($item['file'], "Zend")) {
                 continue;
             }
 
@@ -270,13 +270,13 @@ class Iron_Model_Rest_StatusResponse
 
         $hash = mcrypt_encrypt(
             MCRYPT_RIJNDAEL_256,
-            md5($this->_twoWayEncryptPasswd),
+            md5((string) $this->_twoWayEncryptPasswd),
             $string,
             MCRYPT_MODE_CBC,
-            md5(md5($this->_twoWayEncryptPasswd))
+            md5(md5((string) $this->_twoWayEncryptPasswd))
         );
 
-        return urlencode(base64_encode($hash));
+        return urlencode(base64_encode((string) $hash));
 
     }
 
@@ -289,13 +289,13 @@ class Iron_Model_Rest_StatusResponse
 
         $string = mcrypt_decrypt(
             MCRYPT_RIJNDAEL_256,
-            md5($this->_twoWayEncryptPasswd),
-            base64_decode(urldecode($encrypted)),
+            md5((string) $this->_twoWayEncryptPasswd),
+            base64_decode(urldecode((string) $encrypted)),
             MCRYPT_MODE_CBC,
-            md5(md5($this->_twoWayEncryptPasswd))
+            md5(md5((string) $this->_twoWayEncryptPasswd))
         );
 
-        return rtrim($string, "\0");
+        return rtrim((string) $string, "\0");
 
     }
 

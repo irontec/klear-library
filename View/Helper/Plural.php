@@ -17,7 +17,7 @@ class Iron_View_Helper_Plural extends Zend_View_Helper_Translate
      *                                      locale identifier, @see Zend_Locale for more information
      * @return string
      */
-    public function plural($singular, $plural, $number, $locale = null)
+    public function plural($singular, $plural, $number, string|\Zend_Locale $locale = null)
     {
         if (Zend_Registry::isRegistered(Iron_Plugin_Translator::DEFAULT_REGISTRY_KEY)) {
             $translator = Zend_Registry::get(Iron_Plugin_Translator::DEFAULT_REGISTRY_KEY);

@@ -16,7 +16,7 @@ class Iron_Controller_Plugin_AutoParseRequestBody extends Zend_Controller_Plugin
             if (!empty($requestBody)) {
 
                 //TODO: Comprobar Content-type del request para soportar JSON, XML, etc...
-                $requestBody = json_decode($requestBody, true);
+                $requestBody = json_decode((string) $requestBody, true);
                 if (!is_null($requestBody)) {
                     foreach ($requestBody as $param => $value) {
                         $request->setParam($param, $value);

@@ -52,10 +52,10 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
     /**
      * Default Values
      */
-    const DEFAULT_HOST = '127.0.0.1';
-    const DEFAULT_PORT =  6379;
-    const DEFAULT_PERSISTENT = true;
-    const DEFAULT_DBINDEX = 0;
+    final const DEFAULT_HOST = '127.0.0.1';
+    final const DEFAULT_PORT =  6379;
+    final const DEFAULT_PERSISTENT = true;
+    final const DEFAULT_DBINDEX = 0;
     protected $_options = array(
         'servers' => array(
             array(
@@ -131,7 +131,7 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
      * @param boolean $doNotTestCacheValidity if set to true, the cache validity won't be tested
      * @return string|false cached datas
      */
-    public function load($id, $doNotTestCacheValidity = false)
+    public function load($id, $doNotTestCacheValidity = false): string|false
     {
         if (!($this->_test($id, $doNotTestCacheValidity))) {
             // The cache is not hit !
@@ -187,11 +187,11 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
         if (!$this->_redis)
             return false;
         $lifetime = $this->getLifetime($specificLifetime);
-        if (!$tags || !count($tags))
+        if (!$tags || !(is_countable($tags) ? count($tags) : 0))
             $tags = array('');
         if (is_string($tags))
             $tags = array($tags);
-        if (!count($tags)) {
+        if (!(is_countable($tags) ? count($tags) : 0)) {
             $this->_redis->delete($this->_keyFromItemTags($id));
             if ($lifetime === null) {
                 $return = $this->_redis->set($this->_keyFromId($id), $data);
@@ -260,7 +260,7 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
         }
         if ($redis)
             $return = $redis->exec();
-        if (!count($return))
+        if (!(is_countable($return) ? count($return) : 0))
             return false;
         foreach ($tags as $tag) {
             if ($tag) {
@@ -370,13 +370,13 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
             return false;
         if (is_string($tag))
             $id = array($tag);
-        if (!count($tag))
+        if (!(is_countable($tag) ? count($tag) : 0))
             return false;
         $deleteTags = array();
         foreach ($tag as $t) {
             $deleteTags[] = $this->_keyFromTag($t);
         }
-        if ($deleteTags && count($deleteTags))
+        if ($deleteTags && (is_countable($deleteTags) ? count($deleteTags) : 0))
             $this->_redis->delete($deleteTags);
         return true;
     }
@@ -403,7 +403,7 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
      * @param string $specificLifetime lifetime, null for persistant
      * @return bool result of the add
      */
-    public function addToSet($member, $set, $specificLifetime = false)
+    public function addToSet(mixed $member, $set, $specificLifetime = false)
     {
         if (!$this->_redis)
             return null;
@@ -425,7 +425,7 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
      * @param string $set
      * @return bool result of removal
      */
-    public function removeFromSet($member, $set)
+    public function removeFromSet(mixed $member, $set)
     {
         if (!$this->_redis)
             return null;
@@ -527,7 +527,7 @@ class Iron_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
             return true;
         }
         $tags = $this->_redis->sMembers($this->_keyFromItemTags($id));
-        if (!$tags || !count($tags))
+        if (!$tags || !(is_countable($tags) ? count($tags) : 0))
             return false;
         foreach ($tags as $tag) {
             if ($tag && !$this->_redis->sIsMember($this->_keyFromTag($tag), $id))

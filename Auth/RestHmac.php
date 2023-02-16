@@ -57,7 +57,7 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
             );
         }
 
-        $tokenParts = explode(':', $token);
+        $tokenParts = explode(':', (string) $token);
 
         if (sizeof($tokenParts) !== 3) {
             $this->_errorAuth();
@@ -84,7 +84,7 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
         $serverDigest = hash_hmac(
             'sha256',
             $tokenKey . '+' . $requestDate . '+' . $secret,
-            $tokenKey
+            (string) $tokenKey
         );
 
         $digest = trim($digest, '[');
@@ -122,7 +122,7 @@ class Iron_Auth_RestHmac extends Zend_Controller_Plugin_Abstract
     /**
      * Mensaje de error en la autenticación.
      */
-    protected function _errorAuth($msg = 'Authorization incorrecta')
+    protected function _errorAuth($msg = 'Authorization incorrecta'): never
     {
 
         $front = Zend_Controller_Front::getInstance();

@@ -1,13 +1,13 @@
 <?php
 class Iron_QQUploader_FileUploader {
 
-    private $allowedExtensions = array();
-    private $sizeLimit = 10485760;
+    private array $allowedExtensions = array();
+    private $sizeLimit = 10_485_760;
     private $file;
 
     protected $_translator;
 
-    function __construct(array $allowedExtensions = array(), $sizeLimit = 10485760)
+    function __construct(array $allowedExtensions = array(), $sizeLimit = 10_485_760)
     {
 
         $allowedExtensions = array_map("strtolower", $allowedExtensions);
@@ -47,8 +47,8 @@ class Iron_QQUploader_FileUploader {
     }
 
     private function _toBytes($str){
-        $val = trim($str);
-        $last = strtolower($str[strlen($str)-1]);
+        $val = trim((string) $str);
+        $last = strtolower((string) $str[strlen((string) $str)-1]);
         switch($last) {
             case 'g': $val *= 1024;
             case 'm': $val *= 1024;
@@ -85,14 +85,14 @@ class Iron_QQUploader_FileUploader {
             Throw new Zend_Exception($msg, 1005);
         }
 
-        $pathinfo = pathinfo($this->file->getName());
+        $pathinfo = pathinfo((string) $this->file->getName());
         if ($newFileName !== false) {
             $filename = $newFileName;
         } else {
             $filename = $pathinfo['filename'];
         }
 
-        $ext = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
+        $ext = $pathinfo['extension'] ?? '';
 
         if($this->allowedExtensions && !in_array(strtolower($ext), $this->allowedExtensions)){
             $these = implode(', ', $this->allowedExtensions);
@@ -121,7 +121,7 @@ class Iron_QQUploader_FileUploader {
             }
         }
 
-        $path = explode(DIRECTORY_SEPARATOR, $uploadDirectory);
+        $path = explode(DIRECTORY_SEPARATOR, (string) $uploadDirectory);
         $path[] = $filename . $ext;
 
         if ($this->file->save(implode(DIRECTORY_SEPARATOR,$path))) {

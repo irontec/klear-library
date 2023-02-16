@@ -72,7 +72,7 @@ class Asterisk
      * Si hay una autenticación correcta devuelve el nombre y apellido.
      * @return boolean|array
      */
-    public function authenticate()
+    public function authenticate(): bool|array
     {
 
         if ($this->getUser() === NULL || $this->getPassword() === NULL) {

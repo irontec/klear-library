@@ -30,7 +30,7 @@ class Iron_View_Helper_FormEmail extends Iron_View_Helper_FormHtml5
      *
      * @return string The element XHTML.
      */
-    public function formEmail($name, $value = null, $attribs = null)
+    public function formEmail(string|array $name, mixed $value = null, $attribs = null)
     {
         return $this->_formHtml5Element($name, $value, $attribs);
     }

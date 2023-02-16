@@ -30,7 +30,7 @@ class Iron_View_Helper_FormNumber extends Iron_View_Helper_FormHtml5
      *
      * @return string The element XHTML.
      */
-    public function formNumber($name, $value = null, $attribs = null)
+    public function formNumber(string|array $name, mixed $value = null, $attribs = null)
     {
         return $this->_formHtml5Element($name, $value, $attribs);
     }

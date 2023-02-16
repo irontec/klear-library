@@ -65,7 +65,7 @@ class ConfigurationParser extends Task {
         $config = new Zend_Config_Ini($this->iniFile, $this->stage);
         
         $value = $config;
-        $segments = explode(".", $this->targetProperty);
+        $segments = explode(".", (string) $this->targetProperty);
 
         foreach($segments as $segment) {
             if (isset($value->{$segment})) {

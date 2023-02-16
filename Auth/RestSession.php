@@ -13,6 +13,7 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
 
     public function authenticate($mapper)
     {
+        $sessionName = null;
         $bootstrap = Zend_Controller_Front::getInstance()->getParam('bootstrap');
         
         if (!is_null($bootstrap)) {
@@ -46,7 +47,7 @@ class Iron_Auth_RestSession extends Zend_Controller_Plugin_Abstract
     /**
      * Mensaje de error en la autenticación.
      */
-    protected function _errorAuth()
+    protected function _errorAuth(): never
     {
 
         $front = Zend_Controller_Front::getInstance();

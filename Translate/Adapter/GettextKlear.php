@@ -4,10 +4,10 @@ class Iron_Translate_Adapter_GettextKlear extends Zend_Translate_Adapter_Gettext
 {
 
     // Internal variables
-    private $_bigEndian   = false;
+    private bool $_bigEndian   = false;
     private $_file        = false;
-    private $_adapterInfo = array();
-    private $_data        = array();
+    private array $_adapterInfo = array();
+    private array $_data        = array();
 
     /**
      * Read values from the MO file
@@ -35,6 +35,7 @@ class Iron_Translate_Adapter_GettextKlear extends Zend_Translate_Adapter_Gettext
      */
     protected function _loadTranslationData($filename, $locale, array $options = array())
     {
+        $original = [];
         $this->_data      = array();
         $this->_bigEndian = false;
         $this->_file      = @fopen($filename, 'rb');
@@ -169,9 +170,9 @@ class Iron_Translate_Adapter_GettextKlear extends Zend_Translate_Adapter_Gettext
             $lcString = lcfirst($messageId);
             $ucString = ucfirst($messageId);
             if ($this->isTranslated($lcString)) {
-                $translation = ucfirst($this->_doTranslate($lcString, $locale));
+                $translation = ucfirst((string) $this->_doTranslate($lcString, $locale));
             } elseif ($this->isTranslated($ucString)) {
-                $translation = lcfirst($this->_doTranslate($ucString, $locale));
+                $translation = lcfirst((string) $this->_doTranslate($ucString, $locale));
             }
         }
         return $translation;

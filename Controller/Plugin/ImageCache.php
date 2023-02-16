@@ -86,7 +86,7 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
         }
 
         $routeMap = $this->_imageCacheConfig->config->routeMap;
-        $explodeSlug = explode('-', $slugParam, 2);
+        $explodeSlug = explode('-', (string) $slugParam, 2);
 
         $params = array();
 
@@ -134,8 +134,8 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
 
         try {
 
-            $fetchFso = 'fetch' . ucwords($this->getFso());
-            $getBaseName = 'get' . ucwords($this->getFso()) . 'BaseName';
+            $fetchFso = 'fetch' . ucwords((string) $this->getFso());
+            $getBaseName = 'get' . ucwords((string) $this->getFso()) . 'BaseName';
             $getMimeType = 'get' . $this->getFso() . 'MimeType';
 
             $this->setFilePath(
@@ -182,7 +182,7 @@ class Iron_Controller_Plugin_ImageCache extends Zend_Controller_Plugin_Abstract
 
         if (empty($loadCache)) {
 
-            $extension = substr(strrchr($this->getBasename(), "."), 1);
+            $extension = substr(strrchr((string) $this->getBasename(), "."), 1);
 
             $image = new Imagick($this->getFilePath());
             $image->setImageFormat($extension);

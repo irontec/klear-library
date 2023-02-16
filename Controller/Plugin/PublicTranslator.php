@@ -8,8 +8,8 @@
 class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abstract
 {
 
-    const DEFAULT_USER_SESSION_NAMESPACE = 'PublicUserSettings';
-    const DEFAULT_REQUEST_LANGUAGE_PARAM = 'language';
+    final const DEFAULT_USER_SESSION_NAMESPACE = 'PublicUserSettings';
+    final const DEFAULT_REQUEST_LANGUAGE_PARAM = 'language';
 
     protected $_bootstrap;
     protected $_config;
@@ -108,7 +108,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
             return $defaultLang;
         }
 
-        $defaultLanguage = isset($this->_config['defaultLanguage']) ? $this->_config['defaultLanguage'] : null;
+        $defaultLanguage = $this->_config['defaultLanguage'] ?? null;
         if ($defaultLanguage && array_key_exists($defaultLanguage, $this->_langsConfig)) {
             return $defaultLanguage;
         }
@@ -173,7 +173,7 @@ class Iron_Controller_Plugin_PublicTranslator extends Zend_Controller_Plugin_Abs
         $baseUrl = Zend_Controller_Front::getInstance()->getBaseUrl();
         $domain = $_SERVER['HTTP_HOST'];
         $expiration = $this->_getCookieExpirationTime();
-        setcookie($this->_getLanguageParam(), $currentLang, $expiration, $baseUrl, $domain);
+        setcookie($this->_getLanguageParam(), (string) $currentLang, ['expires' => $expiration, 'path' => $baseUrl, 'domain' => (string) $domain]);
     }
 
     protected function _getCookieExpirationTime()

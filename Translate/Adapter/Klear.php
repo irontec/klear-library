@@ -44,7 +44,7 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
 
         $this->_translationLog();
 
-        $baseTranslationFile = dirname($this->_directory)
+        $baseTranslationFile = dirname((string) $this->_directory)
         . DIRECTORY_SEPARATOR
         . $this->_currentModuleName
         . DIRECTORY_SEPARATOR
@@ -57,7 +57,7 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
         $this->_updateLocaleTranslation($this->_translationFile, $baseTranslationFile);
 
 
-        if ($this->_front->getRequest()->getParam('translationnamespace') == true && !strpos($this->_translationFileName, 'javascript-' )<=0) {
+        if ($this->_front->getRequest()->getParam('translationnamespace') == true && !strpos((string) $this->_translationFileName, 'javascript-' )<=0) {
             $this->setTranslationFileName('javascript-' . $this->_translationFileName);
         }
 
@@ -66,7 +66,7 @@ class Iron_Translate_Adapter_Klear extends Zend_Translate_Adapter_Array
             if ($this->_currentLocale == $sysLocale) continue;
 
             $this->_updateLocaleTranslation(
-                dirname($this->_directory)
+                dirname((string) $this->_directory)
                 . DIRECTORY_SEPARATOR
                 . $this->_currentModuleName
                 . DIRECTORY_SEPARATOR

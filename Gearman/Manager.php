@@ -1,7 +1,7 @@
 <?php
 class Iron_Gearman_Manager
 {
-    private static $_gearmanServers = null;
+    private static ?string $_gearmanServers = null;
     private static $_stdLogger = null;
     private static $_options = null;
 

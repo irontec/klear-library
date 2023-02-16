@@ -69,7 +69,7 @@ class Image_IndexController extends Zend_Controller_Action
         )->getOption('appnamespace');
 
         if (!$this->_imageCacheConfig->config->life) {
-            $this->_imageCacheConfig->config->life = 9999990;
+            $this->_imageCacheConfig->config->life = 9_999_990;
         }
 
         $this->_routeMap = $this->_imageCacheConfig->config->routeMap;
@@ -104,7 +104,7 @@ class Image_IndexController extends Zend_Controller_Action
                 $this->_model->$getMimeType()
             );
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new Zend_Controller_Action_Exception(
                 'Image not found',
                 404
@@ -128,8 +128,8 @@ class Image_IndexController extends Zend_Controller_Action
         );
 
         $piecesKey = array(
-            ucfirst($this->_profileName),
-            ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
+            ucfirst((string) $this->_profileName),
+            ucfirst(str_replace('-', '', (string) $this->_currentProfile->changeSize)),
             ucfirst($this->getFso())
         );
 
@@ -156,7 +156,7 @@ class Image_IndexController extends Zend_Controller_Action
         if (!is_null($this->_ext)) {
             $extension = $this->_ext;
         } else {
-            $extension = substr(strrchr($this->getBasename(), '.'), 1);
+            $extension = substr(strrchr((string) $this->getBasename(), '.'), 1);
         }
 
         if (empty($loadCache)) {
@@ -168,7 +168,7 @@ class Image_IndexController extends Zend_Controller_Action
 
             if (isset($this->_currentProfile->negate)) {
                 if ($this->_currentProfile->negate == 'yes') {
-                    $image->negateImage(0, 134217727);
+                    $image->negateImage(0, 134_217_727);
                 }
             }
 
@@ -208,7 +208,7 @@ class Image_IndexController extends Zend_Controller_Action
                     break;
 
                 case 'fit-resize':
-                    \Iron_Imagick_FitResize::init($image, $config);
+                    (new \Iron_Imagick_FitResize())->init($image, $config);
                     break;
 
                 default:
@@ -301,14 +301,14 @@ class Image_IndexController extends Zend_Controller_Action
         $model = new $models();
 
         $pattern = "/\{[^\}]+\}/";
-        $resultNum = preg_match_all($pattern, $this->_routeMap, $resultados);
+        $resultNum = preg_match_all($pattern, (string) $this->_routeMap, $resultados);
 
         $resultados = $resultados[0];
 
         $this->_routeMap = str_replace(
             $resultados,
             '#',
-            $this->_routeMap
+            (string) $this->_routeMap
         );
         $this->_routeMap = array_values(
             array_filter(
@@ -324,7 +324,7 @@ class Image_IndexController extends Zend_Controller_Action
         if (sizeof($this->_routeMap) > 0) {
             for ($i = 0; $i < sizeof($this->_routeMap); $i++) {
 
-                $result = explode($this->_routeMap[$i], $routeMap, 2);
+                $result = explode($this->_routeMap[$i], (string) $routeMap, 2);
                 $routeMap = $result[1];
 
                 if ($i + 1 === sizeof($this->_routeMap)) {
@@ -634,7 +634,7 @@ class Image_IndexController extends Zend_Controller_Action
 
         $availableLangs = $model->getAvailableLangs();
 
-        if (count($availableLangs) > 0) {
+        if ((is_countable($availableLangs) ? count($availableLangs) : 0) > 0) {
 
             $bootstrap = \Zend_Controller_Front::getInstance()->getParam('bootstrap');
 
@@ -678,7 +678,7 @@ class Image_IndexController extends Zend_Controller_Action
         $where = array();
 
         foreach ($resultados as $result) {
-            $result = trim($result, '{');
+            $result = trim((string) $result, '{');
             $pieces[] = trim($result, '}');
         }
 
@@ -691,11 +691,11 @@ class Image_IndexController extends Zend_Controller_Action
 
                     $basename = $this->getFso() . 'BaseName';
 
-                    $extension = substr(strrchr($paramsResult[$key], '.'), 1);
+                    $extension = substr(strrchr((string) $paramsResult[$key], '.'), 1);
                     if ($extension === false) {
                         $where[$basename . ' like ?'] = $paramsResult[$key] . '.%';
                     } else {
-                        $searchBasename = str_replace('.' . $extension, '', $paramsResult[$key]);
+                        $searchBasename = str_replace('.' . $extension, '', (string) $paramsResult[$key]);
                         $where[$basename . ' like ?'] = $searchBasename . '.%';
                     }
                 } else {
@@ -723,7 +723,7 @@ class Image_IndexController extends Zend_Controller_Action
     /**
      * Crea una imagen por defecto cuando no hay errores.
      */
-    protected function _defaultImage()
+    protected function _defaultImage(): never
     {
 
         $image = new Imagick();

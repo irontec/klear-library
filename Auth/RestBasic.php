@@ -14,7 +14,7 @@ class Iron_Auth_RestBasic extends Zend_Controller_Plugin_Abstract
     public function authenticate($token, $mapper, $getData)
     {
 
-        $tokenDecode = base64_decode($token);
+        $tokenDecode = base64_decode((string) $token);
 
         $userData = explode(':', $tokenDecode);
 
@@ -25,7 +25,7 @@ class Iron_Auth_RestBasic extends Zend_Controller_Plugin_Abstract
         $username = $userData[0];
         $password = $userData[1];
 
-        $getPassword =  'get' . ucfirst($getData['pass']);
+        $getPassword =  'get' . ucfirst((string) $getData['pass']);
 
         $user = $mapper->findOneByField(
             $getData['user'],
@@ -58,16 +58,17 @@ class Iron_Auth_RestBasic extends Zend_Controller_Plugin_Abstract
     protected function _checkPassword($clearPass, $hash)
     {
 
+        $salt = null;
         $hashParts = explode('$', trim($hash, '$'), 2);
 
         switch ($hashParts[0]) {
             case '1': //md5
-                list(,,$salt,) = explode("$", $hash);
+                [, , $salt, ] = explode("$", $hash);
                 $salt = '$1$' . $salt . '$';
                 break;
 
             case '5': //sha
-                list(,,$rounds,$salt,) = explode("$", $hash);
+                [, , $rounds, $salt, ] = explode("$", $hash);
                 $salt = '$5$' . $rounds . '$' . $salt . '$';
                 break;
 
@@ -84,7 +85,7 @@ class Iron_Auth_RestBasic extends Zend_Controller_Plugin_Abstract
     /**
      * Mensaje de error en la autenticación.
      */
-    protected function _errorAuth()
+    protected function _errorAuth(): never
     {
 
         $front = Zend_Controller_Front::getInstance();

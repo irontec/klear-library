@@ -5,9 +5,6 @@
 */
 class Iron_Model_Fso
 {
-    protected $_model;
-    protected $_modelSpecs;
-
     /**
      * @var string path to FSO file in FS
      */
@@ -38,15 +35,12 @@ class Iron_Model_Fso
      */
     protected $_baseNameResolverAdapter;
 
-    public function __construct($model, $specs, $config = array())
+    public function __construct(protected $_model, protected $_modelSpecs, $config = array())
     {
-        $this->_model = $model;
-        $this->_modelSpecs = $specs;
-
         $fsoConfiguration = $this->_buildConfiguration($config);
         $adapters = $fsoConfiguration['adapters'];
 
-        $adapterInstances = $this->_adapterBuilder($model, $specs, $fsoConfiguration);
+        $adapterInstances = $this->_adapterBuilder($_model, $_modelSpecs, $fsoConfiguration);
         if (isset($adapterInstances['storagePathResolver'])) {
             $this->setPathResolver($adapterInstances['storagePathResolver']);
         }
@@ -82,10 +76,10 @@ class Iron_Model_Fso
         $adapterInstances = array();
         foreach ($adapters as $adapterType => $config) {
 
-            $modifiers = isset($config['params']) ? $config['params'] : array();
-            $driver = ucfirst($config['driver']);
+            $modifiers = $config['params'] ?? array();
+            $driver = ucfirst((string) $config['driver']);
 
-            $adapterClass = ucfirst($adapterType) . '_' . $driver;
+            $adapterClass = ucfirst((string) $adapterType) . '_' . $driver;
             $ironAdapter = $classBase . $adapterClass;
 
             if (class_exists($ironAdapter)) {
@@ -204,11 +198,11 @@ class Iron_Model_Fso
         if (empty($configuration)) {
             return array();
         }
-        $entity = strtolower($entity);
+        $entity = strtolower((string) $entity);
 
         foreach ($configuration as $modelClass => $modelConfig) {
 
-            if (strtolower($modelClass) == $entity) {
+            if (strtolower((string) $modelClass) == $entity) {
                 return $modelConfig;
             }
         }
@@ -281,12 +275,12 @@ class Iron_Model_Fso
             try {
                 $oldFilePath = $this->getFilePath();
                 $this->_originalFilePath = $oldFilePath;
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 //Go on
             }
         }
 
-        $this->setBaseName(basename($file), false);
+        $this->setBaseName(basename((string) $file), false);
         $this->_setFileToBeFlushed($file);
         $this->_setSize(filesize($file));
         $this->_setMimeType($file);
@@ -367,7 +361,7 @@ class Iron_Model_Fso
         }
 
         //TO-DO remove $pk?
-        $targetFile = $this->_buildFilePath($pk);
+        $targetFile = $this->_buildFilePath();
 
         $srcFileSize = filesize($this->_fileToBeFlushed);
 
@@ -422,11 +416,11 @@ class Iron_Model_Fso
     {
         $pk = $this->_model->getPrimaryKey();
 
-        $baseNameGetter = 'get' . ucfirst($this->_modelSpecs['baseNameName']);
+        $baseNameGetter = 'get' . ucfirst((string) $this->_modelSpecs['baseNameName']);
         $this->setBaseName($this->_model->$baseNameGetter(), false);
 
         // TO-DO remove pk?
-        $file = $this->_buildFilePath($pk);
+        $file = $this->_buildFilePath();
         if (!file_exists($file)) {
             throw new Exception("File $file not found");
         }
@@ -443,7 +437,7 @@ class Iron_Model_Fso
         $pk = $this->_model->getPrimaryKey();
 
         //TO-DO remove PK
-        $file = $this->_buildFilePath($pk);
+        $file = $this->_buildFilePath();
         $this->_removeFile($file);
         $this->_size = null;
         $this->_mimeType = null;

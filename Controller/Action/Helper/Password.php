@@ -47,7 +47,7 @@ class Iron_Controller_Action_Helper_Password extends Zend_Controller_Action_Help
         $used = array();
         /* Generamos el password */
         while (strlen($password) < $length) {
-            $char = $values[mt_rand(0, $max - 1)];
+            $char = $values[random_int(0, $max - 1)];
             /* Si no se puede repetir y ya existe el caracter, continuamos al siguiente */
             if ($repeat === false && isset($used[$char])) {
                 continue;
@@ -71,7 +71,7 @@ class Iron_Controller_Action_Helper_Password extends Zend_Controller_Action_Help
      */
     public function checkStrength($password)
     {
-        $length = strlen($password);
+        $length = strlen((string) $password);
 
         $numbers = $upper = $lower = $symbols = 0; /* total de cada tipo */
         $cNumber = $cUpper =$cLower = 0; /* consecutivos de cada tipo */
@@ -82,7 +82,7 @@ class Iron_Controller_Action_Helper_Password extends Zend_Controller_Action_Help
         $total = $length * 4; /* Número de caracteres por 4 */
 
         for ($i = 0; $i < $length; $i++) {
-            $char = $password{$i};
+            $char = $password[$i];
 
             if ($char >= '0' && $char <= '9') {
                 /* Si no está en los extremos, sumamos 2 */
@@ -122,7 +122,7 @@ class Iron_Controller_Action_Helper_Password extends Zend_Controller_Action_Help
             /* comprobamos caracteres repetidos */
             $bCharExists = false;
             for ($k = 0; $k < $length; $k++) {
-                if ($char == $password{$k} && $i != $k) {
+                if ($char == $password[$k] && $i != $k) {
                     $bCharExists = true;
                     /*
                     Calculate icrement deduction based on proximity to identical characters

@@ -58,7 +58,7 @@ class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
 
     protected function _isSelfClosingTag($tag)
     {
-        return preg_match("/<[^>]+?\/>/", $tag) == 1;
+        return preg_match("/<[^>]+?\/>/", (string) $tag) == 1;
 
     }
 
@@ -84,7 +84,7 @@ class Iron_View_Helper_Truncate extends Zend_View_Helper_Abstract
     }
 
     protected function _getExtra($text, $maxLength, $extra) {
-        if (strlen($text) > $maxLength) {
+        if (strlen((string) $text) > $maxLength) {
             return $extra;
         }
         return '';

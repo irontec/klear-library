@@ -50,7 +50,7 @@ class Fso_IndexController
 
         $life = $this->getConfig('config', 'life');
         if (is_null($life) || !is_numeric($life)) {
-            $life = 9999990;
+            $life = 9_999_990;
         }
         $this->_life = $life;
 
@@ -102,7 +102,7 @@ class Fso_IndexController
                 $this->_model->$getMimeType()
             );
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new Zend_Controller_Action_Exception(
                 'File not found',
                 404
@@ -205,8 +205,8 @@ class Fso_IndexController
         );
 
         $piecesKey = array(
-            ucfirst($this->_profileName),
-            ucfirst(str_replace('-', '', $this->_currentProfile->changeSize)),
+            ucfirst((string) $this->_profileName),
+            ucfirst(str_replace('-', '', (string) $this->_currentProfile->changeSize)),
             ucfirst($this->getFso()),
             $this->getMultiplierRetina() . 'x'
         );
@@ -243,7 +243,7 @@ class Fso_IndexController
         if (!is_null($this->_ext)) {
             $extension = $this->_ext;
         } else {
-            $extension = substr(strrchr($this->getBasename(), '.'), 1);
+            $extension = substr(strrchr((string) $this->getBasename(), '.'), 1);
         }
 
         if (empty($loadCache)) {
@@ -277,7 +277,7 @@ class Fso_IndexController
 
         if (isset($this->_currentProfile->negate)) {
             if ($this->_currentProfile->negate == 'yes') {
-                $image->negateImage(0, 134217727);
+                $image->negateImage(0, 134_217_727);
             }
         }
 
@@ -415,14 +415,14 @@ class Fso_IndexController
         $model = new $models();
 
         $pattern = "/\{[^\}]+\}/";
-        $resultNum = preg_match_all($pattern, $this->_routeMap, $resultados);
+        $resultNum = preg_match_all($pattern, (string) $this->_routeMap, $resultados);
 
         $resultados = $resultados[0];
 
         $this->_routeMap = str_replace(
             $resultados,
             '#',
-            $this->_routeMap
+            (string) $this->_routeMap
         );
         $this->_routeMap = array_values(
             array_filter(
@@ -438,7 +438,7 @@ class Fso_IndexController
         if (sizeof($this->_routeMap) > 0) {
             for ($i = 0; $i < sizeof($this->_routeMap); $i++) {
 
-                $result = explode($this->_routeMap[$i], $routeMap, 2);
+                $result = explode($this->_routeMap[$i], (string) $routeMap, 2);
                 $routeMap = $result[1];
 
                 if ($i + 1 === sizeof($this->_routeMap)) {
@@ -765,7 +765,7 @@ class Fso_IndexController
 
         $availableLangs = $model->getAvailableLangs();
 
-        if (count($availableLangs) > 0) {
+        if ((is_countable($availableLangs) ? count($availableLangs) : 0) > 0) {
 
             $bootstrap = \Zend_Controller_Front::getInstance()->getParam('bootstrap');
 
@@ -809,7 +809,7 @@ class Fso_IndexController
         $where = array();
 
         foreach ($resultados as $result) {
-            $result = trim($result, '{');
+            $result = trim((string) $result, '{');
             $pieces[] = trim($result, '}');
         }
 
@@ -821,22 +821,22 @@ class Fso_IndexController
             if ($piece !== 'ext') {
                 $currentParamResult = $paramsResult[$key];
 
-                $revinaB = strpos($currentParamResult, '@2x.');
-                $revinaC = strpos($currentParamResult, '@3x.');
+                $revinaB = strpos((string) $currentParamResult, '@2x.');
+                $revinaC = strpos((string) $currentParamResult, '@3x.');
 
                 if ($revinaB != false) {
                     $this->setMultiplierRetina(2);
                     $currentParamResult = str_replace(
                         '@2x',
                         '',
-                        $currentParamResult
+                        (string) $currentParamResult
                     );
                 } elseif ($revinaC != false) {
                     $this->setMultiplierRetina(3);
                     $currentParamResult = str_replace(
                         '@3x',
                         '',
-                        $currentParamResult
+                        (string) $currentParamResult
                     );
                 }
 
@@ -849,7 +849,7 @@ class Fso_IndexController
                     if (empty($extension)) {
                         $where[$basename . ' = ?'] = $currentParamResult;
                     } else {
-                        $searchBasename = str_replace('.' . $extension, '', $currentParamResult);
+                        $searchBasename = str_replace('.' . $extension, '', (string) $currentParamResult);
                         $where[$basename . ' like ?'] = $searchBasename . '.%';
                     }
                 } else {
@@ -878,7 +878,7 @@ class Fso_IndexController
     /**
      * Crea una imagen por defecto cuando no hay errores.
      */
-    protected function _defaultImage()
+    protected function _defaultImage(): never
     {
 
         $image = new Imagick();

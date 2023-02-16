@@ -30,7 +30,7 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
     /**
      * @return string | boolean
      */
-    public function getCacheFilePath($id)
+    public function getCacheFilePath($id): string|bool
     {
         $filepath = $this->_file($id);
 
@@ -135,9 +135,9 @@ class Iron_Cache_Backend_File extends Zend_Cache_Backend_File
     protected function _validPathSintax($path)
     {
         if (
-            strpos($path, "{") !== false
-            || strpos($path, ":") !== false
-            || strpos($path, '"') !== false
+            str_contains((string) $path, "{")
+            || str_contains((string) $path, ":")
+            || str_contains((string) $path, '"')
         ) {
 
             return false;

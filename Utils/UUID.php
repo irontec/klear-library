@@ -128,19 +128,19 @@ class UUID {
             self::$_pid = self::_getLockId();
         }
 
-        list($timeMid, $timeLow) = explode(' ', microtime());
+        [$timeMid, $timeLow] = explode(' ', microtime());
 
         $timeLow = (int)$timeLow;
         $timeMid = (int)substr($timeMid, 2);
 
-        $timeHighAndVersion = mt_rand(0, 0xfff);
+        $timeHighAndVersion = random_int(0, 0xfff);
         /* add version 4 UUID identifier */
         $timeHighAndVersion |= 0x4000;
 
-        $clockSeqLow = mt_rand(0, 0xff);
+        $clockSeqLow = random_int(0, 0xff);
 
         /* type is pseudo-random */
-        $clockSeqHigh  = mt_rand(0, 0x3f);
+        $clockSeqHigh  = random_int(0, 0x3f);
         $clockSeqHigh |= 0x80;
 
         $nodeLow = self::$_pid;

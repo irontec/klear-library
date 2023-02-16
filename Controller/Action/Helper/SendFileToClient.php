@@ -62,7 +62,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
              Es altamente probable (99.99%) que tenga que ver con la cookie de descarga de klear
              */
             $mimetype = mime_content_type($this->_file);
-            if (preg_match("/text\/.*/", $mimetype) || strpos($mimetype, 'application/json') !== false) {
+            if (preg_match("/text\/.*/", $mimetype) || str_contains($mimetype, 'application/json')) {
                 ob_start();
             }
 
@@ -98,10 +98,10 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
 
         $this->_options = $options;
 
-        $size = $this->_isRaw? strlen($this->_file) : filesize($this->_file);
+        $size = $this->_isRaw? strlen((string) $this->_file) : filesize($this->_file);
 
         $defaultOptions = array(
-            'filename' => $this->_isRaw? 'file' : basename($this->_file),
+            'filename' => $this->_isRaw? 'file' : basename((string) $this->_file),
             'Content-Disposition' => 'attachment',
             'Content-Transfer-Encoding' => 'binary',
             'Content-Length' => $size,
@@ -140,7 +140,7 @@ class Iron_Controller_Action_Helper_SendFileToClient extends Zend_Controller_Act
     {
         $response->setHeader(
             'Content-Disposition',
-            $options['Content-Disposition'] . ';filename="' . str_replace('"', '', $options['filename']) . '"',
+            $options['Content-Disposition'] . ';filename="' . str_replace('"', '', (string) $options['filename']) . '"',
             true
         );
 

@@ -85,7 +85,7 @@ class Iron_Controller_Action_Helper_SendPartialFileToClient extends Iron_Control
 
             $range = $request->getServer('HTTP_RANGE');
 
-            if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $range, $matches)) {
+            if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', (string) $range, $matches)) {
                 $begin  = intval($matches[1]);
                 if (!empty($matches[2])) {
                     $end = intval($matches[2]);

@@ -16,7 +16,7 @@ require_once 'Zend/Locale/Format.php';
 
 class Iron_Validate_Nif extends Zend_Validate_Abstract
 {
-    const INVALID = 'notValid';
+    final const INVALID = 'notValid';
 
     /**
      * @var array
@@ -66,10 +66,8 @@ class Iron_Validate_Nif extends Zend_Validate_Abstract
 
     /**
      * Sets the locale to use
-     *
-     * @param string|Zend_Locale $locale
      */
-    public function setLocale($locale = null)
+    public function setLocale(string|\Zend_Locale $locale = null)
     {
         require_once 'Zend/Locale.php';
         $this->_locale = Zend_Locale::findLocale($locale);
@@ -135,11 +133,11 @@ class Iron_Validate_Nif extends Zend_Validate_Abstract
             $suma = $value[2] + $value[4] + $value[6];
 
             for ($i = 1; $i < 8; $i += 2) {
-                $suma += substr((2 * $value[$i]),0,1) + substr((2 * $value[$i]), 1, 1);
+                $suma += substr(((string) (2 * $value[$i])),0,1) + substr(((string) (2 * $value[$i])), 1, 1);
             }
 
             $n = 10 - substr($suma, strlen($suma) - 1, 1);
-            if ($value[8] == chr(64 + $n) || $value[8] == substr($n, strlen($n) - 1, 1)) {
+            if ($value[8] == chr(64 + $n) || $value[8] == substr((string) $n, strlen((string) $n) - 1, 1)) {
                 $isValid = true;
             }
 

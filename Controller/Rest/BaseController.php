@@ -363,7 +363,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
      */
     protected function _prepareOrder($orderParam)
     {
-        if ($orderParam === false || trim($orderParam) === '') {
+        if ($orderParam === false || trim((string) $orderParam) === '') {
             return 'id DESC';
         }
 
@@ -375,11 +375,11 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
      */
     protected function _prepareWhere($search)
     {
-        if ($search === false || trim($search) === '') {
+        if ($search === false || trim((string) $search) === '') {
             return NULL;
         }
 
-        $search = json_decode($search, true);
+        $search = json_decode((string) $search, true);
 
         return implode(" AND ", $this->_parseWhere($search));
     }
@@ -428,7 +428,7 @@ class Iron_Controller_Rest_BaseController extends \Zend_Rest_Controller
     {
 
         $dbAdapter = Zend_Db_Table::getDefaultAdapter();
-        switch (strtolower(key($val))) {
+        switch (strtolower((string) key($val))) {
 
             case 'not':
             case 'notequal':

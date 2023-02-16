@@ -7,7 +7,7 @@
  */
 class Iron_Plugin_Translator extends Zend_Controller_Plugin_Abstract
 {
-    const DEFAULT_REGISTRY_KEY = 'Application_Translate';
+    final const DEFAULT_REGISTRY_KEY = 'Application_Translate';
 
     /**
      *

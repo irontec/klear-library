@@ -38,6 +38,7 @@ class Iron_Auth_PublicAdapter extends Zend_Controller_Plugin_Abstract
     
     public function authenticate()
     {
+        $authMessage = [];
         try {
             $user = $this->_userMapper->findByLogin($this->_username);
             
@@ -63,7 +64,7 @@ class Iron_Auth_PublicAdapter extends Zend_Controller_Plugin_Abstract
     protected function _userHasValidCredentials($user = null)
     {
         if (!is_null($user)) {
-            $hash = $user->{'get' . ucfirst($this->_passwordFieldName)}();
+            $hash = $user->{'get' . ucfirst((string) $this->_passwordFieldName)}();
             if ($this->_checkPassword($this->_password, $hash)) {
                 return true;
             }
@@ -73,24 +74,25 @@ class Iron_Auth_PublicAdapter extends Zend_Controller_Plugin_Abstract
     
     protected function _checkPassword($clearPass, $hash)
     {
-        $hashParts = explode('$', trim($hash, '$'), 2);
+        $salt = null;
+        $hashParts = explode('$', trim((string) $hash, '$'), 2);
         switch ($hashParts[0]) {
             case '1': //md5
-                list(,,$salt,) = explode("$", $hash);
+                [, , $salt, ] = explode("$", (string) $hash);
                 $salt = '$1$' . $salt . '$';
                 break;
     
             case '5': //sha
-                list(,,$rounds,$salt,) = explode("$", $hash);
+                [, , $rounds, $salt, ] = explode("$", (string) $hash);
                 $salt = '$5$' . $rounds . '$' . $salt . '$';
                 break;
     
             case '2a': //blowfish
-                $salt = substr($hash, 0, 29);
+                $salt = substr((string) $hash, 0, 29);
                 break;
         }
     
-        $res = crypt($clearPass, $salt . '$');
+        $res = crypt((string) $clearPass, $salt . '$');
         return $res == $hash;
     }
     

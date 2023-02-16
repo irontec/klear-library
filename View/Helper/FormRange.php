@@ -30,7 +30,7 @@ class Iron_View_Helper_FormRange extends Iron_View_Helper_FormHtml5
      *
      * @return string The element XHTML.
      */
-    public function formRange($name, $value = null, $attribs = null)
+    public function formRange(string|array $name, mixed $value = null, $attribs = null)
     {
         return $this->_formHtml5Element($name, $value, $attribs);
     }

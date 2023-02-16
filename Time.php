@@ -29,7 +29,7 @@ class Iron_Time
     protected function _parseTimeStr($time)
     {
 
-        $time = preg_replace("/[^0-9:]+/", '', $time);
+        $time = preg_replace("/[^0-9:]+/", '', (string) $time);
 
 
         $segments = explode(":", $time);
@@ -64,7 +64,7 @@ class Iron_Time
             return self::secondsToTime($this->_time);
         }
 
-        $format = strtolower($format);
+        $format = strtolower((string) $format);
 
         $replaces = array(
                 'hh'=> sprintf('%02d', self::_getHours($this->_time)), //Hour, (00-12), two digit pr more

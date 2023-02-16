@@ -4,7 +4,7 @@
 */
 class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_Adapter_BaseNameResolver_Interface
 {
-    const CLASS_ATTR_SEPARATOR = '.';
+    final const CLASS_ATTR_SEPARATOR = '.';
 
     protected $_model;
     protected $_primaryKey;
@@ -14,12 +14,12 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
     protected $_localStoragePath;
     protected $_modifiers = array(
         'unique' => false,
-    ); 
+    );
 
     /**
      * @var obj $model
      * @var array $modelSpecs
-     * @var array $modifiers 
+     * @var array $modifiers
      */
     public function __construct($model, $modelSpecs, $localStoragePath, $modifiers = array())
     {
@@ -41,21 +41,21 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
         $this->_primaryKey = $pk;
         return $this;
     }
-    
-    public function setLocalStoragePath($path) 
+
+    public function setLocalStoragePath($path)
     {
         if (empty($path)) {
             throw new \Exception("Local storage path cannot be empty");
         }
 
-        $this->_localStoragePath = $path;    
+        $this->_localStoragePath = $path;
         return $this;
     }
 
-    public function setModelSpecs(array $modelSpecs) 
+    public function setModelSpecs(array $modelSpecs)
     {
-        $this->_modelSpecs = $modelSpecs;    
-        return $this;    
+        $this->_modelSpecs = $modelSpecs;
+        return $this;
     }
 
     /**
@@ -69,7 +69,7 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
         return $this;
     }
 
-    public function setModifier($name, $value) 
+    public function setModifier($name, $value)
     {
         if (!array_key_exists($name, $this->_modifiers)) {
             throw new \Exception("Unknown basename resolver modifier: " . $name);
@@ -79,7 +79,7 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
     }
 
 
-     public function getBaseName($fileName) 
+     public function getBaseName($fileName)
     {
         if( $this->_modifiers['unique'])
         {
@@ -95,10 +95,10 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
             return $fileName;
         }
     }
-    
+
     protected function _generateBaseName($fileName)
     {
-        $file = pathinfo($fileName);
+        $file = pathinfo((string) $fileName);
         $cont = 0;
 
         if(isset($file['extension'])){
@@ -110,9 +110,9 @@ class Iron_Model_Fso_Adapter_BaseNameResolver_Default implements Iron_Model_Fso_
         $models = $mapper->fetchList($this->_modelSpecs['baseNameName'] . " like '" . $file['filename'] . "(%)" . $file['extension'] . "' or " . $this->_modelSpecs['baseNameName'] . " = '" . $file['filename'] . $file['extension'] . "'");
 
         foreach($models as $model) {
-            $get = "get".ucfirst($this->_modelSpecs['baseNameName']);
+            $get = "get".ucfirst((string) $this->_modelSpecs['baseNameName']);
 
-            if(preg_match('/'.$file['filename'].'\(([0-9]+)\)'.$file['extension'].'/', $model->$get(), $matches)){
+            if(preg_match('/'.$file['filename'].'\(([0-9]+)\)'.$file['extension'].'/', (string) $model->$get(), $matches)){
                 if(isset($matches[1]) && $matches[1] > $cont){
                     $cont = $matches[1];
                 }

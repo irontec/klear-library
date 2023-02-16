@@ -81,14 +81,14 @@ class Iron_Controller_Action_Helper_UrlImageCache extends Zend_Controller_Action
         $fso = $this->_images->$profile->fso;
 
         $pattern = "/\{[^\}]+\}/";
-        $resultNum = preg_match_all($pattern, $this->_routeMap, $resultados);
+        $resultNum = preg_match_all($pattern, (string) $this->_routeMap, $resultados);
 
         $resultados = $resultados[0];
 
         $tags = str_replace(
             $resultados,
             '#',
-            $this->_routeMap
+            (string) $this->_routeMap
         );
         $tags = array_values(
             array_filter(
@@ -106,7 +106,7 @@ class Iron_Controller_Action_Helper_UrlImageCache extends Zend_Controller_Action
         if (sizeof($tags) > 0) {
             for ($i = 0; $i < sizeof($tags); $i++) {
 
-                $result = explode($tags[$i], $routeMap, 2);
+                $result = explode($tags[$i], (string) $routeMap, 2);
                 $routeMap = $result[1];
 
                 if ($i + 1 === sizeof($tags)) {
@@ -124,7 +124,7 @@ class Iron_Controller_Action_Helper_UrlImageCache extends Zend_Controller_Action
         $params = array();
 
         foreach ($paramsResult as $result) {
-            $result = trim($result, '{');
+            $result = trim((string) $result, '{');
             $params[] = trim($result, '}');
         }
 
@@ -140,7 +140,7 @@ class Iron_Controller_Action_Helper_UrlImageCache extends Zend_Controller_Action
         foreach ($params as $key) {
             if ($key === 'basename') {
                 if (isset($columnsList[$fso . 'BaseName'])) {
-                    $paramsModel[$key] = 'get' . ucwords($fso)  . 'BaseName';
+                    $paramsModel[$key] = 'get' . ucwords((string) $fso)  . 'BaseName';
                 }
             } else {
                 if (isset($columnsList[$key])) {
@@ -166,7 +166,7 @@ class Iron_Controller_Action_Helper_UrlImageCache extends Zend_Controller_Action
                 $routeMapFinal = str_replace(
                     '{' . $key . '}',
                     $model->$gets(),
-                    $routeMapFinal
+                    (string) $routeMapFinal
                 );
             }
         }
@@ -176,13 +176,13 @@ class Iron_Controller_Action_Helper_UrlImageCache extends Zend_Controller_Action
                 $routeMapFinal = str_replace(
                     '{' . $key . '}',
                     $extra,
-                    $routeMapFinal
+                    (string) $routeMapFinal
                 );
             }
         }
 
         $pattern = "/\{[^\}]+\}/";
-        $resultNum = preg_match_all($pattern, $routeMapFinal, $resultados);
+        $resultNum = preg_match_all($pattern, (string) $routeMapFinal, $resultados);
 
         if ($resultNum > 0) {
             throw new Exception(

@@ -34,6 +34,11 @@ class Iron_Resource_Mustache extends Zend_Application_Resource_ResourceAbstract
     public function setDataTemlate($viewData)
     {
 
+        $cache = null;
+        $cachePath = null;
+        $partials = null;
+        $suffix = null;
+        $partialsPath = null;
         $loader = Zend_Loader_Autoloader::getInstance();
         $loader->registerNamespace('Mustache');
 

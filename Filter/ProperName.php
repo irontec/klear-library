@@ -18,7 +18,7 @@ class Iron_Filter_ProperName implements Zend_Filter_Interface
     
     public function filter($data) 
     {
-        $normalizedData = preg_replace('/\s+/', ' ', $data);
+        $normalizedData = preg_replace('/\s+/', ' ', (string) $data);
         $tokens = explode(' ', $normalizedData);
         foreach ($tokens as $token) {
             if (!in_array(strtolower($token), $this->_blackList)) {

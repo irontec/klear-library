@@ -57,15 +57,14 @@
 class Iron_Minify_JsMin
 {
 
-    const ORD_LF            = 10;
-    const ORD_SPACE         = 32;
-    const ACTION_KEEP_A     = 1;
-    const ACTION_DELETE_A   = 2;
-    const ACTION_DELETE_A_B = 3;
+    final const ORD_LF            = 10;
+    final const ORD_SPACE         = 32;
+    final const ACTION_KEEP_A     = 1;
+    final const ACTION_DELETE_A   = 2;
+    final const ACTION_DELETE_A_B = 3;
 
     protected $a           = "\n";
     protected $b           = '';
-    protected $input       = '';
     protected $inputIndex  = 0;
     protected $inputLength = 0;
     protected $lookAhead   = null;
@@ -77,9 +76,8 @@ class Iron_Minify_JsMin
     /**
      * @param string $input
      */
-    public function __construct($input)
+    public function __construct(protected $input)
     {
-        $this->input = $input;
     }
 
     /**
@@ -96,7 +94,7 @@ class Iron_Minify_JsMin
             $mbIntEnc = mb_internal_encoding();
             mb_internal_encoding('8bit');
         }
-        $this->input = str_replace("\r\n", "\n", $this->input);
+        $this->input = str_replace("\r\n", "\n", (string) $this->input);
         $this->inputLength = strlen($this->input);
 
         $this->action(self::ACTION_DELETE_A_B);
@@ -119,14 +117,14 @@ class Iron_Minify_JsMin
                     // in case of mbstring.func_overload & 2, must check for null b,
                     // otherwise mb_strpos will give WARNING
                 } elseif ($this->b === null
-                        || (false === strpos('{[(+-', $this->b)
+                        || (!str_contains('{[(+-', (string) $this->b)
                                 && ! $this->isAlphaNum($this->b))) {
                     $command = self::ACTION_DELETE_A;
                 }
             } elseif (! $this->isAlphaNum($this->a)) {
                 if ($this->b === ' '
                         || ($this->b === "\n"
-                                && (false === strpos('}])+-"\'', $this->a)))) {
+                                && (!str_contains('}])+-"\'', (string) $this->a)))) {
                     $command = self::ACTION_DELETE_A_B;
                 }
             }
@@ -222,21 +220,21 @@ class Iron_Minify_JsMin
 
     protected function isRegexpLiteral()
     {
-        if (false !== strpos("\n{;(,=:[!&|?", $this->a)) { // we aren't dividing
+        if (str_contains("\n{;(,=:[!&|?", (string) $this->a)) { // we aren't dividing
             return true;
         }
         if (' ' === $this->a) {
-            $length = strlen($this->output);
+            $length = strlen((string) $this->output);
             if ($length < 2) { // weird edge case
                 return true;
             }
             // you can't divide a keyword
-            if (preg_match('/(?:case|else|in|return|typeof)$/', $this->output, $m)) {
+            if (preg_match('/(?:case|else|in|return|typeof)$/', (string) $this->output, $m)) {
                 if ($this->output === $m[0]) { // odd but could happen
                     return true;
                 }
                 // make sure it's a keyword, not end of an identifier
-                $charBeforeKeyword = substr($this->output, $length - strlen($m[0]) - 1, 1);
+                $charBeforeKeyword = substr((string) $this->output, $length - strlen($m[0]) - 1, 1);
                 if (! $this->isAlphaNum($charBeforeKeyword)) {
                     return true;
                 }
@@ -283,7 +281,7 @@ class Iron_Minify_JsMin
      */
     protected function isAlphaNum($c)
     {
-        return (preg_match('/^[0-9a-zA-Z_\\$\\\\]$/', $c) || ord($c) > 126);
+        return (preg_match('/^[0-9a-zA-Z_\\$\\\\]$/', (string) $c) || ord($c) > 126);
     }
 
     protected function singleLineComment()
@@ -312,7 +310,7 @@ class Iron_Minify_JsMin
                 if ($this->peek() === '/') { // end of comment reached
                     $this->get();
                     // if comment preserved by YUI Compressor
-                    if (0 === strpos($comment, '!')) {
+                    if (str_starts_with($comment, '!')) {
                         return "\n/*!" . substr($comment, 1) . "*/\n";
                     }
                     // if IE conditional comment
@@ -341,14 +339,11 @@ class Iron_Minify_JsMin
         if ($get !== '/') {
             return $get;
         }
-        switch ($this->peek()) {
-            case '/':
-                return $this->singleLineComment();
-            case '*':
-                return $this->multipleLineComment();
-            default:
-                return $get;
-        }
+        return match ($this->peek()) {
+            '/' => $this->singleLineComment(),
+            '*' => $this->multipleLineComment(),
+            default => $get,
+        };
     }
 }
 

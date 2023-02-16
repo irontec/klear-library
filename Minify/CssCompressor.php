@@ -36,17 +36,10 @@ class Iron_Minify_CssCompressor
      *
      * @return string
      */
-	protected $_input;
-
     public function min()
     {
         return $this->_process($this->_input);
     }
-
-    /**
-     * @var array options
-     */
-    protected $_options = null;
 
     /**
      * @var bool Are we "in" a hack?
@@ -59,14 +52,15 @@ class Iron_Minify_CssCompressor
     /**
      * Constructor
      *
-     * @param array $options (currently ignored)
+     * @param array $_options (currently ignored)
      *
      * @return null
      */
-    public function __construct($input,$options = array())
+    public function __construct(
+        protected $_input,
+        protected $_options = array()
+    )
     {
-    	$this->_input = $input;
-        $this->_options = $options;
     }
 
     /**
@@ -92,7 +86,7 @@ class Iron_Minify_CssCompressor
         // apply callback to all valid comments (and strip out surrounding ws
         $css = preg_replace_callback(
             '@\\s*/\\*([\\s\\S]*?)\\*/\\s*@',
-            array($this, '_commentCB'),
+            $this->_commentCB(...),
             $css
         );
 
@@ -143,7 +137,7 @@ class Iron_Minify_CssCompressor
                 [^~>+,\\s]+      # selector part
                 {                # open declaration block
             /x',
-            array($this, '_selectorsCB'),
+            $this->_selectorsCB(...),
             $css
         );
 
@@ -157,7 +151,7 @@ class Iron_Minify_CssCompressor
         // remove spaces between font families
         $css = preg_replace_callback(
             '/font-family:([^;}]+)([;}])/',
-            array($this, '_fontFamilyCB'),
+            $this->_fontFamilyCB(...),
             $css
         );
 
@@ -195,7 +189,7 @@ class Iron_Minify_CssCompressor
     protected function _selectorsCB($m)
     {
         // remove ws around the combinators
-        return preg_replace('/\\s*([,>+~])\\s*/', '$1', $m[0]);
+        return preg_replace('/\\s*([,>+~])\\s*/', '$1', (string) $m[0]);
     }
 
     /**
@@ -207,7 +201,7 @@ class Iron_Minify_CssCompressor
      */
     protected function _commentCB($m)
     {
-        $hasSurroundingWs = (trim($m[0]) !== $m[1]);
+        $hasSurroundingWs = (trim((string) $m[0]) !== $m[1]);
         $m = $m[1];
         // $m is the comment content w/o the surrounding tokens,
         // but the return value will replace the entire comment.
@@ -218,7 +212,7 @@ class Iron_Minify_CssCompressor
             // component of http://tantek.com/CSS/Examples/midpass.html
             return '/*" "*/';
         }
-        if (preg_match('@";\\}\\s*\\}/\\*\\s+@', $m)) {
+        if (preg_match('@";\\}\\s*\\}/\\*\\s+@', (string) $m)) {
             // component of http://tantek.com/CSS/Examples/midpass.html
             return '/*";}}/* */';
         }
@@ -232,7 +226,7 @@ class Iron_Minify_CssCompressor
                     \\s*
                     /\\*             # ends like /*/ or /**/
                 @x',
-                $m,
+                (string) $m,
                 $n
             )) {
                 // end hack mode after this comment, but preserve the hack and comment content
@@ -240,7 +234,7 @@ class Iron_Minify_CssCompressor
                 return "/*/{$n[1]}/**/";
             }
         }
-        if (substr($m, -1) === '\\') { // comment ends like \*/
+        if (str_ends_with((string) $m, '\\')) { // comment ends like \*/
             // begin hack mode and preserve hack
             $this->_inHack = true;
             return '/*\\*/';
@@ -272,11 +266,11 @@ class Iron_Minify_CssCompressor
     protected function _fontFamilyCB($m)
     {
         // Issue 210: must not eliminate WS between words in unquoted families
-        $pieces = preg_split('/(\'[^\']+\'|"[^"]+")/', $m[1], null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $pieces = preg_split('/(\'[^\']+\'|"[^"]+")/', (string) $m[1], null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $out = 'font-family:';
         while (null !== ($piece = array_shift($pieces))) {
             if ($piece[0] !== '"' && $piece[0] !== "'") {
-                $piece = preg_replace('/\\s+/', ' ', $piece);
+                $piece = preg_replace('/\\s+/', ' ', (string) $piece);
                 $piece = preg_replace('/\\s?,\\s?/', ',', $piece);
             }
             $out .= $piece;
