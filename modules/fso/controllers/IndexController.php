@@ -289,7 +289,6 @@ class Fso_IndexController
 
         switch ($config['changeSize']) {
             case 'original':
-                continue;
                 break;
 
             case 'crop':
