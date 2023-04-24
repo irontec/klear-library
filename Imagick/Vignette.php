@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Suaviza los extremos de la imagen al estilo viñeta.
  *
@@ -9,13 +10,11 @@
 
 class Iron_Imagick_Vignette
 {
-
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
-
         if (
             !isset($config['blackPoint']) || !isset($config['whitePoint'])
-        ||
+            ||
             !isset($config['x']) || !isset($config['y'])
         ) {
             throw new Exception(
@@ -25,7 +24,7 @@ class Iron_Imagick_Vignette
 
         if (
             !is_numeric($config['blackPoint']) || !is_numeric($config['whitePoint'])
-        ||
+            ||
             !is_numeric($config['x']) || !is_numeric($config['y'])
         ) {
             throw new Exception(
@@ -39,7 +38,5 @@ class Iron_Imagick_Vignette
             $config['x'],
             $config['y']
         );
-
     }
-
 }

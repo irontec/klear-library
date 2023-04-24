@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Hace un crop del Imagick en base a los parametros "width" y "height"
  *
@@ -10,10 +11,8 @@
 
 class Iron_Imagick_Crop
 {
-
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
-
         if (!isset($config['width']) || !isset($config['height'])) {
             throw new Exception(
                 'Es necesario especificar los tamaños con los parametros "width" y "height"'
@@ -22,7 +21,7 @@ class Iron_Imagick_Crop
 
         if (
             !is_numeric($config['width'])
-        ||
+            ||
             !is_numeric($config['height'])
         ) {
             throw new Exception(
@@ -34,7 +33,5 @@ class Iron_Imagick_Crop
             $config['width'],
             $config['height']
         );
-
     }
-
 }

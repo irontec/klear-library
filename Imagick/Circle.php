@@ -1,4 +1,5 @@
 <?php
+
 /**
  * En base a la imagen cargada con el imagick,
  * genera un png circular con transparencias y un tamaño proporcional.
@@ -10,10 +11,8 @@
 
 class Iron_Imagick_Circle
 {
-
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
-
         if (!isset($config['size'])) {
             throw new Exception(
                 'Es necesario especificar un tamaño con el parametro "size"'
@@ -22,9 +21,9 @@ class Iron_Imagick_Circle
 
         if (
             empty($config['size'])
-        ||
+            ||
             is_null($config['size'])
-        ||
+            ||
             !is_numeric($config['size'])
         ) {
             throw new Exception(
@@ -41,14 +40,12 @@ class Iron_Imagick_Circle
 
         $draw = new ImagickDraw();
         $draw->setfillcolor('#ffffff');
-        $draw->circle($size/2, $size/2, $size/2, $size);
+        $draw->circle($size / 2, $size / 2, $size / 2, $size);
         $circle->drawimage($draw);
 
         $imagick->setImageFormat('png');
         $imagick->setimagematte(true);
         $imagick->cropthumbnailimage($size, $size);
         $imagick->compositeimage($circle, Imagick::COMPOSITE_DSTIN, 0, 0);
-
     }
-
 }

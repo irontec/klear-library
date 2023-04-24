@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Crea un borde al rededor de la imagen.
  *
@@ -12,15 +13,13 @@
 
 class Iron_Imagick_Border
 {
-
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
-
         if (
             !isset($config['color'])
-        ||
+            ||
             !isset($config['width'])
-        ||
+            ||
             !isset($config['height'])
         ) {
             throw new Exception(
@@ -39,7 +38,5 @@ class Iron_Imagick_Border
             $config['width'],
             $config['height']
         );
-
     }
-
 }

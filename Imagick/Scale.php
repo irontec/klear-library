@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Escala la imagen de una forma uniforme sin romper las porciones
  * hasta una medida que se adapte a las propocionadas con los parametros "width" y "height"
@@ -10,10 +11,8 @@
 
 class Iron_Imagick_Scale
 {
-
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
-
         if (!isset($config['width']) || !isset($config['height'])) {
             throw new Exception(
                 'Es necesario especificar los tamaños con los parametros "width" y "height"'
@@ -22,7 +21,7 @@ class Iron_Imagick_Scale
 
         if (
             !is_numeric($config['width'])
-        ||
+            ||
             !is_numeric($config['height'])
         ) {
             throw new Exception(
@@ -35,7 +34,5 @@ class Iron_Imagick_Scale
             $config['height'],
             true
         );
-
     }
-
 }

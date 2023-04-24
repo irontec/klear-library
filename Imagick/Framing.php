@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Crea un borde con estilo de enmarcado al rededor de la imagen.
  *
@@ -12,19 +13,17 @@
 
 class Iron_Imagick_Framing
 {
-
-    public function init(Imagick $imagick, $config = array())
+    public static function init(Imagick $imagick, $config = array())
     {
-
         if (
             !isset($config['color'])
-        ||
+            ||
             !isset($config['width'])
-        ||
+            ||
             !isset($config['height'])
-        ||
+            ||
             !isset($config['innerBevel'])
-        ||
+            ||
             !isset($config['outerBevel'])
         ) {
             throw new Exception(
@@ -38,19 +37,17 @@ class Iron_Imagick_Framing
             );
         }
 
-         $innerBevel = $config['innerBevel'];
-         $outerBevel = $config['outerBevel'];
-         $width = $config['width'] + $innerBevel + $outerBevel;
-         $height = $config['height'] + $innerBevel + $outerBevel;
+        $innerBevel = $config['innerBevel'];
+        $outerBevel = $config['outerBevel'];
+        $width = $config['width'] + $innerBevel + $outerBevel;
+        $height = $config['height'] + $innerBevel + $outerBevel;
 
-         $imagick->frameimage(
-             $config['color'],
-             $width,
-             $height,
-             $innerBevel,
-             $outerBevel
-         );
-
+        $imagick->frameimage(
+            $config['color'],
+            $width,
+            $height,
+            $innerBevel,
+            $outerBevel
+        );
     }
-
 }
